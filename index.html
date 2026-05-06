@@ -2719,6 +2719,239 @@ console.warn=function(){};
 console.error=function(){};
 })();
 </script>
+<script>
+/* ============================================================
+   PATLAS ANTI-SCREENSHOT & PRIVACY SHIELD v2.0
+   Tambahkan sebelum </body>
+   ============================================================ */
+(function(){
+  'use strict';
+
+  /* ── 1. OVERLAY HITAM saat screenshot key ditekan ── */
+  const overlay = document.createElement('div');
+  overlay.id = 'ss-overlay';
+  Object.assign(overlay.style, {
+    position: 'fixed', inset: '0', background: '#000',
+    zIndex: '2147483647', display: 'none',
+    pointerEvents: 'none'
+  });
+  document.body.appendChild(overlay);
+
+  function blackout(ms = 800) {
+    overlay.style.display = 'block';
+    setTimeout(() => { overlay.style.display = 'none'; }, ms);
+  }
+
+  /* Tombol screenshot umum */
+  const SS_KEYS = new Set([
+    'PrintScreen','F13','F14',
+    /* macOS via keyboard event tidak selalu terdeteksi, tapi coba tangkap */
+  ]);
+
+  document.addEventListener('keydown', function(e) {
+    /* PrintScreen / Screengrab keys */
+    if (SS_KEYS.has(e.key) || e.key === 'PrintScreen') {
+      e.preventDefault();
+      blackout(1500);
+    }
+    /* Windows Snipping Tool: Win+Shift+S → tidak bisa dicegah, tapi blackout */
+    if (e.shiftKey && e.key === 'S' && (e.metaKey || e.getModifierState('OS'))) {
+      blackout(1500);
+    }
+    /* macOS Cmd+Shift+3 / Cmd+Shift+4 / Cmd+Shift+5 */
+    if (e.metaKey && e.shiftKey && ['3','4','5','6'].includes(e.key)) {
+      e.preventDefault();
+      blackout(1500);
+    }
+    /* Ctrl+Print (beberapa laptop) */
+    if (e.ctrlKey && e.key === 'PrintScreen') {
+      e.preventDefault();
+      blackout(1500);
+    }
+  }, true);
+
+  /* ── 2. CSS: Konten HITAM saat print / screenshot render ── */
+  const antiSS = document.createElement('style');
+  antiSS.textContent = `
+    /* Saat print: semua hitam */
+    @media print {
+      html, body, #app, .page, .card, * {
+        visibility: hidden !important;
+        background: #000 !important;
+        color: #000 !important;
+      }
+      body::after {
+        content: '' !important;
+        display: block !important;
+        position: fixed !important;
+        inset: 0 !important;
+        background: #000 !important;
+        z-index: 99999 !important;
+        visibility: visible !important;
+      }
+    }
+
+    /* CSS Screenshot trick: elemen sensitif pakai ini */
+    .exam-content, .question-text, .option-item, #examPage {
+      -webkit-user-select: none;
+      user-select: none;
+      /* Trick: kombinasi filter agar screenshot capture terlihat gelap
+         di beberapa renderer (tidak 100% tapi membantu) */
+      isolation: isolate;
+    }
+  `;
+  document.head.appendChild(antiSS);
+
+  /* ── 3. BLOKIR PRINT (Ctrl+P) ── */
+  window.addEventListener('beforeprint', function(e) {
+    /* Sembunyikan semua konten sebelum print dialog muncul */
+    document.body.style.visibility = 'hidden';
+    document.body.style.background = '#000';
+    setTimeout(() => {
+      document.body.style.visibility = '';
+      document.body.style.background = '';
+    }, 100);
+  });
+  window.addEventListener('afterprint', function() {
+    document.body.style.visibility = '';
+    document.body.style.background = '';
+  });
+
+  /* ── 4. DETEKSI & BLOKIR TAB INCOGNITO / PRIVATE BROWSING ── */
+  async function detectIncognito() {
+    return new Promise((resolve) => {
+      /* Method 1: FileSystem API (Chrome Incognito tidak support quota penuh) */
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        navigator.storage.estimate().then(({quota}) => {
+          /* Incognito biasanya quota < 120MB */
+          if (quota && quota < 120 * 1024 * 1024) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        }).catch(() => resolve(false));
+      } else {
+        /* Method 2: IndexedDB tidak tersedia di Safari Private */
+        try {
+          const db = indexedDB.open('test');
+          db.onerror = () => resolve(true);
+          db.onsuccess = () => resolve(false);
+        } catch(e) {
+          resolve(true);
+        }
+      }
+    });
+  }
+
+  /* Method 3: localStorage write test (Firefox Private Mode) */
+  function isFirefoxPrivate() {
+    try {
+      localStorage.setItem('__prv_test__', '1');
+      localStorage.removeItem('__prv_test__');
+      return false;
+    } catch(e) {
+      return true;
+    }
+  }
+
+  async function checkPrivacyMode() {
+    const incognito = await detectIncognito();
+    const ffPrivate = isFirefoxPrivate();
+
+    if (incognito || ffPrivate) {
+      showPrivacyWarning();
+    }
+  }
+
+  function showPrivacyWarning() {
+    /* Hanya tampilkan warning saat exam aktif */
+    const examPage = document.getElementById('examPage');
+    if (!examPage || examPage.style.display === 'none' ||
+        !examPage.classList.contains('active')) return;
+
+    const warn = document.createElement('div');
+    warn.innerHTML = `
+      <div style="
+        position:fixed;inset:0;background:#000;z-index:2147483646;
+        display:flex;align-items:center;justify-content:center;
+        flex-direction:column;gap:16px;font-family:monospace;color:#ef4444;
+        text-align:center;padding:24px;
+      ">
+        <div style="font-size:48px;">🚫</div>
+        <div style="font-size:20px;font-weight:bold;">Mode Penyamaran Terdeteksi</div>
+        <div style="font-size:14px;color:#aaa;max-width:400px;">
+          Ujian tidak dapat dilanjutkan dalam mode Incognito/Private.<br>
+          Buka browser biasa dan login kembali.
+        </div>
+      </div>
+    `;
+    document.body.appendChild(warn);
+  }
+
+  /* Jalankan cek incognito setelah halaman load */
+  document.addEventListener('DOMContentLoaded', checkPrivacyMode);
+  /* Atau langsung jika DOM sudah siap */
+  if (document.readyState !== 'loading') checkPrivacyMode();
+
+  /* ── 5. DETEKSI WINDOW BLUR (alt-tab / minimize) saat ujian ── */
+  let blurCount = 0;
+  let blurWarningShown = false;
+
+  window.addEventListener('blur', function() {
+    const examPage = document.getElementById('examPage');
+    if (!examPage || !examPage.classList.contains('active')) return;
+
+    blurCount++;
+    if (blurCount >= 3 && !blurWarningShown) {
+      blurWarningShown = true;
+      /* Tampilkan toast warning — pakai fungsi showToast yang sudah ada */
+      if (typeof showToast === 'function') {
+        showToast(`⚠️ Peringatan: Jangan berpindah tab/jendela saat ujian! (${blurCount}x)`, 'error');
+      }
+    }
+  });
+
+  /* ── 6. DETEKSI TAB TERSEMBUNYI (Page Visibility API) ── */
+  document.addEventListener('visibilitychange', function() {
+    const examPage = document.getElementById('examPage');
+    if (!examPage || !examPage.classList.contains('active')) return;
+
+    if (document.hidden) {
+      /* Log event — bisa dikirim ke server jika perlu */
+      console.warn('[PATLAS] Tab disembunyikan saat ujian');
+      if (typeof showToast === 'function') {
+        showToast('⚠️ Tab berpindah terdeteksi! Aktivitas ini dicatat.', 'error');
+      }
+    }
+  });
+
+  /* ── 7. BLOKIR KLIK KANAN sudah ada, tambahkan drag protection ── */
+  document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+  /* ── 8. DISABLE Screenshot via clipboard (Chrome 86+) ── */
+  document.addEventListener('copy', function(e) {
+    const examPage = document.getElementById('examPage');
+    if (!examPage || !examPage.classList.contains('active')) return;
+    e.clipboardData.setData('text/plain', '');
+    e.preventDefault();
+  });
+
+  /* ── 9. SCREEN CAPTURE API DETECTION (Chrome 94+) ── */
+  if ('getDisplayMedia' in navigator.mediaDevices) {
+    const origGetDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices);
+    navigator.mediaDevices.getDisplayMedia = function(...args) {
+      blackout(2000);
+      if (typeof showToast === 'function') {
+        showToast('🚫 Screen recording terdeteksi!', 'error');
+      }
+      return origGetDisplayMedia(...args);
+    };
+  }
+
+  console.log('[PATLAS] Privacy Shield v2.0 aktif');
+
+})();
+</script>
 
 </body>
 </html>
