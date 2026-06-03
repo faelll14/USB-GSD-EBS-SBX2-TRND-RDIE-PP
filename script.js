@@ -3515,36 +3515,47 @@
     let _faceApiReady=false;
     let _faceApiLoading=false;
 
-    const FACEAPI_CDN="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
-    const FACEAPI_MODELS="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights";
+    // ─── Model lokal — taruh semua file di folder yang sama dengan index.html ───
+    const FACEAPI_LOCAL_JS="./face-api.min.js";
+    const FACEAPI_LOCAL_MODELS="./models";
+    let _faceApiLoadPromise=null;
 
     async function _loadFaceApi(){
       if(_faceApiReady)return true;
-      if(_faceApiLoading)return new Promise(r=>{const t=setInterval(()=>{if(_faceApiReady){clearInterval(t);r(true);}},200);});
-      _faceApiLoading=true;
-      try{
-        if(!window.faceapi){
-          await new Promise((res,rej)=>{
-            const s=document.createElement("script");
-            s.src=FACEAPI_CDN;
-            s.onload=res;
-            s.onerror=rej;
-            document.head.appendChild(s);
-          });
+      // Kalau sedang loading, tunggu promise yang sama — tidak buat baru
+      if(_faceApiLoadPromise)return _faceApiLoadPromise;
+
+      _faceApiLoadPromise=(async()=>{
+        _faceApiLoading=true;
+        try{
+          // Load script face-api.min.js dari lokal
+          if(!window.faceapi){
+            await new Promise((res,rej)=>{
+              const s=document.createElement("script");
+              s.src=FACEAPI_LOCAL_JS;
+              s.onload=res;
+              s.onerror=()=>rej(new Error("face-api.min.js tidak ditemukan. Pastikan file ada di folder yang sama dengan index.html"));
+              document.head.appendChild(s);
+            });
+          }
+          // Load model dari subfolder models/
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_LOCAL_MODELS),
+            faceapi.nets.faceLandmark68TinyNet.loadFromUri(FACEAPI_LOCAL_MODELS),
+            faceapi.nets.faceRecognitionNet.loadFromUri(FACEAPI_LOCAL_MODELS),
+          ]);
+          _faceApiReady=true;
+          _faceApiLoading=false;
+          return true;
+        }catch(e){
+          _faceApiLoading=false;
+          _faceApiLoadPromise=null; // reset agar bisa retry
+          console.error("face-api load error:",e);
+          return false;
         }
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_MODELS),
-          faceapi.nets.faceLandmark68TinyNet.loadFromUri(FACEAPI_MODELS),
-          faceapi.nets.faceRecognitionNet.loadFromUri(FACEAPI_MODELS),
-        ]);
-        _faceApiReady=true;
-        _faceApiLoading=false;
-        return true;
-      }catch(e){
-        _faceApiLoading=false;
-        console.error("face-api load error:",e);
-        return false;
-      }
+      })();
+
+      return _faceApiLoadPromise;
     }
 
     function _setRingProgress(progressEl,pct,color){
@@ -3680,7 +3691,7 @@
 
       const loaded=await _loadFaceApi();
       if(!loaded){
-        _setStatus(ring,progress,badge,fill,"error","❌ Model gagal dimuat. Refresh halaman.");
+        _setStatus(ring,progress,badge,fill,"error","❌ Model gagal dimuat. Pastikan face-api.min.js & folder models/ ada di folder yang sama.");
         return;
       }
 
@@ -3809,7 +3820,10 @@
         const vid=document.getElementById("v2lVideo");
         if(vid){
           vid.srcObject=stream;
-          vid.style.transform="none"; // no mirror
+          // Pastikan tidak mirror: gerak kiri = video kiri (kamera normal, bukan selfie mirror)
+          vid.style.transform="none";
+          vid.style.webkitTransform="none";
+          vid.style.setProperty("transform","none","important");
         }
 
         // Cek kualitas
@@ -3935,7 +3949,10 @@
         const vid=document.getElementById("v2lVerifyVideo");
         if(vid){
           vid.srcObject=stream;
-          vid.style.transform="none"; // no mirror
+          // Pastikan tidak mirror: gerak kiri = video kiri (kamera normal, bukan selfie mirror)
+          vid.style.transform="none";
+          vid.style.webkitTransform="none";
+          vid.style.setProperty("transform","none","important");
         }
 
         // Cek kualitas
@@ -3972,7 +3989,7 @@
 
       const loaded=await _loadFaceApi();
       if(!loaded){
-        _setStatus(ring,progress,badge,fill,"error","❌ Model gagal dimuat. Refresh halaman.");
+        _setStatus(ring,progress,badge,fill,"error","❌ Model gagal dimuat. Pastikan face-api.min.js & folder models/ ada di folder yang sama.");
         return;
       }
 
