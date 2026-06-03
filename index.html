@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Sistem Ujian Online SMAN 14 Depok">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>PATLAS - Sistem Ujian Online | SMAN 14 Depok</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+        --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--surface:#1e1e2e;--surface2:#252538;--surface3:#2d2d44;
+        --border:#2a2a3d;--border2:#3a3a55;--text:#e8e8f0;--text2:#a0a0b8;--text3:#6b6b85;
+        --accent:#4f8ef7;--accent2:#6ba3ff;--accent3:#3a7af5;--green:#22c55e;--red:#ef4444;
+        --yellow:#f59e0b;--purple:#a855f7;--shadow:rgba(0,0,0,0.6);
+        --font-head:'Syne',sans-serif;--font-mono:'Space Mono',monospace;--font-body:'Inter',sans-serif;
+        --radius:10px;--radius2:16px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);
+        }
+        [data-theme="light"]{--bg:#f0f2f8;--bg2:#e8eaf4;--bg3:#dde0ef;--surface:#ffffff;--surface2:#f5f7ff;--surface3:#eceffe;--border:#d0d4e8;--border2:#b8bede;--text:#1a1a2e;--text2:#4a4a6a;--text3:#8a8aaa;--accent:#2563eb;--accent2:#3b82f6;--accent3:#1d4ed8;--shadow:rgba(0,0,0,0.15);}
+        [data-theme="pinky"]{
+        --bg:#fff0f8;--bg2:#ffe4f3;--bg3:#ffd6ee;--surface:#ffffff;--surface2:#fff5fb;--surface3:#ffeaf7;
+        --border:#ffb3d9;--border2:#ff80c0;--text:#5a1040;--text2:#8a2060;--text3:#cc6699;
+        --accent:#ff4da6;--accent2:#ff80c0;--accent3:#ff1a8c;--green:#c8e6c9;--red:#f48fb1;
+        --yellow:#ffcdd2;--purple:#ce93d8;--shadow:rgba(255,77,166,0.2);
+        --font-head:'Nunito',sans-serif;--font-body:'Nunito',sans-serif;
+        }
+        [data-theme="minecraft"]{--bg:#1a1a00;--bg2:#222200;--bg3:#2d2d00;--surface:#3d3d00;--surface2:#4a4a00;--surface3:#5c5c00;--border:#6b6b00;--border2:#8a8a00;--text:#e8e800;--text2:#c8c840;--text3:#a0a020;--accent:#00aa00;--accent2:#00cc00;--accent3:#008800;--green:#55dd55;--red:#dd3333;--yellow:#ffaa00;--purple:#aa00aa;--shadow:rgba(0,50,0,0.8);--font-mono:'Space Mono',monospace;--font-head:'Space Mono',monospace;}
+        [data-theme="kemerdekaan"]{--bg:#060606;--bg2:#0d0d0d;--bg3:#141414;--surface:#1a0000;--surface2:#200a00;--surface3:#2a1000;--border:#8b0000;--border2:#cc0000;--text:#fff5e0;--text2:#ffd580;--text3:#cc9940;--accent:#cc0000;--accent2:#ff2020;--accent3:#990000;--green:#228b22;--red:#cc0000;--yellow:#ffd700;--purple:#800080;--shadow:rgba(80,0,0,0.7);}
+
+        [data-theme="hacker"]{--bg:#000000;--bg2:#030303;--bg3:#050505;--surface:#000800;--surface2:#001000;--surface3:#001800;--border:#00ff00;--border2:#00cc00;--text:#00ff00;--text2:#00cc00;--text3:#008800;--accent:#00ff00;--accent2:#33ff33;--accent3:#00cc00;--green:#00ff00;--red:#ff0000;--yellow:#ffff00;--purple:#00ffff;--shadow:rgba(0,255,0,0.2);--font-head:'Space Mono',monospace;--font-mono:'Space Mono',monospace;--font-body:'Space Mono',monospace;}
+        html,body{height:100%;overflow-x:hidden}
+        body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Inter,sans-serif;font-size:15px;line-height:1.6;transition:background var(--transition),color var(--transition);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+        body.exam-mode{user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none}
+        body.exam-mode *{user-select:none!important;-webkit-user-select:none!important;pointer-events:auto}
+        body.exam-mode input,body.exam-mode textarea,body.exam-mode button{pointer-events:auto}
+        body.exam-mode .option-item{pointer-events:auto;cursor:pointer}body.exam-mode #examPage,body.exam-mode .question-area,body.exam-mode .question-nav,body.exam-mode .question-card,body.exam-mode .exam-header,body.exam-mode .options-list,body.exam-mode .question-actions{pointer-events:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom}
+        #app{min-height:100vh;display:flex;flex-direction:column}
+        .hidden{display:none!important}
+        .page{display:none;min-height:100vh;flex-direction:column;animation:fadeIn 0.4s ease}
+        .page.active{display:flex}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes glitch{0%{clip-path:inset(40% 0 61% 0)}20%{clip-path:inset(92% 0 1% 0)}40%{clip-path:inset(43% 0 1% 0)}60%{clip-path:inset(25% 0 58% 0)}80%{clip-path:inset(54% 0 7% 0)}100%{clip-path:inset(58% 0 43% 0)}}
+        @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        .school-header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);min-height:0}
+        .school-logo{width:36px;height:36px;object-fit:contain;border-radius:6px;flex-shrink:0}
+        .school-logo-placeholder{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:9px;font-weight:700;color:#fff;text-align:center;flex-shrink:0;letter-spacing:-0.5px}
+        .school-info{min-width:0;overflow:hidden}
+        .school-info h1{font-family:var(--font-head);font-size:clamp(11px,2vw,15px);font-weight:800;color:var(--text);letter-spacing:-0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .school-info p{font-size:10px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .school-header-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0}
+        .theme-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:var(--radius);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all var(--transition);white-space:nowrap}
+        .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+        .nav-tabs-wrapper{position:relative;background:var(--surface);border-bottom:1px solid var(--border)}.nav-scroll-btn{position:absolute;top:0;bottom:0;width:36px;z-index:10;display:none;align-items:center;justify-content:center;background:linear-gradient(var(--dir,90deg),var(--surface),transparent);border:none;cursor:pointer;color:var(--text2);font-size:18px;padding:0}.nav-scroll-btn.left{left:0;--dir:90deg}.nav-scroll-btn.right{right:0;--dir:270deg}.nav-scroll-btn.show{display:flex}.nav-tabs{display:flex;gap:4px;padding:0 36px;background:transparent;overflow-x:auto;scrollbar-width:none}
+        .nav-tabs::-webkit-scrollbar{display:none}
+        .nav-tab{padding:12px 20px;font-size:13px;font-family:var(--font-mono);color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all var(--transition);background:none;border-left:none;border-right:none;border-top:none}
+        .nav-tab:hover{color:var(--text)}
+        .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+        .content{flex:1;padding:24px;max-width:1200px;margin:0 auto;width:100%}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:24px;margin-bottom:20px;transition:border-color var(--transition)}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+        .btn{padding:10px 20px;border-radius:var(--radius);border:1px solid transparent;font-family:var(--font-mono);font-size:13px;font-weight:700;cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;white-space:nowrap;letter-spacing:0.3px;-webkit-appearance:none;outline:none;max-width:100%;box-sizing:border-box}
+        .btn:focus-visible,.btn:active{outline:none!important;box-shadow:none!important}
+        .btn:disabled{opacity:0.5;cursor:not-allowed}
+        .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+        .btn-primary:hover:not(:disabled){background:var(--accent2);border-color:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,142,247,0.3)}
+        .btn-danger{background:var(--red);border-color:var(--red);color:#fff}
+        .btn-danger:hover:not(:disabled){opacity:0.9;transform:translateY(-1px)}
+        .btn-secondary{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+        .btn-secondary:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+        .btn-success{background:var(--green);border-color:var(--green);color:#fff}
+        .btn-outline{background:transparent;border-color:var(--border2);color:var(--text2)}
+        .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+        .btn-sm{padding:6px 12px;font-size:12px}
+        .btn-lg{padding:14px 28px;font-size:15px}
+        .form-group{margin-bottom:18px}
+        .form-label{display:block;font-size:12px;font-family:var(--font-mono);color:var(--text3);margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase}
+        .form-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;color:var(--text);font-size:14px;font-family:system-ui,-apple-system,sans-serif;transition:all var(--transition);outline:none;-webkit-appearance:none}
+        .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,0.12)}
+        .form-input::placeholder{color:var(--text3)}
+        select.form-input{cursor:pointer}
+        .form-input[type="password"]{letter-spacing:3px}
+        .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--font-mono);font-weight:700;letter-spacing:0.5px}
+        .badge-blue{background:rgba(79,142,247,0.15);color:var(--accent2);border:1px solid rgba(79,142,247,0.3)}
+        .badge-green{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+        .badge-red{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+        .badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);border:1px solid rgba(245,158,11,0.3)}
+        .badge-purple{background:rgba(168,85,247,0.15);color:var(--purple);border:1px solid rgba(168,85,247,0.3)}
+        .alert{padding:14px 18px;border-radius:var(--radius);font-size:13px;margin-bottom:16px;border-left:3px solid;display:flex;align-items:flex-start;gap:10px}
+        .alert-error{background:rgba(239,68,68,0.08);border-color:var(--red);color:var(--red)}
+        .alert-success{background:rgba(34,197,94,0.08);border-color:var(--green);color:var(--green)}
+        .alert-info{background:rgba(79,142,247,0.08);border-color:var(--accent);color:var(--accent2)}
+        .alert-warning{background:rgba(245,158,11,0.08);border-color:var(--yellow);color:var(--yellow)}
+        .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th{background:var(--surface2);padding:12px 16px;text-align:left;font-family:var(--font-mono);font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+        td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+        tr:last-child td{border-bottom:none}
+        tr:hover td{background:var(--surface2);color:var(--text)}
+        .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;transition:all var(--transition)}
+        .stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+        .stat-value{font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--accent)}
+        .stat-label{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-top:4px;letter-spacing:0.5px}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease}
+        .modal-overlay.hidden{display:none}
+        .modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius2);padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:slideIn 0.3s ease}
+        .modal-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:20px;color:var(--text)}
+        .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+        #loginPage{background:var(--bg);position:relative;overflow:hidden}
+        .login-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+        .login-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.3}
+        .login-container{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+        .login-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 24px 64px var(--shadow);animation:slideIn 0.5s ease}
+        .login-logo-wrap{text-align:center;margin-bottom:32px}
+        .login-logo{width:72px;height:72px;object-fit:contain;border-radius:12px;margin-bottom:12px}
+        .login-logo-placeholder{width:72px;height:72px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff;text-align:center;line-height:1.3;margin:0 auto 12px;letter-spacing:-0.5px}
+        .login-title{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+        .login-subtitle{font-size:12px;color:var(--text3);font-family:var(--font-mono);margin-top:4px}
+        .remember-wrap{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+        .remember-wrap input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+        .remember-wrap label{font-size:13px;color:var(--text2);cursor:pointer}
+        .security-indicator{display:flex;align-items:center;gap:6px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);margin-bottom:20px;font-size:11px;font-family:var(--font-mono);color:var(--green)}
+        .sec-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+        .exam-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+        .exam-timer{font-family:var(--font-mono);font-size:clamp(18px,4vw,26px);font-weight:700;color:var(--accent);letter-spacing:2px;min-width:100px;text-align:center}
+        .exam-timer.warning{color:var(--yellow);animation:pulse 1s ease-in-out infinite}
+        .exam-timer.danger{color:var(--red);animation:pulse 0.5s ease-in-out infinite}
+        .exam-progress{flex:1;max-width:300px}
+        .progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.5s ease}
+        .progress-text{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-top:6px;text-align:right}
+        .question-nav{display:flex;flex-wrap:wrap;gap:6px;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border)}
+        .q-num-btn{width:34px;height:34px;border-radius:var(--radius);font-size:12px;font-family:var(--font-mono);font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text3);transition:all var(--transition)}
+        .q-num-btn.answered{background:var(--accent);border-color:var(--accent);color:#fff}
+        .q-num-btn.current{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 2px rgba(79,142,247,0.2)}
+        .q-num-btn.flagged{background:var(--yellow);border-color:var(--yellow);color:#fff}
+        .question-area{flex:1;padding:24px;max-width:900px;margin:0 auto;width:100%;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+        .question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:28px;margin-bottom:20px}
+        .question-number{font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase}
+        .question-text{font-size:16px;line-height:1.7;color:var(--text);margin-bottom:24px;font-weight:500;user-select:none;-webkit-user-select:none}
+        .options-list{display:flex;flex-direction:column;gap:10px}
+        .option-item{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all var(--transition)}
+        .option-item:hover{border-color:var(--border2);background:var(--surface3)}
+        .option-item.selected{border-color:var(--accent);background:rgba(79,142,247,0.08);box-shadow:0 0 0 2px rgba(79,142,247,0.15)}
+        .option-letter{width:28px;height:28px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text3);flex-shrink:0;transition:all var(--transition)}
+        .option-item.selected .option-letter{background:var(--accent);border-color:var(--accent);color:#fff}
+        .option-text{font-size:14px;color:var(--text2);line-height:1.5;padding-top:3px}
+        .option-item.selected .option-text{color:var(--text)}
+        .question-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+        .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+        .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
+        .theme-option{padding:12px;border-radius:var(--radius);border:2px solid var(--border);cursor:pointer;text-align:center;font-family:var(--font-mono);font-size:12px;font-weight:700;transition:all var(--transition);display:flex;flex-direction:column;gap:6px;align-items:center}
+        .theme-option:hover{border-color:var(--border2)}
+        .theme-option.active{border-color:var(--accent);background:rgba(79,142,247,0.08)}
+        .theme-preview{width:100%;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,0.1)}
+        .loader{display:inline-flex;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+        .loader-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+        .loader-overlay.hidden{display:none}
+        .loader-big{width:48px;height:48px;border:3px solid rgba(79,142,247,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+        .loader-text{font-family:var(--font-mono);font-size:13px;color:var(--text2)}
+        .violation-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:20px;font-size:11px;font-family:var(--font-mono);color:var(--red);font-weight:700}
+        .fullscreen-warning{position:fixed;top:0;left:0;right:0;z-index:998;background:var(--red);color:#fff;padding:8px 20px;font-family:var(--font-mono);font-size:12px;text-align:center;display:none;animation:pulse 1s infinite}
+        .fullscreen-warning.show{display:block}
+        .minecraft-bg{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+        .mc-block{position:absolute;width:32px;height:32px;opacity:0.15;animation:float 4s ease-in-out infinite}
+
+                .kemerdekaan-stars{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+        .k-star{position:absolute;font-size:10px;color:var(--yellow);opacity:0.3;animation:float 5s ease-in-out infinite}
+        .toast-container{position:fixed;bottom:24px;right:24px;z-index:9998;display:flex;flex-direction:column;gap:8px}
+        .toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 18px;font-size:13px;font-family:var(--font-mono);color:var(--text);max-width:300px;animation:slideIn 0.3s ease;box-shadow:0 8px 24px var(--shadow)}
+        .toast.success{border-left:3px solid var(--green);color:var(--green)}
+        .toast.error{border-left:3px solid var(--red);color:var(--red)}
+        .toast.info{border-left:3px solid var(--accent);color:var(--accent2)}
+        .toast.warning{border-left:3px solid var(--yellow);color:var(--yellow)}
+        .result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:40px;text-align:center;animation:fadeIn 0.6s ease}
+        .result-score{font-family:var(--font-head);font-size:clamp(64px,12vw,96px);font-weight:800;line-height:1;margin:20px 0}
+        .result-score.high{color:var(--green)}
+        .result-score.mid{color:var(--yellow)}
+        .result-score.low{color:var(--red)}
+        .result-label{font-size:14px;font-family:var(--font-mono);color:var(--text3);margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase}
+        .soal-import-area{background:var(--bg2);border:2px dashed var(--border2);border-radius:var(--radius2);padding:24px;font-family:var(--font-mono);font-size:12px;color:var(--text2);min-height:200px;resize:vertical;width:100%;outline:none;transition:border-color var(--transition)}
+        .soal-import-area:focus{border-color:var(--accent)}
+        .schedule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+        .schedule-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:all var(--transition)}
+        .schedule-item:hover{border-color:var(--accent)}
+        .schedule-mapel{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text)}
+        .schedule-time{font-family:var(--font-mono);font-size:12px;color:var(--accent);margin-top:4px}
+        .schedule-class{font-size:11px;color:var(--text3);margin-top:4px}
+        .countdown-display{font-family:var(--font-mono);font-size:clamp(32px,6vw,56px);font-weight:700;color:var(--accent);text-align:center;letter-spacing:4px;padding:20px}
+        .countdown-label{font-size:12px;color:var(--text3);text-align:center;letter-spacing:0.5px}
+        .divider{height:1px;background:var(--border);margin:20px 0}
+        .page-title{font-family:var(--font-head);font-size:clamp(20px,4vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.5px;margin-bottom:6px}
+        .page-subtitle{font-size:13px;color:var(--text3);font-family:var(--font-mono)}
+        .page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+        .user-chip{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px}
+        .user-chip-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff}
+        .user-chip-info{display:flex;flex-direction:column}
+        .user-chip-name{font-size:12px;font-weight:600;color:var(--text)}
+        .user-chip-role{font-size:10px;font-family:var(--font-mono);color:var(--text3)}
+        .empty-state{text-align:center;padding:60px 20px;color:var(--text3);font-family:var(--font-mono);font-size:13px}
+        .empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.4}
+        .import-helper{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:12px;font-size:12px;font-family:var(--font-mono);color:var(--text3);line-height:1.8}
+        .import-helper code{background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--accent2);font-size:11px}
+        .ai-prompt-box{background:var(--bg2);border:1px solid var(--accent);border-radius:var(--radius);padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--text2);line-height:1.7;margin-top:12px;position:relative}
+        .ai-prompt-copy{position:absolute;top:10px;right:10px}
+        .violation-warning{position:fixed;inset:0;background:rgba(239,68,68,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;text-align:center;padding:40px;animation:fadeIn 0.2s ease}
+        .violation-warning.hidden{display:none}
+        .violation-number{font-family:var(--font-head);font-size:80px;font-weight:800;color:#fff;line-height:1}
+        .violation-msg{font-size:18px;color:#fff;font-family:var(--font-mono);font-weight:700}
+        .violation-sub{font-size:14px;color:rgba(255,255,255,0.8);font-family:var(--font-mono)}
+        .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+        .filter-bar select,.filter-bar input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;color:var(--text);font-size:13px;font-family:var(--font-mono);outline:none;cursor:pointer;transition:border-color var(--transition);min-width:0;flex-shrink:1}
+        .filter-bar select{max-width:200px}
+        .filter-bar input{max-width:200px}
+        .filter-bar select:focus,.filter-bar input:focus{border-color:var(--accent)}
+        .account-info-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:16px}
+        .account-info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+        .account-info-row:last-child{border-bottom:none}
+        .account-info-label{font-size:12px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
+        .account-info-value{font-size:14px;font-weight:600;color:var(--text);font-family:var(--font-mono)}
+        .notif-dot{min-width:18px;height:18px;background:var(--red);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;animation:pulse 1.5s infinite;margin-left:4px;font-size:10px;font-weight:700;color:#fff;padding:0 4px;vertical-align:middle;line-height:1}
+        .ranking-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;transition:all var(--transition)}
+        .ranking-item:hover{border-color:var(--accent)}
+        .ranking-num{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--text3);min-width:32px;text-align:center}
+        .ranking-num.gold{color:#ffd700}
+        .ranking-num.silver{color:#c0c0c0}
+        .ranking-num.bronze{color:#cd7f32}
+        .ranking-info{flex:1}
+        .ranking-name{font-weight:600;font-size:14px;color:var(--text)}
+        .ranking-detail{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-top:2px}
+        .ranking-score{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--accent)}
+        .notif-panel{position:fixed;top:70px;right:20px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius2);padding:16px;width:320px;max-height:400px;overflow-y:auto;z-index:500;box-shadow:0 8px 32px var(--shadow);display:none}
+        .notif-panel.open{display:block;animation:slideIn 0.2s ease}
+        .notif-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+        .notif-item:last-child{border-bottom:none}
+        .notif-title{font-weight:600;color:var(--text)}
+        .notif-body{font-size:12px;color:var(--text3);font-family:var(--font-mono);margin-top:4px}
+        .unlock-btn{background:var(--yellow);border:none;border-radius:var(--radius);padding:4px 10px;font-size:11px;font-family:var(--font-mono);font-weight:700;color:#000;cursor:pointer;margin-top:6px;transition:opacity var(--transition)}
+        .unlock-btn:hover{opacity:0.8}
+        .absent-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--font-mono);font-weight:700;background:rgba(245,158,11,0.15);color:var(--yellow);border:1px solid rgba(245,158,11,0.3)}
+        .confirm-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px}
+        .confirm-modal-overlay.hidden{display:none}
+        .confirm-modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius2);padding:28px;width:100%;max-width:420px;animation:slideIn 0.25s ease;text-align:center}
+        .confirm-modal-icon{font-size:40px;margin-bottom:12px;line-height:1}
+        .confirm-modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
+        .confirm-modal-msg{font-size:13px;color:var(--text2);font-family:var(--font-body);line-height:1.6;margin-bottom:24px}
+        .confirm-modal-actions{display:flex;gap:12px;justify-content:center}
+        .time-input-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+        @media(max-width:480px){.time-input-grid{grid-template-columns:repeat(2,1fr)}}
+        [data-theme="pinky"] .card,[data-theme="pinky"] .login-box{background:var(--surface);border-color:var(--border2);box-shadow:0 0 20px rgba(255,77,166,0.1)}
+        [data-theme="pinky"] .btn-primary{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 15px rgba(255,77,166,0.3)}
+        [data-theme="pinky"] .form-input:focus{box-shadow:0 0 0 3px rgba(255,77,166,0.15)}
+        [data-theme="pinky"] .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+        [data-theme="pinky"] .stat-value{color:var(--accent)}
+        [data-theme="minecraft"] .card,[data-theme="minecraft"] .login-box{background:var(--surface);border:2px solid #6b6b00;image-rendering:pixelated}
+        [data-theme="minecraft"] .btn{border-radius:0;image-rendering:pixelated}
+        [data-theme="minecraft"] .form-input{border-radius:0;border:2px solid #6b6b00}
+        [data-theme="hacker"] .card,[data-theme="hacker"] .login-box{border:1px solid var(--accent);box-shadow:0 0 20px rgba(0,255,0,0.1),inset 0 0 20px rgba(0,255,0,0.02)}
+        [data-theme="hacker"] .form-input{border-color:var(--accent);background:#001000}
+        [data-theme="hacker"] .btn-primary{background:transparent;border:1px solid var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(0,255,0,0.2)}
+        [data-theme="hacker"] *{user-select:text!important;-webkit-user-select:text!important}
+        [data-theme="hacker"] body.exam-mode *{user-select:none!important;-webkit-user-select:none!important;pointer-events:auto}
+        [data-theme="galaxy"]{
+        --bg:#00000a;--bg2:#02020e;--bg3:#04041a;--surface:rgba(6,6,28,0.82);--surface2:rgba(10,10,40,0.85);--surface3:rgba(16,16,52,0.88);
+        --border:rgba(100,80,255,0.18);--border2:rgba(140,100,255,0.32);--text:#eef0ff;--text2:#bcc4ff;--text3:#7a88cc;
+        --accent:#8b6fff;--accent2:#b89bff;--accent3:#5b2dd9;--green:#2eefb0;--red:#ff6b8a;
+        --yellow:#ffe066;--purple:#d580ff;--shadow:rgba(80,50,255,0.3);
+        --font-head:'Syne',sans-serif;--font-body:'Inter',sans-serif;
+        }
+        [data-theme="galaxy"] #app{position:relative;z-index:1}
+        [data-theme="galaxy"] .card{background:var(--surface);border:1px solid var(--border2);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);box-shadow:0 0 0 1px rgba(139,111,255,0.08),0 8px 32px rgba(0,0,10,0.7),inset 0 1px 0 rgba(255,255,255,0.06)}
+        [data-theme="galaxy"] .card:hover{border-color:rgba(139,111,255,0.55);box-shadow:0 0 0 1px rgba(139,111,255,0.15),0 0 40px rgba(139,111,255,0.12),0 12px 40px rgba(0,0,10,0.8)}
+        [data-theme="galaxy"] .login-box{background:rgba(4,4,20,0.88);border:1px solid rgba(139,111,255,0.35);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 80px rgba(90,50,220,0.25),0 0 0 1px rgba(139,111,255,0.1),0 24px 64px rgba(0,0,0,0.8)}
+        [data-theme="galaxy"] .btn-primary{background:linear-gradient(135deg,#5b2dd9 0%,#8b6fff 50%,#b89bff 100%);background-size:200% 200%;border:1px solid rgba(139,111,255,0.6);color:#fff;box-shadow:0 0 20px rgba(139,111,255,0.45),0 4px 16px rgba(80,40,200,0.5);animation:galaxy-btn-shine 4s ease infinite}
+        [data-theme="galaxy"] .btn-primary:hover:not(:disabled){box-shadow:0 0 35px rgba(139,111,255,0.7),0 6px 24px rgba(80,40,200,0.6);transform:translateY(-2px) scale(1.01)}
+        [data-theme="galaxy"] .btn-secondary{background:rgba(10,10,40,0.7);border:1px solid rgba(100,80,255,0.3);backdrop-filter:blur(8px);color:var(--text2)}
+        [data-theme="galaxy"] .btn-secondary:hover:not(:disabled){border-color:rgba(139,111,255,0.6);color:var(--accent2)}
+        [data-theme="galaxy"] .btn-outline{background:transparent;border:1px solid rgba(100,80,255,0.35);color:var(--text3)}
+        [data-theme="galaxy"] .btn-outline:hover{border-color:var(--accent2);color:var(--accent2)}
+        [data-theme="galaxy"] .form-input{border:1px solid var(--border2);background:rgba(4,4,18,0.8);color:var(--text);backdrop-filter:blur(8px)}
+        [data-theme="galaxy"] .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,111,255,0.18)}
+        [data-theme="galaxy"] .form-input::placeholder{color:var(--text3)}
+        [data-theme="galaxy"] .nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);text-shadow:0 0 12px rgba(184,155,255,0.6)}
+        [data-theme="galaxy"] .nav-tab:hover{color:var(--text)}
+        [data-theme="galaxy"] .school-header{background:rgba(2,2,14,0.88);border-color:rgba(100,80,255,0.22);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+        [data-theme="galaxy"] .nav-tabs-wrapper{background:rgba(2,2,14,0.7);border-color:rgba(100,80,255,0.16);backdrop-filter:blur(12px)}
+        [data-theme="galaxy"] .stat-card{background:rgba(8,6,30,0.75);border:1px solid rgba(139,111,255,0.2);backdrop-filter:blur(12px)}
+        [data-theme="galaxy"] .stat-card:hover{border-color:rgba(184,155,255,0.4)}
+        [data-theme="galaxy"] .stat-value{color:var(--accent2);text-shadow:0 0 16px rgba(184,155,255,0.5)}
+        [data-theme="galaxy"] .login-grid{opacity:0.05}
+        [data-theme="galaxy"] .modal{background:rgba(4,4,22,0.92);border:1px solid rgba(139,111,255,0.3);backdrop-filter:blur(24px);box-shadow:0 0 60px rgba(80,40,200,0.2)}
+        [data-theme="galaxy"] .modal-overlay{background:rgba(0,0,10,0.8);backdrop-filter:blur(6px)}
+        [data-theme="galaxy"] .table-wrap{border-color:rgba(100,80,255,0.2)}
+        [data-theme="galaxy"] th{background:rgba(10,8,40,0.9);color:var(--text2)}
+        [data-theme="galaxy"] td{color:var(--text2)}
+        [data-theme="galaxy"] tr:hover td{background:rgba(139,111,255,0.06);color:var(--text)}
+        [data-theme="galaxy"] .filter-bar select,[data-theme="galaxy"] .filter-bar input{color:var(--text);background:rgba(8,6,30,0.8);border-color:rgba(100,80,255,0.3);backdrop-filter:blur(8px)}
+        [data-theme="galaxy"] .toast{background:rgba(6,4,24,0.92);border:1px solid rgba(139,111,255,0.3);backdrop-filter:blur(16px)}
+        [data-theme="galaxy"] .option-item{background:rgba(8,6,30,0.7);border-color:rgba(100,80,255,0.2);backdrop-filter:blur(8px)}
+        [data-theme="galaxy"] .option-item:hover{background:rgba(14,10,50,0.85);border-color:rgba(139,111,255,0.4)}
+        [data-theme="galaxy"] .option-item.selected{background:rgba(139,111,255,0.1);border-color:var(--accent);box-shadow:0 0 16px rgba(139,111,255,0.15)}
+        [data-theme="galaxy"] .question-card{background:rgba(6,4,24,0.8);border-color:rgba(100,80,255,0.2);backdrop-filter:blur(12px)}
+        [data-theme="galaxy"] .notif-panel{background:rgba(4,4,22,0.95);border-color:rgba(139,111,255,0.3);backdrop-filter:blur(20px)}
+        @keyframes galaxy-btn-shine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+        #galaxy-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0;transition:opacity 1.5s ease}
+
+        [data-theme="kemerdekaan"] .form-label{color:var(--text2)}
+        [data-theme="kemerdekaan"] .filter-bar select,[data-theme="kemerdekaan"] .filter-bar input{color:var(--text);background:var(--surface2)}
+        [data-theme="minecraft"] .filter-bar select,[data-theme="minecraft"] .filter-bar input{color:var(--text);background:var(--surface2)}
+        [data-theme="hacker"] .filter-bar select,[data-theme="hacker"] .filter-bar input{color:var(--text);background:var(--surface)}
+        [data-theme="kemerdekaan"] .login-box{border:2px solid var(--red)}
+        [data-theme="kemerdekaan"] .btn-primary{background:var(--red);border-color:var(--red)}
+        @media(max-width:768px){
+          .content{padding:16px}
+          .school-header{padding:8px 12px;gap:8px}
+          .school-info h1{font-size:11px}
+          .school-info p{display:none}
+          .school-header-right .badge{display:none}
+          .login-box{padding:28px 20px}
+          .exam-header{padding:10px 16px;flex-wrap:wrap}
+          .question-area{padding:16px}
+          .question-card{padding:20px}
+          .card{padding:18px}
+          .nav-tabs{padding:0 10px}
+          .question-nav{padding:12px 16px}
+          .stat-grid{grid-template-columns:repeat(2,1fr)}
+          .btn-sm{padding:5px 8px;font-size:11px}
+          .user-chip-name{max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+          .btn{padding:8px 14px;font-size:12px}
+          .btn-lg{padding:11px 18px;font-size:13px}
+          .modal{padding:20px 16px}
+          .modal-footer{flex-wrap:wrap;gap:8px}
+          .modal-footer .btn{flex:1;min-width:0}
+          .confirm-modal-actions{flex-wrap:wrap}
+          .confirm-modal-actions .btn{flex:1;min-width:120px}
+          .v2l-method-tabs{flex-wrap:nowrap}
+          .filter-bar{flex-wrap:wrap}
+          .filter-bar select,.filter-bar input{width:100%;max-width:100%}
+          .page-header{flex-direction:column;gap:10px}
+          .question-actions{flex-wrap:wrap;gap:8px}
+          .question-actions .btn{flex:1;min-width:120px;justify-content:center}
+        }
+        @media(max-width:480px){
+          .stat-grid{grid-template-columns:repeat(2,1fr)}
+          .theme-grid{grid-template-columns:repeat(3,1fr)}
+          .btn-lg{padding:10px 16px;font-size:13px}
+          .exam-timer{font-size:20px}
+          .school-info h1{font-size:10px}
+          .school-header-right .user-chip{display:none}
+          .btn{font-size:12px;padding:8px 12px}
+          .exam-header .btn{font-size:11px;padding:7px 10px}
+          .v2l-camera-wrap{margin:10px 0}
+          .modal{padding:16px 12px}
+          .v2l-method-tab{font-size:11px;padding:8px 6px}
+        }
+    
+        .guru-tab-content{display:block}.guru-tab-content.hidden{display:none!important}
+
+        /* ═══ MOBILE BTN OVERFLOW FIX ═══ */
+        .modal-footer,.confirm-modal-actions{flex-wrap:wrap}
+        .v2l-btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+        .v2l-btn-row .btn{flex:1;min-width:0}
+        @media(max-width:520px){
+          .modal{max-width:100%!important;padding:18px 14px}
+          .modal-footer{gap:8px}
+          .modal-footer .btn{flex:1;min-width:0;padding:9px 10px;font-size:12px}
+          .confirm-modal-actions .btn{flex:1;min-width:110px;font-size:12px}
+          .v2l-method-tabs{gap:6px}
+          .v2l-method-tab{padding:9px 6px;font-size:11px}
+          .v2l-btn-row{gap:8px}
+          .v2l-btn-row .btn{padding:9px 10px;font-size:12px}
+        }
+
+        /* ═══ V2L ENHANCED RING & CAMERA FIX ═══ */
+        .v2l-ring-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+        /* Fix camera mirror — no scaleX flip */
+        #v2lVideo,#v2lVerifyVideo{transform:none!important;-webkit-transform:none!important}
+        /* Camera container aspect ratio for mobile */
+        .v2l-camera-wrap{position:relative;width:100%;padding-top:75%;border-radius:var(--radius);overflow:hidden;background:#000;border:2px solid var(--border2);margin:16px 0}
+        .v2l-camera-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:none!important}
+        .v2l-camera-wrap canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+        .v2l-face-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+        .v2l-face-ring{position:absolute;width:55%;padding-top:68%;border:3px solid rgba(79,142,247,0.7);border-radius:50%;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);transition:border-color 0.3s ease}
+        .v2l-face-ring.success{border-color:var(--green);box-shadow:0 0 0 9999px rgba(0,0,0,0.45),0 0 30px rgba(34,197,94,0.5)}
+        .v2l-face-ring.error{border-color:var(--red);box-shadow:0 0 0 9999px rgba(0,0,0,0.55),0 0 20px rgba(239,68,68,0.5)}
+        .v2l-face-ring.scanning{border-color:#22c55e}
+        /* Smooth progress bar */
+        .v2l-scan-fill{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:2px;transition:width 0.2s ease;width:0%}
+        .v2l-scan-fill.error{background:linear-gradient(90deg,var(--red),#f87171)}
+        /* Status badge animate */
+        @keyframes v2lPulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+        @keyframes v2lPulseRed{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+        .v2l-face-ring.scanning{animation:v2lPulseGreen 1s ease-in-out infinite}
+        .v2l-face-ring.error{animation:v2lPulseRed 0.6s ease-in-out infinite}
+
+
+        .v2l-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+        .v2l-toggle-row:last-child{border-bottom:none}
+        .v2l-toggle-label{font-size:13px;color:var(--text);font-weight:600}
+        .v2l-toggle-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:2px}
+        .v2l-toggle{position:relative;width:46px;height:26px;flex-shrink:0}
+        .v2l-toggle input{opacity:0;width:0;height:0;position:absolute}
+        .v2l-toggle-slider{position:absolute;inset:0;background:var(--surface3);border-radius:26px;cursor:pointer;transition:all 0.3s ease;border:1px solid var(--border2)}
+        .v2l-toggle-slider::before{content:'';position:absolute;width:20px;height:20px;left:2px;top:2px;background:#fff;border-radius:50%;transition:all 0.3s ease;box-shadow:0 2px 4px rgba(0,0,0,0.3)}
+        .v2l-toggle input:checked+.v2l-toggle-slider{background:var(--accent);border-color:var(--accent)}
+        .v2l-toggle input:checked+.v2l-toggle-slider::before{transform:translateX(20px)}
+        .v2l-toggle input:disabled+.v2l-toggle-slider{opacity:0.4;cursor:not-allowed}
+        .v2l-face-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);margin:12px 0;font-size:12px;font-family:var(--font-mono)}
+        .v2l-face-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+        .v2l-face-dot.stored{background:var(--green);animation:pulse 2s ease-in-out infinite}
+        .v2l-face-dot.empty{background:var(--text3)}
+        .v2l-security-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:var(--green);font-size:10px;font-family:var(--font-mono);font-weight:700;letter-spacing:0.5px}
+        #v2lModal .modal{max-width:560px}
+        #v2lScanModal .modal{max-width:520px}
+        /* v2l-camera-wrap, v2l-face-ring, v2l-scan-fill defined in enhanced block above */
+        .v2l-scan-progress{text-align:center;margin-top:8px;font-size:12px;font-family:var(--font-mono);color:var(--text2);min-height:20px}
+        .v2l-scan-bar{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;margin:8px 0}
+        .v2l-qr-wrap{text-align:center;padding:20px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);margin:16px 0}
+        .v2l-qr-canvas{border-radius:8px;border:4px solid var(--surface3)}
+        .v2l-qr-timer{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--accent);margin:12px 0 4px}
+        .v2l-qr-timer.danger{color:var(--red);animation:pulse 0.6s ease-in-out infinite}
+        .v2l-qr-info{font-size:11px;color:var(--text3);font-family:var(--font-mono)}
+        .v2l-verify-screen{display:flex;flex-direction:column;gap:16px;align-items:center;padding:20px}
+        .v2l-verify-title{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--text);text-align:center}
+        .v2l-verify-sub{font-size:13px;color:var(--text2);text-align:center;line-height:1.6}
+        .v2l-checkbox-wrap{display:flex;align-items:flex-start;gap:12px;padding:14px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius);font-size:12px;color:var(--text2);line-height:1.6;cursor:pointer;width:100%;text-align:left}
+        .v2l-checkbox-wrap input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:1px}
+        .v2l-method-tabs{display:flex;gap:8px;margin-bottom:16px;width:100%}
+        .v2l-method-tab{flex:1;padding:10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:var(--font-mono);font-size:12px;cursor:pointer;text-align:center;transition:all var(--transition);font-weight:600}
+        .v2l-method-tab.active{border-color:var(--accent);background:rgba(79,142,247,0.10);color:var(--accent)}
+        .v2l-method-panel{display:none}.v2l-method-panel.active{display:block}
+        .nav-scroll-btn{position:absolute;top:0;bottom:0;width:36px;z-index:10;display:none;align-items:center;justify-content:center;background:linear-gradient(var(--_dir,90deg),var(--surface) 60%,transparent);border:none;cursor:pointer;color:var(--text2);font-size:20px;padding:0;transition:opacity 0.2s}
+        .nav-scroll-btn.left{left:0;--_dir:90deg}.nav-scroll-btn.right{right:0;--_dir:270deg}
+        .nav-scroll-btn.show{display:flex}.nav-scroll-btn:hover{color:var(--accent)}
+        .nav-tabs-wrapper{position:relative;background:var(--surface);border-bottom:1px solid var(--border)}
+        #importAiPromptBox{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;padding-top:36px;white-space:pre-wrap;font-family:var(--font-mono);font-size:11px;color:var(--text2);line-height:1.6}
+
+        /* ═══ HOME PAGE ═══ */
+        #homePage{background:var(--bg);min-height:100vh;min-height:100dvh;flex-direction:column;position:relative;overflow:hidden;display:none}
+        #homePage.active{display:flex!important}
+        .home-wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;max-width:920px;margin:0 auto;width:100%;padding:0 20px 48px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+        /* ── Mesh gradient blobs (iOS-style) ── */
+        .home-blob-wrap{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+        .home-blob{position:absolute;border-radius:50%;filter:blur(72px);will-change:transform}
+
+        /* Blob animations — slow independent drifts */
+        @keyframes blob1{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(6%,8%) scale(1.06)}50%{transform:translate(-4%,14%) scale(0.96)}75%{transform:translate(10%,5%) scale(1.03)}}
+        @keyframes blob2{0%,100%{transform:translate(0,0) scale(1)}30%{transform:translate(-8%,-6%) scale(1.08)}60%{transform:translate(5%,-12%) scale(0.94)}80%{transform:translate(-3%,7%) scale(1.04)}}
+        @keyframes blob3{0%,100%{transform:translate(0,0) scale(1)}20%{transform:translate(12%,-8%) scale(0.97)}55%{transform:translate(-6%,10%) scale(1.05)}80%{transform:translate(8%,-4%) scale(0.99)}}
+        @keyframes blob4{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(-10%,12%) scale(1.07)}65%{transform:translate(7%,-6%) scale(0.95)}90%{transform:translate(-5%,-9%) scale(1.02)}}
+
+        /* Dark (default) */
+        .home-blob-1{width:600px;height:600px;background:var(--accent);opacity:0.13;top:-180px;right:-140px;animation:blob1 18s ease-in-out infinite}
+        .home-blob-2{width:500px;height:500px;background:var(--purple);opacity:0.11;bottom:-160px;left:-140px;animation:blob2 22s ease-in-out infinite}
+        .home-blob-3{width:380px;height:380px;background:var(--green);opacity:0.07;top:40%;left:38%;animation:blob3 26s ease-in-out infinite}
+        .home-blob-4{width:300px;height:300px;background:var(--accent2);opacity:0.08;top:20%;left:-80px;animation:blob4 20s ease-in-out infinite}
+
+        /* Frosted glass overlay — softens blobs into smooth mesh */
+        .home-blob-frost{position:absolute;inset:0;backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);background:transparent}
+
+        /* Light */
+        [data-theme="light"] .home-blob-1{opacity:0.10}
+        [data-theme="light"] .home-blob-2{opacity:0.08}
+        [data-theme="light"] .home-blob-3{opacity:0.06}
+        [data-theme="light"] .home-blob-4{opacity:0.07}
+
+        /* Pinky */
+        [data-theme="pinky"] .home-blob-1{background:#ff4da6;opacity:0.16}
+        [data-theme="pinky"] .home-blob-2{background:#ff80c0;opacity:0.13}
+        [data-theme="pinky"] .home-blob-3{background:#ff1a8c;opacity:0.08}
+        [data-theme="pinky"] .home-blob-4{background:#ffb3d9;opacity:0.10}
+
+        /* Galaxy */
+        [data-theme="galaxy"] .home-blob-1{background:#8b6fff;opacity:0.18}
+        [data-theme="galaxy"] .home-blob-2{background:#d580ff;opacity:0.14}
+        [data-theme="galaxy"] .home-blob-3{background:#2eefb0;opacity:0.07}
+        [data-theme="galaxy"] .home-blob-4{background:#5b2dd9;opacity:0.12}
+
+        /* Kemerdekaan */
+        [data-theme="kemerdekaan"] .home-blob-1{background:#cc0000;opacity:0.14}
+        [data-theme="kemerdekaan"] .home-blob-2{background:#ffd700;opacity:0.09}
+        [data-theme="kemerdekaan"] .home-blob-3{background:#ff2020;opacity:0.06}
+        [data-theme="kemerdekaan"] .home-blob-4{background:#800000;opacity:0.10}
+
+        /* Minecraft — tetap pixelated, no blobs */
+        [data-theme="minecraft"] .home-blob-wrap{display:none}
+
+        /* Hacker — green scanline feel, subtle blobs */
+        [data-theme="hacker"] .home-blob-1{background:#00ff00;opacity:0.06;filter:blur(60px)}
+        [data-theme="hacker"] .home-blob-2{background:#00cc00;opacity:0.05;filter:blur(60px)}
+        [data-theme="hacker"] .home-blob-3{display:none}
+        [data-theme="hacker"] .home-blob-4{display:none}
+
+        /* ── Card glass effect ── */
+        .home-card{
+          background:rgba(255,255,255,0.06);
+          backdrop-filter:blur(24px) saturate(1.6);
+          -webkit-backdrop-filter:blur(24px) saturate(1.6);
+          border:1px solid rgba(255,255,255,0.10);
+        }
+        [data-theme="light"] .home-card{
+          background:rgba(255,255,255,0.55);
+          backdrop-filter:blur(24px) saturate(1.8);
+          -webkit-backdrop-filter:blur(24px) saturate(1.8);
+          border:1px solid rgba(255,255,255,0.7);
+          box-shadow:0 2px 20px rgba(0,0,0,0.06);
+        }
+        [data-theme="pinky"] .home-card{
+          background:rgba(255,255,255,0.45);
+          backdrop-filter:blur(24px) saturate(1.8);
+          -webkit-backdrop-filter:blur(24px) saturate(1.8);
+          border:1px solid rgba(255,180,220,0.45);
+          border-radius:24px;
+        }
+        [data-theme="galaxy"] .home-card{
+          background:rgba(10,6,40,0.45);
+          backdrop-filter:blur(28px) saturate(1.5);
+          -webkit-backdrop-filter:blur(28px) saturate(1.5);
+          border:1px solid rgba(139,111,255,0.22);
+        }
+        [data-theme="hacker"] .home-card{
+          background:rgba(0,8,0,0.7);
+          backdrop-filter:blur(16px);
+          -webkit-backdrop-filter:blur(16px);
+          border:1px solid rgba(0,255,0,0.22);
+        }
+        [data-theme="kemerdekaan"] .home-card{
+          background:rgba(10,0,0,0.45);
+          backdrop-filter:blur(24px) saturate(1.4);
+          -webkit-backdrop-filter:blur(24px) saturate(1.4);
+          border:1px solid rgba(180,0,0,0.22);
+        }
+        [data-theme="minecraft"] .home-card{border-radius:0;border:2px solid #6b6b00;image-rendering:pixelated;background:var(--surface)}
+
+        .home-header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 0;gap:12px;flex-wrap:wrap}
+        .home-logo-row{display:flex;align-items:center;gap:12px}
+        .home-logo-img{width:42px;height:42px;object-fit:contain;border-radius:10px}
+        .home-logo-placeholder{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:8px;font-weight:700;color:#fff;text-align:center;flex-shrink:0;line-height:1.3}
+        .home-logo-text{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.3px;line-height:1.2}
+        .home-logo-sub{font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:0.3px}
+        .home-header-actions{display:flex;align-items:center;gap:8px}
+
+        /* Hero */
+        .home-hero{padding:36px 0 24px;text-align:center}
+        .home-hero-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(79,142,247,0.10);border:1px solid rgba(79,142,247,0.22);border-radius:30px;padding:5px 14px;font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;opacity:0;animation:fadeIn 0.5s ease 0.1s forwards}
+        .home-hero-pill-dot{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+        .home-hero-name{font-family:var(--font-head);font-size:clamp(22px,5vw,34px);font-weight:800;color:var(--text);letter-spacing:-0.8px;margin-bottom:10px;opacity:0;animation:fadeIn 0.6s ease 0.2s forwards;line-height:1.15}
+        .home-hero-chips{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;opacity:0;animation:fadeIn 0.5s ease 0.3s forwards}
+        .home-hero-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-family:var(--font-mono);font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+        .home-hero-chip svg{width:11px;height:11px;flex-shrink:0;opacity:0.7}
+        .home-hero-divider{width:36px;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;margin:18px auto 0;opacity:0;animation:fadeIn 0.4s ease 0.38s forwards}
+        [data-theme="pinky"] .home-hero-pill{background:rgba(255,77,166,0.10);border-color:rgba(255,77,166,0.22);color:var(--accent)}
+        [data-theme="pinky"] .home-hero-pill-dot{background:var(--accent)}
+        [data-theme="hacker"] .home-hero-pill{background:rgba(0,255,0,0.08);border-color:rgba(0,255,0,0.25);color:var(--accent)}
+        [data-theme="minecraft"] .home-hero-pill{border-radius:0;border-color:#8a8a00}
+        [data-theme="galaxy"] .home-hero-pill{background:rgba(139,111,255,0.08);border-color:rgba(139,111,255,0.22);color:var(--accent2)}
+
+        /* Section label */
+        .home-cards-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;text-align:center;opacity:0;animation:fadeIn 0.4s ease 0.42s forwards}
+
+        /* Cards grid — centered (1 kartu) */
+        .home-cards-grid{display:flex;justify-content:center;align-items:stretch;gap:16px;flex-wrap:wrap;opacity:0;animation:fadeIn 0.6s ease 0.5s forwards}
+
+        /* Card base */
+        .home-card{max-width:380px;width:100%;border-radius:20px;padding:28px 24px 40px;cursor:pointer;transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.25s ease,border-color 0.2s ease;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;text-align:left;-webkit-tap-highlight-color:transparent}
+        .home-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--card-color-a,var(--accent)) 0%,var(--card-color-b,var(--accent2)) 100%);opacity:0;transition:opacity 0.28s ease;border-radius:inherit;pointer-events:none}
+        .home-card:hover{transform:translateY(-7px) scale(1.01);box-shadow:0 24px 64px var(--shadow)}
+        .home-card:hover::after{opacity:0.07}
+        .home-card:active{transform:translateY(-2px) scale(0.99)}
+
+        /* Card icon box */
+        .home-card-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--card-color-a,var(--accent)),var(--card-color-b,var(--accent2)));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 20px rgba(0,0,0,0.25);position:relative;z-index:1}
+        .home-card-icon svg{width:26px;height:26px;color:#fff;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+        /* Card content */
+        .home-card-body{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px}
+        .home-card-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-family:var(--font-mono);font-weight:700;letter-spacing:0.5px;width:fit-content;line-height:1.4}
+        .home-card-badge-active{background:rgba(79,142,247,0.14);color:var(--accent);border:1px solid rgba(79,142,247,0.28)}
+        .home-card-badge-soon{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+        .home-card-badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+        .home-card-title{font-family:var(--font-head);font-size:17px;font-weight:800;color:var(--text);letter-spacing:-0.2px;line-height:1.25}
+        .home-card-desc{font-size:12.5px;color:var(--text3);line-height:1.65}
+
+        /* Arrow CTA */
+        .home-card-cta{position:absolute;right:20px;bottom:18px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--font-mono);font-weight:700;color:var(--accent);opacity:0;transform:translateX(-4px);transition:all 0.25s ease;letter-spacing:0.5px}
+        .home-card-cta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .home-card:hover .home-card-cta{opacity:1;transform:translateX(0)}
+
+        /* Badge per-theme */
+        [data-theme="galaxy"] .home-card-badge-active{background:rgba(139,111,255,0.12);color:var(--accent2);border-color:rgba(139,111,255,0.25)}
+        [data-theme="pinky"] .home-card-badge-active{background:rgba(255,77,166,0.12);color:var(--accent);border-color:rgba(255,77,166,0.25)}
+        [data-theme="hacker"] .home-card-badge-active{background:rgba(0,255,0,0.08);color:var(--accent);border-color:rgba(0,255,0,0.25)}
+        [data-theme="minecraft"] .home-card-icon{border-radius:0}
+        [data-theme="minecraft"] .home-card-badge{border-radius:0}
+
+        /* Bottom bar */
+        .home-bottom-bar{margin-top:auto;padding-top:36px;display:flex;align-items:center;justify-content:center;opacity:0;animation:fadeIn 0.4s ease 0.75s forwards}
+        .home-bottom-text{font-size:11px;color:var(--text3);font-family:var(--font-mono);opacity:0.7;letter-spacing:0.3px}
+
+        @media(max-width:480px){
+        .home-hero-name{font-size:22px}
+        .home-card{max-width:100%;padding:22px 18px 38px}
+        .home-card-icon{width:46px;height:46px;border-radius:12px}
+        .home-card-icon svg{width:22px;height:22px}
+        }
+</style>
+</head>
+<body>
+<div id="app">
+    <div id="loaderOverlay" class="loader-overlay">
+        <div class="loader-big"></div>
+        <div class="loader-text" id="loaderText">Memuat sistem...</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div id="violationWarning" class="violation-warning hidden">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+            <span style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:4px 12px;font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff;letter-spacing:1px">PELANGGARAN</span>
+            <span style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:4px 12px;font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff" id="violationCountBadge">#1</span>
+        </div>
+        <div class="violation-number" id="violationCount">!</div>
+        <div class="violation-msg" id="violationTypeLabel">PELANGGARAN TERDETEKSI</div>
+        <div class="violation-sub" id="violationMsg">Pelanggaran terdeteksi</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-mono);margin-top:4px;background:rgba(0,0,0,0.2);padding:8px 16px;border-radius:8px">Pelanggaran ini telah dicatat. Ujian Anda masih berlanjut.</div>
+        <button class="btn btn-secondary" id="violationRefreshBtn" style="margin-top:16px">Refresh — Cek Status Kunci</button>
+    </div>
+    <div id="fullscreenWarning" class="fullscreen-warning">Keluar dari layar penuh terdeteksi. Kembali ke mode fullscreen segera.</div>
+    <div id="loginPage" class="page active">
+        <div class="login-bg"><div class="login-grid"></div></div>
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-logo-wrap">
+                    <img src="logo.png" alt="SMAN 14 Depok" class="login-logo" id="loginLogo" onerror="this.style.display='none';document.getElementById('loginLogoPlaceholder').style.display='flex'">
+                    <div class="login-logo-placeholder" id="loginLogoPlaceholder" style="display:none">SMA<br>14<br>DPK</div>
+                    <div class="login-title">PATLAS</div>
+                    <div class="login-subtitle">SMAN 14 DEPOK &mdash; Sistem Ujian Online</div>
+                </div>
+                <div class="security-indicator">
+                    <div class="sec-dot"></div>
+                    <span>Koneksi aman &mdash; SSL/TLS terenkripsi</span>
+                </div>
+                <div id="loginAlert" class="alert alert-error hidden"></div>
+                <div class="form-group">
+                    <label class="form-label">Nomor Induk Siswa (NIS)</label>
+                    <input type="text" id="nisInput" class="form-input" placeholder="Masukkan NIS Anda" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false">
+                </div>
+                <div class="form-group" id="passwordGroup" style="display:none">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="passwordInput" class="form-input" placeholder="Masukkan password" autocomplete="off">
+                </div>
+                <div class="remember-wrap" style="display:none">
+                    <input type="checkbox" id="rememberMe" checked>
+                    <label for="rememberMe">Ingat saya di perangkat ini</label>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px;font-size:12px;color:var(--text3);font-family:var(--font-mono)">
+                    <span style="color:var(--green)">&#10003;</span>
+                    <span>Sesi otomatis tersimpan 7 hari di perangkat ini</span>
+                </div>
+                <button class="btn btn-primary btn-lg" style="width:100%" onclick="handleLogin()" id="loginBtn">Masuk ke Sistem</button>
+                <div style="margin-top:20px;text-align:center">
+                    <button class="btn btn-outline btn-sm" onclick="openThemeModal()">Ganti Tema</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ HOME PAGE ═══ -->
+    <div id="homePage" class="page">
+        <div class="home-blob-wrap">
+            <div class="home-blob home-blob-1"></div>
+            <div class="home-blob home-blob-2"></div>
+            <div class="home-blob home-blob-3"></div>
+            <div class="home-blob home-blob-4"></div>
+        </div>
+        <div class="home-wrap">
+            <!-- Header -->
+            <div class="home-header">
+                <div class="home-logo-row">
+                    <img src="logo.png" alt="SMAN 14 Depok" class="home-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div class="home-logo-placeholder" style="display:none">SMA<br>14</div>
+                    <div>
+                        <div class="home-logo-text">PATLAS</div>
+                        <div class="home-logo-sub">SMAN 14 DEPOK</div>
+                    </div>
+                </div>
+                <div class="home-header-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="openThemeModal()">Tema</button>
+                    <button class="btn btn-danger btn-sm" onclick="logoutUser()">Keluar</button>
+                </div>
+            </div>
+
+            <!-- Hero -->
+            <div class="home-hero">
+                <div class="home-hero-pill">
+                    <div class="home-hero-pill-dot"></div>
+                    <span>Sistem Ujian Online</span>
+                </div>
+                <div class="home-hero-name" id="homeHeroName">Halo!</div>
+                <div class="home-hero-chips" id="homeHeroChips">
+                    <div class="home-hero-chip" id="homeChipNISWrap">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3V2M8 3V2M11 3V2"/></svg>
+                        <span id="homeChipNIS">NIS: —</span>
+                    </div>
+                    <div class="home-hero-chip" id="homeChipRoleWrap">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2L2 5v2c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V5L8 2z"/></svg>
+                        <span id="homeChipKelas">Kelas: —</span>
+                    </div>
+                    <div class="home-hero-chip" id="homeChipRoleBadge" style="display:none">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+                        <span id="homeChipRoleText">—</span>
+                    </div>
+                </div>
+                <div class="home-hero-divider"></div>
+            </div>
+
+            <div class="home-cards-label" id="homeCardsLabel">Pilih Layanan</div>
+
+            <!-- Cards — diisi oleh JS sesuai role -->
+            <div class="home-cards-grid" id="homeCardsGrid"></div>
+
+            <div class="home-bottom-bar">
+                <span class="home-bottom-text">PATLAS v2 &mdash; SMAN 14 Depok &mdash; 2025</span>
+            </div>
+        </div>
+    </div>
+    <div id="studentPage" class="page">
+        <div class="school-header">
+            <img src="logo.png" alt="" class="school-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="school-logo-placeholder" style="display:none">14</div>
+            <div class="school-info"><h1>SMAN 14 DEPOK</h1><p>PATLAS &mdash; Sistem Ujian Online</p></div>
+            <div class="school-header-right">
+                <div id="studentModeBadge" class="badge badge-blue" style="display:none">MODE: UJIAN</div>
+                <div class="user-chip" id="studentUserChip"></div>
+                <button class="btn btn-secondary btn-sm" onclick="refreshStudentPage()">&#8635;</button>
+                <button class="btn btn-secondary btn-sm" onclick="openThemeModal()">Tema</button>
+                <button class="btn btn-danger btn-sm" onclick="logoutUser()">Keluar</button>
+            </div>
+        </div>
+        <div class="nav-tabs" id="navtabs-student">
+            <button class="nav-tab active" data-tab="student-home" onclick="switchStudentTab('student-home',this)">Beranda</button>
+            <button class="nav-tab" data-tab="student-exam" onclick="switchStudentTab('student-exam',this)">Ujian</button>
+            <button class="nav-tab" data-tab="student-score" onclick="switchStudentTab('student-score',this)">Nilai</button>
+            <button class="nav-tab" data-tab="student-ranking" onclick="switchStudentTab('student-ranking',this)">Peringkat</button>
+            <button class="nav-tab" data-tab="student-settings" onclick="switchStudentTab('student-settings',this)">Pengaturan</button>
+        </div>
+        <div class="content">
+            <div id="student-home" class="student-tab-content">
+                <div class="page-header"><div><div class="page-title" id="studentGreeting">Selamat datang!</div><div class="page-subtitle" id="studentInfo">Memuat data...</div></div></div>
+                <div class="stat-grid" id="studentStats"></div>
+                <div class="card"><div class="card-title">Peta Ruang Ujian</div><div id="studentRoomMap"></div></div>
+                <div class="card"><div class="card-title">Jadwal Ujian Hari Ini</div><div id="todaySchedule"></div></div>
+                <div class="card"><div class="card-title">Pengumuman</div><div id="studentAnnouncement" class="empty-state"><div class="empty-state-icon">-</div><div>Tidak ada pengumuman saat ini</div></div></div>
+            </div>
+            <div id="student-exam" class="student-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Ujian Tersedia</div><div class="page-subtitle">Pilih mata pelajaran yang akan diujikan</div></div></div>
+                <div id="availableExams"></div>
+            </div>
+            <div id="student-score" class="student-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Riwayat Nilai</div><div class="page-subtitle">Daftar nilai ujian Anda</div></div>
+                    <button class="btn btn-secondary btn-sm" onclick="exportStudentScores()">Export CSV</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="studentScoreFilter" onchange="applyStudentScoreFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                        <option value="nilai_tinggi">Nilai Tertinggi</option>
+                        <option value="nilai_rendah">Nilai Terendah</option>
+                    </select>
+                    <input type="text" id="studentScoreSearch" placeholder="Cari mapel..." oninput="applyStudentScoreFilter()" style="width:160px">
+                </div>
+                <div id="studentScoreList"></div>
+            </div>
+            <div id="student-ranking" class="student-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Peringkat Siswa</div><div class="page-subtitle">Top 10 berdasarkan rata-rata nilai semua ujian</div></div></div>
+                <div class="filter-bar">
+                    <select id="rankingKelasFilter" onchange="loadStudentRanking()">
+                        <option value="">Semua Tingkat</option>
+                        <option value="X">Tingkat X</option>
+                        <option value="XI">Tingkat XI</option>
+                        <option value="XII">Tingkat XII</option>
+                    </select>
+                </div>
+                <div id="studentRankingList"></div>
+            </div>
+            <div id="student-settings" class="student-tab-content hidden">
+                <div class="page-title" style="margin-bottom:20px">Pengaturan Akun</div>
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-title">Informasi Akun</div>
+                        <div class="account-info-card" id="studentAccountInfo"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Ganti Password</div>
+                        <div class="form-group"><label class="form-label">Password Lama</label><input type="password" id="oldPassword" class="form-input" placeholder="Password saat ini"></div>
+                        <div class="form-group"><label class="form-label">Password Baru</label><input type="password" id="newPassword" class="form-input" placeholder="Minimal 4 karakter"></div>
+                        <div class="form-group"><label class="form-label">Konfirmasi Password</label><input type="password" id="confirmPassword" class="form-input" placeholder="Ulangi password baru"></div>
+                        <button class="btn btn-primary" onclick="changePassword()">Simpan Password</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Preferensi Tampilan</div>
+                        <div class="theme-grid" id="studentThemeGrid"></div>
+                    </div>
+                    <div class="card" id="v2lCardStudent">
+                        <div class="card-title" style="display:flex;align-items:center;gap:10px">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18" style="display:none"/></svg>
+                            Verifikasi Wajah (V2L)
+                            <span class="v2l-security-badge">🔒 AMAN</span>
+                        </div>
+                        <div id="v2lStatusStudent" class="v2l-face-status">
+                            <div class="v2l-face-dot empty" id="v2lDotStudent"></div>
+                            <span id="v2lStatusTextStudent">Memuat status...</span>
+                        </div>
+                        <div class="v2l-toggle-row">
+                            <div>
+                                <div class="v2l-toggle-label">Aktifkan Verifikasi Wajah Login</div>
+                                <div class="v2l-toggle-sub">Setiap login akan meminta scan wajah</div>
+                            </div>
+                            <label class="v2l-toggle">
+                                <input type="checkbox" id="v2lToggleStudent" onchange="toggleV2L('student',this.checked)" disabled>
+                                <span class="v2l-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+                            <button class="btn btn-primary btn-sm" onclick="openAddFaceModal('student')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 11l2 2 4-4" style="color:var(--green)"/></svg>
+                                Tambah Pengenalan Wajah
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="openQrScanModal('student')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4v-4m4-3h-4m4 0v4"/></svg>
+                                Scan QR Login
+                            </button>
+                        </div>
+                        <div style="margin-top:12px;font-size:11px;color:var(--text3);font-family:var(--font-mono);line-height:1.7">
+                            Data wajah disimpan secara terenkripsi dan tidak dibagikan kepada pihak manapun. Hanya digunakan untuk verifikasi identitas login akun ini.
+                        </div>
+                    </div>
+                    <div class="card" style="border:1px solid var(--border2);background:var(--surface2)">
+                        <div class="card-title" style="font-size:13px;color:var(--text3)">Tentang Pengembang</div>
+                        <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
+                            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple,#a855f7));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0">R</div>
+                            <div>
+                                <div style="font-weight:700;font-size:14px;font-family:var(--font-head)">Raffael Putra Hermawan</div>
+                                <div style="font-size:12px;color:var(--text3);margin-top:2px">Developer &amp; Designer — PATLAS</div>
+                                <a href="https://www.raffaelhub.my.id" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);font-family:var(--font-mono);text-decoration:none;display:inline-block;margin-top:4px">&#127760; raffaelhub.my.id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="panitiaPage" class="page">
+        <div class="school-header">
+            <img src="logo.png" alt="" class="school-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="school-logo-placeholder" style="display:none">14</div>
+            <div class="school-info"><h1>SMAN 14 DEPOK</h1><p>PATLAS &mdash; Panel Panitia</p></div>
+            <div class="school-header-right">
+                <div class="badge badge-purple">PANITIA</div>
+                <div class="user-chip" id="panitiaUserChip"></div>
+                <div style="position:relative">
+                    <button class="btn btn-secondary btn-sm" onclick="toggleNotifPanel()" id="notifBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notif<span id="notifCount" class="notif-dot" style="display:none"></span>
+                    </button>
+                    <div id="notifPanel" class="notif-panel"></div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="refreshPanitiaPage()">&#8635;</button>
+                <button class="btn btn-secondary btn-sm" onclick="openThemeModal()">Tema</button>
+                <button class="btn btn-danger btn-sm" onclick="logoutUser()">Keluar</button>
+            </div>
+        </div>
+        <div class="nav-tabs-wrapper" id="ntw-student"><button class="nav-scroll-btn left" id="nsl-student" onclick="scrollNavLeft('student')">&#8249;</button><div class="nav-tabs-wrapper" id="ntw-panitia"><button class="nav-scroll-btn left" id="nsl-panitia" onclick="scrollNavLeft('panitia')">&#8249;</button><div class="nav-tabs">
+            <button class="nav-tab active" data-tab="panitia-dashboard" onclick="switchPanitiaTab('panitia-dashboard',this)">Dashboard</button>
+            <button class="nav-tab" data-tab="panitia-soal" onclick="switchPanitiaTab('panitia-soal',this)">Kelola Soal</button>
+            <button class="nav-tab" data-tab="panitia-jadwal" onclick="switchPanitiaTab('panitia-jadwal',this)">Jadwal Ujian</button>
+            <button class="nav-tab" data-tab="panitia-nilai" onclick="switchPanitiaTab('panitia-nilai',this)">Nilai Siswa</button>
+
+            <button class="nav-tab" data-tab="panitia-ranking" onclick="switchPanitiaTab('panitia-ranking',this)">Peringkat</button>
+            <button class="nav-tab" data-tab="panitia-history" onclick="switchPanitiaTab('panitia-history',this)">Riwayat Login</button>
+            <button class="nav-tab" data-tab="panitia-absen" onclick="switchPanitiaTab('panitia-absen',this)">Deteksi Absen</button>
+            <button class="nav-tab" data-tab="panitia-control" id="panitiaControlTab" style="display:none" onclick="switchPanitiaTab('panitia-control',this)">&#128275; Control Ruang <span id="panitiaControlRuangLabel"></span></button>
+            <button class="nav-tab" data-tab="panitia-settings" onclick="switchPanitiaTab('panitia-settings',this)">Pengaturan</button>
+        </div><button class="nav-scroll-btn right" id="nsr-panitia" onclick="scrollNavRight('panitia')">&#8250;</button></div><button class="nav-scroll-btn right" id="nsr-student" onclick="scrollNavRight('student')">&#8250;</button></div>
+        <div class="content">
+            <div id="panitia-dashboard" class="panitia-tab-content">
+                <div id="panitiaJagaAlert" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.1));border:1px solid var(--yellow);border-radius:var(--radius2);padding:16px 20px;margin-bottom:20px;align-items:flex-start;gap:14px">
+                    <div style="font-size:28px;line-height:1;flex-shrink:0">&#9888;&#65039;</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:var(--yellow);font-family:var(--font-head);margin-bottom:4px" id="panitiaJagaAlertTitle">Anda dijadwalkan menjaga ujian</div>
+                        <div style="font-size:13px;color:var(--text2);font-family:var(--font-mono);line-height:1.6" id="panitiaJagaAlertBody"></div>
+                    </div>
+                </div>
+                <div class="page-header"><div><div class="page-title">Dashboard Panitia</div><div class="page-subtitle" id="panitiaGreeting">Selamat datang di panel panitia</div></div></div>
+                <div class="stat-grid" id="panitiaStats"></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+                    <div class="card"><div class="card-title">Jadwal Ujian Aktif</div><div id="panitiaActiveSchedule"></div></div>
+                    <div class="card"><div class="card-title">Ruang Jaga Saya</div><div id="panitiaMyRoom"></div></div>
+                </div>
+            </div>
+            <div id="panitia-soal" class="panitia-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Kelola Soal Ujian</div><div class="page-subtitle">Tambahkan soal ke jadwal mata pelajaran yang sudah dibuat</div></div>
+                    <button class="btn btn-primary" onclick="openSoalModal()">+ Tambah Soal ke Jadwal</button>
+                </div>
+                <div id="soalList"></div>
+            </div>
+            <div id="panitia-jadwal" class="panitia-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Jadwal Ujian</div><div class="page-subtitle">Atur jadwal ujian per mata pelajaran dan kelas</div></div>
+                    <button class="btn btn-primary" onclick="openJadwalModal()">+ Tambah Jadwal</button>
+                </div>
+                <div id="jadwalList"></div>
+            </div>
+            <div id="panitia-nilai" class="panitia-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Nilai Siswa (Ruang Jaga)</div><div class="page-subtitle" id="panitiaRoomLabel">Nilai siswa di ruang jaga Anda</div></div>
+                    <button class="btn btn-secondary" onclick="exportPanitiaNilai()">Export CSV</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="panitiaNilaiFilter" onchange="applyPanitiaNilaiFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                        <option value="nilai_tinggi">Nilai Tertinggi</option>
+                        <option value="nilai_rendah">Nilai Terendah</option>
+                        <option value="kelas">Urut Kelas</option>
+                        <option value="nama">Urut Nama A-Z</option>
+                    </select>
+                    <input type="text" id="panitiaNilaiSearch" placeholder="Cari nama/NIS..." oninput="applyPanitiaNilaiFilter()" style="width:180px">
+                </div>
+                <div id="nilaiList"></div>
+            </div>
+            <div id="panitia-pelanggaran" class="panitia-tab-content hidden" style="display:none!important">
+                <div class="page-header">
+                    <div><div class="page-title">Pelanggaran Siswa</div><div class="page-subtitle">Daftar pelanggaran di ruang jaga Anda</div></div>
+                    <button class="btn btn-secondary" onclick="exportPanitiaViolations()">Export CSV</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="panitiaViolFilter" onchange="applyPanitiaViolFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                        <option value="jumlah">Jumlah Terbanyak</option>
+                    </select>
+                </div>
+                <div id="panitiaViolList"></div>
+            </div>
+            <div id="panitia-ranking" class="panitia-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Peringkat Siswa</div><div class="page-subtitle">Nilai rata-rata per tingkat kelas — realtime</div></div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                        <button class="btn btn-success btn-sm" onclick="toggleRankingVisibility()" id="panitiaRankPublishBtn">Memuat...</button>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <select id="panitiaRankKelas" onchange="loadPanitiaRanking()">
+                        <option value="">Semua Tingkat (X, XI, XII)</option>
+                        <option value="X">Tingkat X</option>
+                        <option value="XI">Tingkat XI</option>
+                        <option value="XII">Tingkat XII</option>
+                    </select>
+                </div>
+                <div id="panitiaRankList"></div>
+            </div>
+            <div id="panitia-history" class="panitia-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Riwayat Login Panitia</div><div class="page-subtitle">Log aktivitas login panitia</div></div>
+                    <button class="btn btn-secondary" onclick="exportPanitiaHistory()">Export CSV</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="panitiaHistFilter" onchange="applyPanitiaHistFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                    </select>
+                </div>
+                <div id="panitiaHistoryList"></div>
+            </div>
+            <div id="panitia-absen" class="panitia-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Deteksi Tidak Hadir</div><div class="page-subtitle">Siswa yang belum mengerjakan ujian di ruang jaga Anda</div></div>
+                </div>
+                <div class="filter-bar">
+                    <select id="absenJadwalFilter" onchange="loadAbsenDetection()">
+                        <option value="">Pilih Jadwal Ujian...</option>
+                    </select>
+                </div>
+                <div id="absenList"></div>
+            </div>
+            <div id="panitia-control" class="panitia-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title" id="panitiaControlTitle">Control Ruang</div><div class="page-subtitle" id="panitiaControlSubtitle">Pantau dan kelola siswa di ruang jaga Anda secara real-time</div></div>
+                    <button class="btn btn-primary btn-sm" onclick="refreshControlRuang()">&#8635; Refresh</button>
+                </div>
+                <div id="panitiaControlBanner" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.1));border:1px solid var(--yellow);border-radius:var(--radius2);padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--yellow);font-weight:600;display:none"></div>
+                <div class="card" style="margin-bottom:16px">
+                    <div class="card-title" style="margin-bottom:10px">Status Ujian Berjalan</div>
+                    <div id="panitiaControlExamStatus" style="color:var(--text3);font-size:13px">Memuat...</div>
+                </div>
+                <div class="card" style="margin-bottom:16px">
+                    <div class="card-title" style="margin-bottom:10px">Daftar Siswa di Ruang Ini</div>
+                    <div id="panitiaControlSiswaList"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:10px">Pelanggaran Real-time</div>
+                    <div id="panitiaControlViolationList"></div>
+                </div>
+            </div>
+            <div id="panitia-settings" class="panitia-tab-content hidden">
+                <div class="page-title" style="margin-bottom:20px">Pengaturan Akun</div>
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-title">Informasi Akun</div>
+                        <div class="account-info-card" id="panitiaAccountInfo"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Ganti Password</div>
+                        <div class="form-group"><label class="form-label">Password Lama</label><input type="password" id="panitiaOldPwd" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Password Baru</label><input type="password" id="panitiaNewPwd" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Konfirmasi</label><input type="password" id="panitiaConfirmPwd" class="form-input"></div>
+                        <button class="btn btn-primary" onclick="changePanitiaPassword()">Simpan</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Preferensi Tampilan</div>
+                        <div class="theme-grid" id="panitiaThemeGrid"></div>
+                    </div>
+                    <div class="card" id="v2lCardPanitia">
+                        <div class="card-title" style="display:flex;align-items:center;gap:10px">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Verifikasi Wajah (V2L)
+                            <span class="v2l-security-badge">🔒 AMAN</span>
+                        </div>
+                        <div id="v2lStatusPanitia" class="v2l-face-status">
+                            <div class="v2l-face-dot empty" id="v2lDotPanitia"></div>
+                            <span id="v2lStatusTextPanitia">Memuat status...</span>
+                        </div>
+                        <div class="v2l-toggle-row">
+                            <div>
+                                <div class="v2l-toggle-label">Aktifkan Verifikasi Wajah Login</div>
+                                <div class="v2l-toggle-sub">Setiap login akan meminta scan wajah</div>
+                            </div>
+                            <label class="v2l-toggle">
+                                <input type="checkbox" id="v2lTogglePanitia" onchange="toggleV2L('panitia',this.checked)" disabled>
+                                <span class="v2l-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+                            <button class="btn btn-primary btn-sm" onclick="openAddFaceModal('panitia')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                Tambah Pengenalan Wajah
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="openQrScanModal('panitia')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4v-4m4-3h-4m4 0v4"/></svg>
+                                Scan QR Login
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card" style="border:1px solid var(--border2);background:var(--surface2)">
+                        <div class="card-title" style="font-size:13px;color:var(--text3)">Tentang Pengembang</div>
+                        <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
+                            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple,#a855f7));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0">R</div>
+                            <div>
+                                <div style="font-weight:700;font-size:14px;font-family:var(--font-head)">Raffael Putra Hermawan</div>
+                                <div style="font-size:12px;color:var(--text3);margin-top:2px">Developer &amp; Designer — PATLAS</div>
+                                <a href="https://www.raffaelhub.my.id" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);font-family:var(--font-mono);text-decoration:none;display:inline-block;margin-top:4px">&#127760; raffaelhub.my.id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="guruPage" class="page">
+        <div class="school-header">
+            <div style="display:flex;align-items:center;gap:10px;flex:1">
+                <img src="logo.png" alt="" style="width:32px;height:32px;object-fit:contain;border-radius:6px" onerror="this.style.display='none'">
+                <div class="school-info"><h1>PATLAS</h1><p>SMAN 14 Depok</p></div>
+            </div>
+            <div class="school-header-right">
+                <div class="badge badge-yellow">GURU</div>
+                <div id="guruUserChip" class="user-chip"></div>
+                <button class="btn btn-secondary btn-sm" onclick="refreshGuruPage()">&#8635;</button>
+                <button class="btn btn-secondary btn-sm" onclick="openThemeModal()">Tema</button>
+                <button class="btn btn-danger btn-sm" onclick="logoutUser()">Keluar</button>
+            </div>
+        </div>
+        <div class="nav-tabs-wrapper" id="ntw-guru">
+            <button class="nav-scroll-btn left" id="nsl-guru" onclick="scrollNavLeft('guru')">&#8249;</button>
+            <div class="nav-tabs" id="navtabs-guru">
+                <button class="nav-tab active" data-tab="guru-dashboard" onclick="switchGuruTab('guru-dashboard',this)">Dashboard</button>
+                <button class="nav-tab" data-tab="guru-soal" onclick="switchGuruTab('guru-soal',this)">Kelola Soal</button>
+                <button class="nav-tab" data-tab="guru-jadwal" onclick="switchGuruTab('guru-jadwal',this)">Jadwal Ulangan</button>
+                <button class="nav-tab" data-tab="guru-control" id="guruControlTab" style="display:none" onclick="switchGuruTab('guru-control',this)">&#128275; Monitor Ruang</button>
+                <button class="nav-tab" data-tab="guru-nilai" onclick="switchGuruTab('guru-nilai',this)">Nilai Siswa</button>
+                <button class="nav-tab" data-tab="guru-ranking" onclick="switchGuruTab('guru-ranking',this)">Peringkat</button>
+                <button class="nav-tab" data-tab="guru-absen" onclick="switchGuruTab('guru-absen',this)">Deteksi Absen</button>
+                <button class="nav-tab" data-tab="guru-history" onclick="switchGuruTab('guru-history',this)">Log Akses</button>
+                <button class="nav-tab" data-tab="guru-settings" onclick="switchGuruTab('guru-settings',this)">Pengaturan</button>
+            </div>
+            <button class="nav-scroll-btn right" id="nsr-guru" onclick="scrollNavRight('guru')">&#8250;</button>
+        </div>
+        <div class="content">
+            <div id="guru-dashboard" class="guru-tab-content">
+                <div class="page-header"><div><div class="page-title">Dashboard Guru</div><div class="page-subtitle">Ringkasan ulangan harian yang sedang berlangsung</div></div></div>
+                <div id="guruDashboard"></div>
+            </div>
+            <div id="guru-soal" class="guru-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Kelola Soal</div><div class="page-subtitle">Kelola soal untuk jadwal ulangan harian Anda</div></div>
+                    <button class="btn btn-primary" onclick="openSoalModal('ulangan')">+ Tambah Soal</button>
+                </div>
+                <div id="guruSoalList"></div>
+            </div>
+            <div id="guru-jadwal" class="guru-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Jadwal Ulangan Harian</div><div class="page-subtitle">Jadwal ulangan yang ditugaskan ke guru ini</div></div>
+                    <button class="btn btn-primary" onclick="openGuruJadwalModal()">+ Tambah Jadwal</button>
+                </div>
+                <div id="guruJadwalList"></div>
+            </div>
+            <div id="guru-nilai" class="guru-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Nilai Siswa</div><div class="page-subtitle">Pilih ulangan untuk melihat nilai</div></div>
+                </div>
+                <!-- STEP 1: List ulangan -->
+                <div id="guruNilaiUlanganList"></div>
+                <!-- STEP 2: Detail nilai per ulangan (muncul setelah pilih) -->
+                <div id="guruNilaiDetail" style="display:none">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+                        <button class="btn btn-secondary btn-sm" onclick="guruBackToUlanganList()">&#8592; Kembali</button>
+                        <div id="guruNilaiDetailTitle" style="font-family:var(--font-head);font-weight:700;font-size:15px"></div>
+                        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+                            <button class="btn btn-sm" id="guruPublishNilaiBtn" onclick="toggleGuruPublishNilai()">Publikasi Nilai</button>
+                            <button class="btn btn-sm btn-secondary" onclick="exportGuruNilaiDetail()">&#8659; Export CSV</button>
+                        </div>
+                    </div>
+                    <div id="guruNilaiDetailList"></div>
+                </div>
+            </div>
+            <div id="guru-ranking" class="guru-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Peringkat</div><div class="page-subtitle">Peringkat siswa per ulangan (hanya tampil hari ini)</div></div>
+                </div>
+                <!-- list ulangan -->
+                <div id="guruRankingUlanganList"></div>
+                <!-- detail ranking per ulangan -->
+                <div id="guruRankingDetail" style="display:none">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+                        <button class="btn btn-secondary btn-sm" onclick="guruBackToRankingList()">&#8592; Kembali</button>
+                        <div id="guruRankingDetailTitle" style="font-family:var(--font-head);font-weight:700;font-size:15px"></div>
+                        <div style="margin-left:auto">
+                            <button class="btn btn-sm" id="guruPublishRankingBtn" onclick="toggleGuruPublishRanking()">Publikasi Peringkat</button>
+                        </div>
+                    </div>
+                    <div id="guruRankingList"></div>
+                </div>
+            </div>
+            <div id="guru-control" class="guru-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Monitor Ulangan</div><div class="page-subtitle">Pantau siswa yang sedang mengerjakan ulangan harian Anda</div></div>
+                    <button class="btn btn-primary btn-sm" onclick="loadGuruControlRuang()">&#8635; Refresh</button>
+                </div>
+                <div id="guruControlJadwalFilter" style="margin-bottom:16px">
+                    <select id="guruControlJadwalSelect" class="form-input" style="max-width:360px" onchange="onGuruControlJadwalChange()">
+                        <option value="">Pilih Jadwal Ulangan...</option>
+                    </select>
+                </div>
+                <div id="guruControlStatusCard" class="card" style="margin-bottom:16px;display:none">
+                    <div class="card-title" style="margin-bottom:8px">Status Ulangan</div>
+                    <div id="guruControlStatus" style="color:var(--text3);font-size:13px">Memuat...</div>
+                </div>
+                <div class="card" style="margin-bottom:16px">
+                    <div class="card-title" style="margin-bottom:10px">Daftar Siswa</div>
+                    <div id="guruControlSiswaList"><div class="empty-state"><div>Pilih jadwal ulangan terlebih dahulu</div></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:10px">Catatan Pelanggaran</div>
+                    <div id="guruControlViolList"><div class="empty-state"><div>Tidak ada pelanggaran</div></div></div>
+                </div>
+            </div>
+            <div id="guru-absen" class="guru-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Deteksi Absen</div><div class="page-subtitle">Siswa yang belum mengerjakan ulangan</div></div></div>
+                <div id="guruAbsenFilter" style="margin-bottom:16px">
+                    <select id="guruAbsenJadwalFilter" class="form-input" style="max-width:300px" onchange="loadGuruAbsen()"><option value="">Pilih Jadwal Ulangan...</option></select>
+                </div>
+                <div id="guruAbsenList"></div>
+            </div>
+            <div id="guru-history" class="guru-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Log Akses</div><div class="page-subtitle">Riwayat login akun guru ini</div></div>
+                    <button class="btn btn-secondary" onclick="exportGuruHistory()">Export CSV</button>
+                </div>
+                <div id="guruHistoryList"></div>
+            </div>
+            <div id="guru-settings" class="guru-tab-content hidden">
+                <div class="page-title" style="margin-bottom:20px">Pengaturan Akun</div>
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-title">Informasi Akun</div>
+                        <div class="account-info-card" id="guruAccountInfo"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Ganti Password</div>
+                        <div class="form-group"><label class="form-label">Password Lama</label><input type="password" id="guruOldPwd" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Password Baru</label><input type="password" id="guruNewPwd" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Konfirmasi</label><input type="password" id="guruConfirmPwd" class="form-input"></div>
+                        <button class="btn btn-primary" onclick="changeGuruPassword()">Simpan Password</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Preferensi Tampilan</div>
+                        <div class="theme-grid" id="guruThemeGrid"></div>
+                    </div>
+                    <div class="card" id="v2lCardGuru">
+                        <div class="card-title" style="display:flex;align-items:center;gap:10px">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Verifikasi Wajah (V2L)
+                            <span class="v2l-security-badge">🔒 AMAN</span>
+                        </div>
+                        <div id="v2lStatusGuru" class="v2l-face-status">
+                            <div class="v2l-face-dot empty" id="v2lDotGuru"></div>
+                            <span id="v2lStatusTextGuru">Memuat status...</span>
+                        </div>
+                        <div class="v2l-toggle-row">
+                            <div>
+                                <div class="v2l-toggle-label">Aktifkan Verifikasi Wajah Login</div>
+                                <div class="v2l-toggle-sub">Setiap login akan meminta scan wajah</div>
+                            </div>
+                            <label class="v2l-toggle">
+                                <input type="checkbox" id="v2lToggleGuru" onchange="toggleV2L('guru',this.checked)" disabled>
+                                <span class="v2l-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+                            <button class="btn btn-primary btn-sm" onclick="openAddFaceModal('guru')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                Tambah Pengenalan Wajah
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="openQrScanModal('guru')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4v-4m4-3h-4m4 0v4"/></svg>
+                                Scan QR Login
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card" style="border:1px solid var(--border2);background:var(--surface2)">
+                        <div class="card-title" style="font-size:13px;color:var(--text3)">Tentang Pengembang</div>
+                        <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
+                            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple,#a855f7));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0">R</div>
+                            <div>
+                                <div style="font-weight:700;font-size:14px;font-family:var(--font-head)">Raffael Putra Hermawan</div>
+                                <div style="font-size:12px;color:var(--text3);margin-top:2px">Developer &amp; Designer — PATLAS</div>
+                                <a href="https://www.raffaelhub.my.id" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);font-family:var(--font-mono);text-decoration:none;display:inline-block;margin-top:4px">&#127760; raffaelhub.my.id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div id="adminPage" class="page">
+        <div class="school-header">
+            <img src="logo.png" alt="" class="school-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="school-logo-placeholder" style="display:none">14</div>
+            <div class="school-info"><h1>SMAN 14 DEPOK</h1><p>PATLAS &mdash; Panel Administrator</p></div>
+            <div class="school-header-right">
+                <div class="badge badge-red">ADMIN</div>
+                <div class="user-chip" id="adminUserChip"></div>
+                <button class="btn btn-secondary btn-sm" onclick="refreshAdminPage()">&#8635;</button>
+                <button class="btn btn-secondary btn-sm" onclick="openThemeModal()">Tema</button>
+                <button class="btn btn-danger btn-sm" onclick="logoutUser()">Keluar</button>
+            </div>
+        </div>
+        <div class="nav-tabs-wrapper" id="ntw-admin"><button class="nav-scroll-btn left" id="nsl-admin" onclick="scrollNavLeft('admin')">&#8249;</button><div class="nav-tabs" id="navtabs-admin">
+            <button class="nav-tab active" data-tab="admin-dashboard" onclick="switchAdminTab('admin-dashboard',this)">Dashboard</button>
+            <button class="nav-tab" data-tab="admin-users" onclick="switchAdminTab('admin-users',this)">Manajemen Akun</button>
+            <button class="nav-tab" data-tab="admin-soal" onclick="switchAdminTab('admin-soal',this)">Kelola Soal</button>
+            <button class="nav-tab" data-tab="admin-jadwal-ujian" onclick="switchAdminTab('admin-jadwal-ujian',this)">Jadwal Ujian</button>
+            <button class="nav-tab" data-tab="admin-jadwal" onclick="switchAdminTab('admin-jadwal',this)">Atur Jadwal Jaga</button>
+            <button class="nav-tab" data-tab="admin-nilai" onclick="switchAdminTab('admin-nilai',this)">Semua Nilai</button>
+            <button class="nav-tab" data-tab="admin-violations" onclick="switchAdminTab('admin-violations',this)">Pelanggaran</button>
+            <button class="nav-tab" data-tab="admin-ranking" onclick="switchAdminTab('admin-ranking',this)">Peringkat</button>
+            <button class="nav-tab" data-tab="admin-history" onclick="switchAdminTab('admin-history',this)">Log Akses</button>
+            <button class="nav-tab" data-tab="admin-backup" onclick="switchAdminTab('admin-backup',this)">Backup Data</button>
+            <button class="nav-tab" data-tab="admin-settings" onclick="switchAdminTab('admin-settings',this)">Pengaturan</button>
+        </div><button class="nav-scroll-btn right" id="nsr-admin" onclick="scrollNavRight('admin')">&#8250;</button></div>
+        <div class="content">
+            <div id="admin-dashboard" class="admin-tab-content">
+                <div class="page-header"><div><div class="page-title">Dashboard Administrator</div><div class="page-subtitle" id="adminGreeting">Panel kendali sistem PATLAS</div></div></div>
+                <div class="stat-grid" id="adminStats"></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+                    <div class="card"><div class="card-title">Akun Terbaru Terdaftar</div><div id="recentUsers"></div></div>
+                    <div class="card"><div class="card-title">Aktivitas Login Terbaru</div><div id="recentLogins"></div></div>
+                </div>
+            </div>
+            <div id="admin-users" class="admin-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Manajemen Akun</div><div class="page-subtitle">Kelola seluruh akun terdaftar</div></div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                        <button class="btn btn-primary" onclick="openCreateUserModal('siswa')">+ Akun Siswa</button>
+                        <button class="btn btn-secondary" onclick="openCreateUserModal('panitia')">+ Akun Panitia</button>
+                        <button class="btn btn-secondary" onclick="openCreateUserModal('admin')">+ Akun Admin</button>
+                        <button class="btn btn-secondary" onclick="openCreateUserModal('guru')">+ Akun Guru</button>
+                        <button class="btn btn-outline" onclick="openImportAkunModal()">&#8679; Import Massal</button>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <input type="text" id="userSearchInput" class="form-input" placeholder="Cari NIS atau nama..." oninput="filterUsers()" style="max-width:320px">
+                    <select id="userRoleFilter" onchange="filterUsers()">
+                        <option value="">Semua Role</option>
+                        <option value="siswa">Siswa</option>
+                        <option value="panitia">Panitia</option>
+                        <option value="admin">Admin</option>
+                        <option value="guru">Guru</option>
+                    </select>
+                    <select id="userSortFilter" onchange="filterUsers()">
+                        <option value="nama">Urut Nama</option>
+                        <option value="nis">Urut NIS</option>
+                        <option value="kelas">Urut Kelas</option>
+                    </select>
+                </div>
+                <div id="userList"></div>
+            </div>
+            <div id="admin-soal" class="admin-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Kelola Soal Ujian</div><div class="page-subtitle">Tambahkan soal ke jadwal mata pelajaran yang sudah dibuat</div></div>
+                    <button class="btn btn-primary" onclick="openSoalModal()">+ Tambah Soal ke Jadwal</button>
+                </div>
+                <div id="adminSoalList"></div>
+            </div>
+            <div id="admin-jadwal-ujian" class="admin-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Jadwal Ujian</div><div class="page-subtitle">Kelola jadwal ujian per mata pelajaran dan kelas</div></div>
+                    <button class="btn btn-primary" onclick="openJadwalModal()">+ Tambah Jadwal</button>
+                </div>
+                <div id="adminJadwalUjianList"></div>
+            </div>
+            <div id="admin-jadwal" class="admin-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Atur Jadwal Panitia Jaga</div><div class="page-subtitle">Tentukan ruang dan panitia yang menjaga setiap sesi ujian</div></div></div>
+                <div id="adminJadwalJagaList"></div>
+            </div>
+            <div id="admin-nilai" class="admin-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Semua Nilai Siswa</div><div class="page-subtitle">Rekap nilai seluruh peserta ujian</div></div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                        <button class="btn btn-success" onclick="toggleScorePublishing()" id="publishBtn">Publikasi Nilai</button>
+                        <button class="btn btn-secondary" onclick="exportAllNilai()">Export CSV</button>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <select id="adminNilaiFilter" onchange="applyAdminNilaiFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                        <option value="nilai_tinggi">Nilai Tertinggi</option>
+                        <option value="nilai_rendah">Nilai Terendah</option>
+                        <option value="kelas">Urut Kelas</option>
+                        <option value="nama">Urut Nama A-Z</option>
+                    </select>
+                    <select id="adminNilaiKelasFilter" onchange="applyAdminNilaiFilter()">
+                        <option value="">Semua Kelas</option>
+                        <option value="X">Kelas X</option>
+                        <option value="XI">Kelas XI</option>
+                        <option value="XII">Kelas XII</option>
+                    </select>
+                    <input type="text" id="adminNilaiSearch" placeholder="Cari nama/NIS/mapel..." oninput="applyAdminNilaiFilter()" style="width:200px">
+                </div>
+                <div id="adminNilaiList"></div>
+            </div>
+            <div id="admin-violations" class="admin-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Log Pelanggaran</div><div class="page-subtitle">Catatan pelanggaran selama ujian</div></div>
+                    <button class="btn btn-secondary" onclick="exportAllViolations()">Export CSV</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="adminViolFilter" onchange="applyAdminViolFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                        <option value="jumlah">Jumlah Terbanyak</option>
+                    </select>
+                    <input type="text" id="adminViolSearch" placeholder="Cari nama/NIS..." oninput="applyAdminViolFilter()" style="width:180px">
+                </div>
+                <div id="violationList"></div>
+            </div>
+            <div id="admin-ranking" class="admin-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Peringkat Seluruh Siswa</div><div class="page-subtitle">Nilai rata-rata per tingkat kelas — realtime</div></div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                        <button class="btn btn-success btn-sm" onclick="toggleRankingVisibility()" id="rankPublishBtn">Memuat...</button>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <select id="adminRankKelas" onchange="loadAdminRanking()">
+                        <option value="">Semua Tingkat (X, XI, XII)</option>
+                        <option value="X">Tingkat X</option>
+                        <option value="XI">Tingkat XI</option>
+                        <option value="XII">Tingkat XII</option>
+                    </select>
+                </div>
+                <div id="adminRankList"></div>
+            </div>
+            <div id="admin-history" class="admin-tab-content hidden">
+                <div class="page-header">
+                    <div><div class="page-title">Log Akses Sistem</div><div class="page-subtitle">Riwayat seluruh aktivitas login</div></div>
+                    <button class="btn btn-secondary" onclick="exportAdminHistory()">Export CSV</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="adminHistFilter" onchange="applyAdminHistFilter()">
+                        <option value="terbaru">Terbaru</option>
+                        <option value="terlama">Terlama</option>
+                    </select>
+                    <select id="adminHistRole" onchange="applyAdminHistFilter()">
+                        <option value="">Semua Role</option>
+                        <option value="siswa">Siswa</option>
+                        <option value="panitia">Panitia</option>
+                        <option value="admin">Admin</option>
+                        <option value="guru">Guru</option>
+                    </select>
+                </div>
+                <div id="adminHistoryList"></div>
+            </div>
+            <div id="admin-backup" class="admin-tab-content hidden">
+                <div class="page-header"><div><div class="page-title">Backup, Restore &amp; Reset</div><div class="page-subtitle">Backup manual harian, restore, dan reset data sistem</div></div></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+                    <div class="card">
+                        <div class="card-title">Buat Backup</div>
+                        <div style="font-size:13px;color:var(--text3);font-family:var(--font-mono);margin-bottom:16px">Backup semua data ke Firebase dalam format terenkripsi. Lakukan setiap hari.</div>
+                        <button class="btn btn-primary" onclick="createBackup()">Buat Backup Sekarang</button>
+                        <div id="backupStatus" style="margin-top:16px"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Restore Data</div>
+                        <div class="form-group">
+                            <label class="form-label">Pilih Backup</label>
+                            <select id="backupSelect" class="form-input"><option value="">Memuat daftar backup...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password Restore</label>
+                            <input type="password" id="restorePassword" class="form-input" placeholder="Masukkan password restore">
+                        </div>
+                        <button class="btn btn-danger" onclick="restoreBackup()">Restore Data</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="color:var(--red)">Reset Data</div>
+                        <div style="font-size:13px;color:var(--text3);font-family:var(--font-mono);margin-bottom:16px">Hapus data secara permanen. Akun admin utama tidak terpengaruh. Tidak dapat dibatalkan.</div>
+                        <button class="btn btn-danger" onclick="openResetModal()">Reset Data Sistem</button>
+                    </div>
+                </div>
+            </div>
+            <div id="admin-settings" class="admin-tab-content hidden">
+                <div class="page-title" style="margin-bottom:20px">Pengaturan Sistem</div>
+                <div class="card" style="margin-bottom:20px;border:2px solid var(--accent)">
+                    <div class="card-title" style="display:flex;align-items:center;gap:12px">
+                        <span id="modeBadge" class="badge badge-blue">MODE: UJIAN</span>
+                        Mode Operasi Sistem
+                    </div>
+                    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Pilih mode operasi. <strong>Mode Ujian</strong>: panitia, siswa, admin aktif dengan semua fitur pengawasan. <strong>Mode Ulangan Harian</strong>: hanya guru dan siswa yang beroperasi, fitur disederhanakan.</div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap">
+                        <button class="btn btn-primary" id="btnModeUjian" onclick="setAppMode('ujian')">&#128196; Aktifkan Mode Ujian</button>
+                        <button class="btn btn-secondary" id="btnModeUlangan" onclick="setAppMode('ulangan')">&#128221; Aktifkan Mode Ulangan Harian</button>
+                    </div>
+                    <div id="modeStatusInfo" style="margin-top:12px;font-size:12px;font-family:var(--font-mono);color:var(--text3)"></div>
+                </div>
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-title">Informasi Akun Admin</div>
+                        <div class="account-info-card" id="adminAccountInfo"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Ganti Password Admin</div>
+                        <div class="form-group"><label class="form-label">Password Lama</label><input type="password" id="adminOldPwd" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Password Baru</label><input type="password" id="adminNewPwd" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">Konfirmasi</label><input type="password" id="adminConfirmPwd" class="form-input"></div>
+                        <button class="btn btn-primary" onclick="changeAdminPassword()">Simpan Password</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Preferensi Tampilan</div>
+                        <div class="theme-grid" id="adminThemeGrid"></div>
+                    </div>
+                    <div class="card" id="v2lCardAdmin">
+                        <div class="card-title" style="display:flex;align-items:center;gap:10px">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Verifikasi Wajah (V2L)
+                            <span class="v2l-security-badge">🔒 AMAN</span>
+                        </div>
+                        <div id="v2lStatusAdmin" class="v2l-face-status">
+                            <div class="v2l-face-dot empty" id="v2lDotAdmin"></div>
+                            <span id="v2lStatusTextAdmin">Memuat status...</span>
+                        </div>
+                        <div class="v2l-toggle-row">
+                            <div>
+                                <div class="v2l-toggle-label">Aktifkan Verifikasi Wajah Login</div>
+                                <div class="v2l-toggle-sub">Setiap login akan meminta scan wajah</div>
+                            </div>
+                            <label class="v2l-toggle">
+                                <input type="checkbox" id="v2lToggleAdmin" onchange="toggleV2L('admin',this.checked)" disabled>
+                                <span class="v2l-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+                            <button class="btn btn-primary btn-sm" onclick="openAddFaceModal('admin')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                Tambah Pengenalan Wajah
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="openQrScanModal('admin')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3m0 4v-4m4-3h-4m4 0v4"/></svg>
+                                Scan QR Login
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card" style="border:1px solid var(--border2);background:var(--surface2)">
+                        <div class="card-title" style="font-size:13px;color:var(--text3)">Tentang Pengembang</div>
+                        <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
+                            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple,#a855f7));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0">R</div>
+                            <div>
+                                <div style="font-weight:700;font-size:14px;font-family:var(--font-head)">Raffael Putra Hermawan</div>
+                                <div style="font-size:12px;color:var(--text3);margin-top:2px">Developer &amp; Designer — PATLAS</div>
+                                <a href="https://www.raffaelhub.my.id" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);font-family:var(--font-mono);text-decoration:none;display:inline-block;margin-top:4px">&#127760; raffaelhub.my.id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="examPage" class="page">
+        <div class="exam-header">
+            <div style="display:flex;align-items:center;gap:12px;flex:1">
+                <img src="logo.png" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:6px" onerror="this.style.display='none'">
+                <div>
+                    <div style="font-family:var(--font-head);font-weight:700;font-size:14px;color:var(--text)" id="examMapelTitle">Ujian</div>
+                    <div style="font-size:11px;font-family:var(--font-mono);color:var(--text3)" id="examStudentInfo"></div>
+                </div>
+            </div>
+            <div class="exam-progress">
+                <div class="progress-bar"><div class="progress-fill" id="examProgressFill" style="width:0%"></div></div>
+                <div class="progress-text" id="examProgressText">0 / 0 terjawab</div>
+            </div>
+            <div class="exam-timer" id="examTimer">00:00:00</div>
+            <button class="btn btn-success btn-sm" onclick="submitExam()">Kumpulkan</button>
+        </div>
+        <div class="question-nav" id="questionNav"></div>
+        <div class="question-area">
+            <div id="questionContainer"></div>
+            <div class="question-actions">
+                <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()">Sebelumnya</button>
+                <button class="btn btn-outline" onclick="toggleFlag()" id="flagBtn">Tandai Ragu</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Selanjutnya</button>
+            </div>
+        </div>
+    </div>
+    <div id="resultPage" class="page">
+        <div class="school-header">
+            <img src="logo.png" alt="" class="school-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="school-logo-placeholder" style="display:none">14</div>
+            <div class="school-info"><h1>SMAN 14 DEPOK</h1><p>PATLAS &mdash; Hasil Ujian</p></div>
+        </div>
+        <div class="content" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px)">
+            <div class="result-card" style="max-width:500px;width:100%">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                    <span style="background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);border-radius:20px;padding:3px 12px;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.5px">SELESAI</span>
+                </div>
+                <div style="font-family:var(--font-head);font-size:22px;font-weight:800;margin-top:4px" id="resultMapel">-</div>
+                <div style="font-size:13px;color:var(--text3);font-family:var(--font-mono);margin-bottom:24px" id="resultStudent">-</div>
+                <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius2);padding:24px;text-align:left;margin-bottom:20px">
+                    <div style="font-size:11px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Pesan dari Pengawas</div>
+                    <div style="font-size:16px;color:var(--text);line-height:1.7;font-weight:500" id="resultMessage">Jawaban Anda telah berhasil dikumpulkan. Terima kasih atas kejujuran Anda dalam mengerjakan ujian ini.</div>
+                    <div style="margin-top:12px;font-size:11px;font-family:var(--font-mono);color:var(--text3);display:flex;align-items:center;gap:6px">
+                        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block"></span>
+                        <span id="resultMessageFrom">Panitia Ujian</span>
+                    </div>
+                </div>
+                <div id="resultViolations"></div>
+                <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" onclick="goToDashboard()">Kembali ke Dashboard</button>
+            </div>
+        </div>
+    </div>
+    <div id="themeModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title">Pilih Tema Tampilan</div>
+            <div class="theme-grid" id="themeModalGrid"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('themeModal').classList.add('hidden')">Tutup</button>
+            </div>
+        </div>
+    </div>
+    <div id="createUserModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title" id="createUserTitle">Buat Akun Baru</div>
+            <div id="createUserAlert" class="alert alert-error hidden"></div>
+            <div class="form-group"><label class="form-label">NIS</label><input type="text" id="newUserNis" class="form-input" placeholder="Masukkan NIS" maxlength="20"></div>
+            <div class="form-group"><label class="form-label">Nama Lengkap</label><input type="text" id="newUserName" class="form-input" placeholder="Nama lengkap"></div>
+            <div class="form-group" id="newUserKelasGroup">
+                <label class="form-label">Kelas</label>
+                <select id="newUserKelas" class="form-input">
+                    <option value="X.1">X.1</option><option value="X.2">X.2</option><option value="X.3">X.3</option><option value="X.4">X.4</option>
+                    <option value="XI.1">XI.1</option><option value="XI.2">XI.2</option><option value="XI.3">XI.3</option><option value="XI.4">XI.4</option>
+                    <option value="XII.1">XII.1</option><option value="XII.2">XII.2</option><option value="XII.3">XII.3</option><option value="XII.4">XII.4</option>
+                </select>
+            </div>
+            <div class="form-group" id="newUserNoAbsenGroup" style="display:none">
+                <label class="form-label">No. Absen</label>
+                <input type="number" id="newUserNoAbsen" class="form-input" placeholder="Nomor absen" min="1" max="40">
+            </div>
+            <div class="form-group" id="newUserRuangGroup" style="display:none">
+                <label class="form-label" id="newUserRuangLabel">No. Ruang</label>
+                <input type="number" id="newUserRuang" class="form-input" placeholder="Nomor ruang" min="1" max="99">
+            </div>
+            <div class="alert alert-info">Password default: <strong>141414</strong>. User dapat menggantinya setelah login.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('createUserModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="createUser()" id="createUserBtn">Buat Akun</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="importAkunModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:760px">
+            <div class="modal-title">Import Akun Massal</div>
+            <div class="alert alert-info" style="margin-bottom:16px">
+                Tempel data akun di bawah. Bisa campur semua role sekaligus. Mendukung hingga 1000+ akun.
+            </div>
+            <div class="card" style="margin-bottom:16px;padding:16px">
+                <div style="font-size:12px;font-family:var(--font-mono);color:var(--text3);line-height:2">
+                    <strong style="color:var(--text2)">Format siswa:</strong> nis, nama_lengkap, kelas, no_absen, no_ruang, siswa<br>
+                    <strong style="color:var(--text2)">Format panitia:</strong> nis, nama_lengkap, panitia<br>
+                    <strong style="color:var(--text2)">Format admin:</strong> nis, nama_lengkap, admin<br>
+                    <strong style="color:var(--text2)">Format guru:</strong> nis, nama_lengkap, guru<br>
+                    <span style="color:var(--yellow)">Kelas valid: X.1, X.2... XI IPA.1, XI IPS.2... XII IPA.1, XII IPS.2 dll</span><br>
+                    <span style="color:var(--accent)">No absen dan no ruang harus angka. No absen unik per kelas.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Data Akun (paste di sini)</label>
+                <textarea id="importAkunText" class="form-input" style="min-height:240px;resize:vertical;font-family:var(--font-mono);font-size:12px" placeholder="Contoh:&#10;14551563624, trio lesnar poe, X.2, 12, 1, siswa&#10;76543673626, brock lesnar, XI IPA.1, 11, 5, siswa&#10;11, leonardo boim, panitia&#10;162, joko suli, guru&#10;161613, el signora, admin"></textarea>
+            </div>
+            <div id="importAkunProgress" class="hidden">
+                <div style="height:6px;background:var(--border);border-radius:4px;margin-bottom:8px"><div id="importAkunBar" style="height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width 0.3s"></div></div>
+                <div id="importAkunStatus" style="font-size:12px;font-family:var(--font-mono);color:var(--text3)">Memproses...</div>
+            </div>
+            <div id="importAkunResult" class="hidden" style="margin-top:12px"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('importAkunModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-outline" onclick="generateImportPrompt()">&#128161; Generate Prompt AI</button>
+                <button class="btn btn-primary" onclick="executeImportAkun()" id="importAkunBtn">Import Sekarang</button>
+            </div>
+        </div>
+    </div>
+    <div id="importPromptModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:720px">
+            <div class="modal-title">Prompt AI — Perbaiki Format Data Akun</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Salin prompt ini → buka AI manapun (ChatGPT/Gemini/Claude) → tempel file/data siswa → AI akan output teks yang siap dipaste ke sistem.</div>
+            <div class="ai-prompt-box" id="importAiPromptBox" style="max-height:400px;overflow-y:auto">
+                <button class="btn btn-outline btn-sm ai-prompt-copy" onclick="copyImportPrompt()">Salin</button>
+                <span id="importAiPromptText" style="white-space:pre-wrap;font-size:12px"></span>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('importPromptModal').classList.add('hidden')">Tutup</button>
+                <button class="btn btn-primary" onclick="copyImportPrompt()">Salin Prompt</button>
+            </div>
+        </div>
+    </div>
+<div id="soalModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:700px">
+            <div class="modal-title">Tambah Soal ke Jadwal Ujian</div>
+            <div class="form-group">
+                <label class="form-label">Pilih Jadwal Ujian</label>
+                <select id="soalJadwalSelect" class="form-input">
+                    <option value="">Memuat jadwal...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Import Soal dari Teks</label>
+                <textarea id="soalImport" class="soal-import-area" placeholder="Tempelkan soal di sini dalam format yang ditentukan..."></textarea>
+                <div class="import-helper">
+                    Format import soal:<br>
+                    <code>1.pertanyaan soal</code><br>
+                    <code>a.jawaban a</code> <code>b.jawaban b</code> <code>c.jawaban c</code> <code>d.jawaban d</code> <code>e.jawaban e</code><br>
+                    <code>kunci: a</code><br><br>
+                    <code>2.pertanyaan soal berikutnya</code> dst.<br>
+                    <small style="color:var(--text3)">Pilihan E opsional (4 atau 5 pilihan). Huruf wajib lowercase (a/b/c/d/e), kunci bisa huruf kecil atau kapital</small>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Prompt AI untuk Pembuatan Soal</label>
+                <div class="ai-prompt-box" id="aiPromptBox">
+                    <button class="btn btn-outline btn-sm ai-prompt-copy" onclick="copyAiPrompt()">Salin</button>
+                    <span id="aiPromptText"></span>
+                </div>
+                <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:8px"> Cara pakai: Salin prompt → buka ChatGPT/Gemini/Claude → tempel prompt → kirim file materi atau langsung kirim (tanpa kata tambahan) → AI langsung buat soal → copy hasilnya → tempel ke kolom import di atas.</div>
+            </div>
+            <div class="form-group" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+                <label class="form-label">Pesan untuk Siswa Setelah Ujian</label>
+                <textarea id="soalPesanSiswa" class="form-input" style="min-height:80px;resize:vertical" placeholder="Pesan yang akan ditampilkan kepada siswa setelah mengumpulkan jawaban. Contoh: Tetap semangat dan jujur dalam setiap ujian."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pengirim Pesan</label>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                    <select id="soalPesanDariMode" class="form-input" style="max-width:200px" onchange="togglePesanDariInput()">
+                        <option value="anonymous">Anonymous</option>
+                        <option value="manual">Isi Manual</option>
+                    </select>
+                    <input type="text" id="soalPesanDariManual" class="form-input" style="flex:1;display:none" placeholder="Nama guru / pengirim">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('soalModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="saveSoal()">Simpan Soal</button>
+            </div>
+        </div>
+    </div>
+    <div id="jadwalModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title">Tambah Jadwal Ujian</div>
+            <div class="form-group"><label class="form-label">Mata Pelajaran</label><input type="text" id="jadwalMapel" class="form-input" placeholder="Nama mata pelajaran"></div>
+            <div class="form-group">
+                <label class="form-label">Target Kelas</label>
+                <select id="jadwalKelas" class="form-input" onchange="updateRuangOptions()">
+                    <option value="X">X (10)</option><option value="XI">XI (11)</option><option value="XII">XII (12)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nomor Ruang</label>
+                <select id="jadwalRuang" class="form-input"><option value="">Pilih ruangan...</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tanggal</label>
+                <input type="date" id="jadwalTanggal" class="form-input">
+            </div>
+            <div class="time-input-grid">
+                <div class="form-group"><label class="form-label">Jam</label><input type="number" id="jadwalJam" class="form-input" min="1" max="12" value="8"></div>
+                <div class="form-group"><label class="form-label">Menit</label><input type="number" id="jadwalMenit" class="form-input" min="0" max="59" value="0"></div>
+                <div class="form-group">
+                    <label class="form-label">AM/PM</label>
+                    <select id="jadwalAmPm" class="form-input"><option value="AM">AM</option><option value="PM">PM</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Durasi (mnt)</label><input type="number" id="jadwalDurasi" class="form-input" min="5" max="180" value="90"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('jadwalModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="saveJadwal()">Simpan Jadwal</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ MODAL: GURU TAMBAH JADWAL ULANGAN ═══ -->
+    <div id="guruJadwalModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title">Tambah Jadwal Ulangan Harian</div>
+            <div class="form-group"><label class="form-label">Mata Pelajaran</label><input type="text" id="guruJadwalMapel" class="form-input" placeholder="Nama mata pelajaran"></div>
+            <div class="form-group">
+                <label class="form-label">Target Kelas <span style="font-size:10px;color:var(--text3)">(diambil dari daftar siswa terdaftar)</span></label>
+                <select id="guruJadwalKelas" class="form-input">
+                    <option value="">Memuat kelas...</option>
+                </select>
+                <div id="guruJadwalKelasInfo" style="font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:6px"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tanggal</label>
+                <input type="date" id="guruJadwalTanggal" class="form-input">
+            </div>
+            <div class="time-input-grid">
+                <div class="form-group"><label class="form-label">Jam</label><input type="number" id="guruJadwalJam" class="form-input" min="1" max="12" value="8"></div>
+                <div class="form-group"><label class="form-label">Menit</label><input type="number" id="guruJadwalMenit" class="form-input" min="0" max="59" value="0"></div>
+                <div class="form-group"><label class="form-label">AM/PM</label><select id="guruJadwalAmPm" class="form-input"><option value="AM">AM</option><option value="PM">PM</option></select></div>
+                <div class="form-group"><label class="form-label">Durasi (mnt)</label><input type="number" id="guruJadwalDurasi" class="form-input" min="5" max="180" value="90"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('guruJadwalModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="saveGuruJadwal()">Simpan Jadwal</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ MODAL: EDIT JADWAL (tanggal & waktu) ═══ -->
+    <div id="editJadwalModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title">Edit Jadwal Ujian</div>
+            <input type="hidden" id="editJadwalId">
+            <div class="form-group"><label class="form-label">Tanggal</label><input type="date" id="editJadwalTanggal" class="form-input"></div>
+            <div class="time-input-grid">
+                <div class="form-group"><label class="form-label">Jam</label><input type="number" id="editJadwalJam" class="form-input" min="1" max="12" value="8"></div>
+                <div class="form-group"><label class="form-label">Menit</label><input type="number" id="editJadwalMenit" class="form-input" min="0" max="59" value="0"></div>
+                <div class="form-group"><label class="form-label">AM/PM</label><select id="editJadwalAmPm" class="form-input"><option value="AM">AM</option><option value="PM">PM</option></select></div>
+                <div class="form-group"><label class="form-label">Durasi (mnt)</label><input type="number" id="editJadwalDurasi" class="form-input" min="5" max="180" value="90"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('editJadwalModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="saveEditJadwal()">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ MODAL: KELOLA SOAL (lihat soal + upload foto) ═══ -->
+    <div id="kelolaSoalModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:800px">
+            <div class="modal-title" id="kelolaSoalTitle">Kelola Soal</div>
+            <div style="font-size:12px;color:var(--text3);font-family:var(--font-mono);margin-bottom:16px">Setiap soal dapat dilengkapi dengan foto/gambar pendukung. Kunci jawaban tidak ditampilkan.</div>
+            <div id="kelolaSoalContainer" style="max-height:65vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding-right:4px"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('kelolaSoalModal').classList.add('hidden')">Tutup</button>
+                <button class="btn btn-primary" id="kelolaSoalSaveBtn" onclick="saveKelolaSoalPhotos()">Simpan Perubahan Foto</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ MODAL: ASSIGN JAGA PANITIA ═══ -->
+    <div id="assignJagaModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title" id="assignJagaTitle">Atur Panitia Jaga</div>
+            <div class="form-group">
+                <label class="form-label">Nomor Ruang</label>
+                <select id="jagaRuang" class="form-input"><option value="">Memuat ruangan...</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pilih Panitia</label>
+                <select id="jagaPanitia" class="form-input"><option value="">Pilih panitia...</option></select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('assignJagaModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="saveJagaAssignment()">Simpan</button>
+            </div>
+        </div>
+    </div>
+    <div id="unlockModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title">Buka Kunci Pelanggaran</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:16px" id="unlockInfo">Siswa membutuhkan izin untuk melanjutkan.</div>
+            <div class="form-group">
+                <label class="form-label">Alasan Membuka</label>
+                <textarea id="unlockReason" class="soal-import-area" style="min-height:80px" placeholder="Isi alasan mengapa pelanggaran ini dibuka/dimaafkan..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('unlockModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-primary" onclick="confirmUnlock()">Konfirmasi Buka</button>
+            </div>
+        </div>
+    </div>
+    <div id="confirmModal" class="confirm-modal-overlay hidden">
+        <div class="confirm-modal-box">
+            <div class="confirm-modal-icon" id="confirmIcon">&#9888;</div>
+            <div class="confirm-modal-title" id="confirmTitle">Konfirmasi</div>
+            <div class="confirm-modal-msg" id="confirmMsg">Apakah Anda yakin?</div>
+            <div class="confirm-modal-actions">
+                <button class="btn btn-secondary" id="confirmCancelBtn" onclick="resolveConfirm(false)">Batal</button>
+                <button class="btn btn-danger" id="confirmOkBtn" onclick="resolveConfirm(true)">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resetDataModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-title">Reset Semua Data</div>
+            <div class="alert alert-error" style="margin-bottom:16px">Tindakan ini akan menghapus semua data secara permanen. Akun admin utama tidak akan dihapus.</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Pilih data yang ingin direset:</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetNilai" checked style="accent-color:var(--accent);width:16px;height:16px"> <span>Semua nilai ujian</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetPelanggaran" checked style="accent-color:var(--accent);width:16px;height:16px"> <span>Semua pelanggaran</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetHistory" checked style="accent-color:var(--accent);width:16px;height:16px"> <span>Log akses / riwayat login</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetNotif" checked style="accent-color:var(--accent);width:16px;height:16px"> <span>Notifikasi</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetSoal" style="accent-color:var(--accent);width:16px;height:16px"> <span>Semua soal ujian</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetJadwal" style="accent-color:var(--accent);width:16px;height:16px"> <span>Semua jadwal ujian</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetJaga" style="accent-color:var(--accent);width:16px;height:16px"> <span>Penugasan panitia jaga</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetAkun" style="accent-color:var(--accent);width:16px;height:16px"> <span>Semua akun (kecuali admin utama)</span></label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" id="resetBackup" style="accent-color:var(--accent);width:16px;height:16px"> <span>Hapus backup juga</span></label>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Konfirmasi dengan Password Admin</label>
+                <input type="password" id="resetConfirmPwd" class="form-input" placeholder="Masukkan password admin Anda">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('resetDataModal').classList.add('hidden')">Batal</button>
+                <button class="btn btn-danger" onclick="executeReset()">Hapus Data Terpilih</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- ═══ MODAL: V2L ADD FACE ═══ -->
+    <div id="v2lModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:560px">
+            <div class="modal-title">Tambah Pengenalan Wajah</div>
+            <div id="v2lModalStep1">
+                <div class="alert alert-warning" style="font-size:13px;line-height:1.7">
+                    <strong>⚠️ Perhatian Penting</strong><br>
+                    Dengan melanjutkan, wajah Anda akan direkam dan disimpan secara terenkripsi sebagai data biometrik untuk verifikasi identitas pada sistem PATLAS. Data ini hanya digunakan oleh sistem sekolah dan tidak akan dibagikan ke pihak lain.
+                </div>
+                <div id="v2lDesktopWarn" class="alert alert-info" style="font-size:13px;display:none">
+                    📱 Untuk keakuratan terbaik, fitur ini direkomendasikan menggunakan kamera HP. Namun, Anda dapat tetap melanjutkan menggunakan kamera perangkat ini (pastikan kamera dalam kondisi baik dan pencahayaan cukup).
+                </div>
+                <div class="v2l-face-status" id="v2lCameraQualityNotice" style="display:none">
+                    <div class="v2l-face-dot" style="background:var(--yellow)"></div>
+                    <span id="v2lCameraQualityText">Mendeteksi kualitas kamera...</span>
+                </div>
+                <label class="v2l-checkbox-wrap" for="v2lConsentCheck">
+                    <input type="checkbox" id="v2lConsentCheck">
+                    <span>Saya <strong>menyetujui</strong> penyimpanan data wajah saya untuk keperluan verifikasi identitas login akun PATLAS ini. Saya memahami tujuan penggunaannya dan dapat menonaktifkan fitur ini kapan saja melalui Pengaturan.</span>
+                </label>
+                <div class="form-group" style="margin-top:16px">
+                    <label class="form-label">Konfirmasi Password Akun</label>
+                    <input type="password" id="v2lConfirmPwd" class="form-input" placeholder="Masukkan password akun Anda">
+                </div>
+                <div class="modal-footer" style="flex-wrap:wrap;gap:10px">
+                    <button class="btn btn-secondary" style="flex:1;min-width:100px" onclick="document.getElementById('v2lModal').classList.add('hidden')">Batal</button>
+                    <button class="btn btn-primary" style="flex:2;min-width:160px" onclick="proceedV2LCapture()">Lanjutkan — Buka Kamera</button>
+                </div>
+            </div>
+            <div id="v2lModalStep2" style="display:none">
+                <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;text-align:center">
+                    📌 Posisikan wajah di lingkaran, lalu <strong>kedipkan mata sekali</strong> saat diminta untuk uji liveness. Sistem akan menyimpan otomatis.
+                </div>
+                <div class="v2l-camera-wrap" id="v2lCameraWrap">
+                    <video id="v2lVideo" autoplay playsinline muted></video>
+                    <canvas id="v2lCanvas" style="display:none"></canvas>
+                    <div class="v2l-face-overlay">
+                        <svg class="v2l-ring-svg" viewBox="0 0 220 270" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse id="v2lRingTrack" cx="110" cy="135" rx="105" ry="130" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
+                            <ellipse id="v2lRingProgress" cx="110" cy="135" rx="105" ry="130" fill="none" stroke="#22c55e" stroke-width="4"
+                                stroke-dasharray="740" stroke-dashoffset="740"
+                                stroke-linecap="round"
+                                style="transition:stroke-dashoffset 0.3s ease,stroke 0.3s ease;transform-origin:center;transform:rotate(-90deg)"/>
+                        </svg>
+                        <div class="v2l-face-ring" id="v2lFaceRing"></div>
+                    </div>
+                    <div id="v2lFaceStatusBadge" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border-radius:20px;padding:6px 16px;font-family:var(--font-mono);font-size:12px;color:#fff;white-space:nowrap;transition:all 0.3s ease;border:1px solid rgba(255,255,255,0.15)">
+                        🔍 Mencari wajah...
+                    </div>
+                </div>
+                <div class="v2l-scan-bar"><div class="v2l-scan-fill" id="v2lScanFill"></div></div>
+                <div class="v2l-scan-progress" id="v2lScanProgress">Mendeteksi wajah... pastikan wajah di dalam lingkaran</div>
+                <div class="v2l-btn-row" style="justify-content:center">
+                    <button class="btn btn-secondary" onclick="cancelV2LCapture()">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: V2L VERIFY (Login) ═══ -->
+    <div id="v2lVerifyModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:500px">
+            <div class="modal-title">🔐 Verifikasi Identitas</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+                Akun ini menggunakan Verifikasi Wajah. Silakan verifikasi identitas Anda untuk melanjutkan login.
+            </div>
+            <div class="v2l-method-tabs">
+                <div class="v2l-method-tab active" onclick="switchV2LVerifyTab('camera',this)">📷 Scan Wajah</div>
+                <div class="v2l-method-tab" onclick="switchV2LVerifyTab('qr',this)">📱 QR Code</div>
+            </div>
+            <div id="v2lVerifyCamera" class="v2l-method-panel active">
+                <div class="v2l-camera-wrap" id="v2lVerifyCameraWrap">
+                    <video id="v2lVerifyVideo" autoplay playsinline muted></video>
+                    <canvas id="v2lVerifyCanvas" style="display:none"></canvas>
+                    <div class="v2l-face-overlay">
+                        <svg class="v2l-ring-svg" viewBox="0 0 220 270" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="110" cy="135" rx="105" ry="130" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
+                            <ellipse id="v2lVerifyRingProgress" cx="110" cy="135" rx="105" ry="130" fill="none" stroke="#22c55e" stroke-width="4"
+                                stroke-dasharray="740" stroke-dashoffset="740"
+                                stroke-linecap="round"
+                                style="transition:stroke-dashoffset 0.3s ease,stroke 0.3s ease;transform-origin:center;transform:rotate(-90deg)"/>
+                        </svg>
+                        <div class="v2l-face-ring" id="v2lVerifyRing"></div>
+                    </div>
+                    <div id="v2lVerifyStatusBadge" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border-radius:20px;padding:6px 16px;font-family:var(--font-mono);font-size:12px;color:#fff;white-space:nowrap;transition:all 0.3s ease;border:1px solid rgba(255,255,255,0.15)">
+                        🔍 Mendeteksi wajah...
+                    </div>
+                </div>
+                <div class="v2l-scan-bar"><div class="v2l-scan-fill" id="v2lVerifyFill"></div></div>
+                <div class="v2l-scan-progress" id="v2lVerifyProgress">Posisikan wajah Anda di dalam lingkaran</div>
+                <div id="v2lCameraQualityAlert" style="display:none;margin-top:8px" class="alert alert-warning">
+                    Kualitas kamera kurang memadai untuk verifikasi akurat. Silakan coba metode QR Code.
+                </div>
+                <div class="v2l-btn-row">
+                    <button class="btn btn-secondary" onclick="cancelV2LVerify()">Batal Login</button>
+                </div>
+            </div>
+            <div id="v2lVerifyQR" class="v2l-method-panel">
+                <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">
+                    Scan QR Code ini menggunakan perangkat yang sudah login ke akun yang sama. QR berubah setiap 60 detik dan tidak dapat digunakan ulang.
+                </div>
+                <div class="v2l-qr-wrap">
+                    <canvas id="v2lQrCanvas" class="v2l-qr-canvas" width="220" height="220"></canvas>
+                    <div class="v2l-qr-timer" id="v2lQrTimer">60</div>
+                    <div class="v2l-qr-info" id="v2lQrInfo">QR berlaku 60 detik — scan dari perangkat terdaftar</div>
+                </div>
+                <div id="v2lQrStatus" style="min-height:32px;text-align:center;font-family:var(--font-mono);font-size:12px;color:var(--text2)"></div>
+                <div class="v2l-btn-row" style="margin-top:12px">
+                    <button class="btn btn-secondary" onclick="cancelV2LVerify()">Batal Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: QR SCAN (dari pengaturan) ═══ -->
+    <div id="v2lQrScanModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width:480px">
+            <div class="modal-title">📱 Scan QR untuk Konfirmasi Login</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+                QR Code di bawah berisi token unik akun Anda. Scan menggunakan kamera HP atau perangkat lain yang sudah login ke akun ini untuk mengkonfirmasi verifikasi wajah.
+            </div>
+            <div class="v2l-qr-wrap">
+                <canvas id="v2lSettingsQrCanvas" class="v2l-qr-canvas" width="220" height="220"></canvas>
+                <div class="v2l-qr-timer" id="v2lSettingsQrTimer">60</div>
+                <div class="v2l-qr-info">QR berubah setiap 60 detik — unik per akun</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeQrScanModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>

