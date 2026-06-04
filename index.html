@@ -381,11 +381,11 @@
 
         /* ═══ V2L ENHANCED RING & CAMERA FIX ═══ */
         .v2l-ring-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-        /* Kamera tampil TIDAK mirror (kaya kamera biasa, bukan kaca) */
-        #v2lVideo,#v2lVerifyVideo{transform:none!important;-webkit-transform:none!important;object-fit:cover}
+        /* Kamera tampil mirror (kaya kaca/selfie) */
+        #v2lVideo,#v2lVerifyVideo{transform:scaleX(-1)!important;-webkit-transform:scaleX(-1)!important;object-fit:cover}
         /* Camera container aspect ratio for mobile */
         .v2l-camera-wrap{position:relative;width:100%;padding-top:75%;border-radius:var(--radius);overflow:hidden;background:#000;border:2px solid var(--border2);margin:16px 0}
-        .v2l-camera-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:none!important;-webkit-transform:none!important}
+        .v2l-camera-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)!important;-webkit-transform:scaleX(-1)!important}
         .v2l-camera-wrap canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
         .v2l-face-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
         .v2l-face-ring{position:absolute;width:55%;padding-top:68%;border:3px solid rgba(79,142,247,0.7);border-radius:50%;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);transition:border-color 0.3s ease}
@@ -1994,29 +1994,21 @@
     <!-- ═══ MODAL: QR SCAN (dari pengaturan) ═══ -->
     <div id="v2lQrScanModal" class="modal-overlay hidden">
         <div class="modal" style="max-width:480px">
-            <div class="modal-title">📷 Scan QR Login</div>
-            <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">
-                Arahkan kamera ke <strong>QR Code yang tampil di layar perangkat yang mau login</strong> (tab Verifikasi Wajah → QR). Setelah berhasil discan, perangkat itu akan langsung terverifikasi.
+            <div class="modal-title">📱 Scan QR untuk Konfirmasi Login</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+                QR Code di bawah berisi token unik akun Anda. Scan menggunakan kamera HP atau perangkat lain yang sudah login ke akun ini untuk mengkonfirmasi verifikasi wajah.
             </div>
-            <div style="position:relative;width:100%;max-width:320px;margin:0 auto 12px;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:1">
-                <video id="v2lSettingsQrVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block"></video>
-                <div style="position:absolute;inset:0;pointer-events:none">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;position:absolute;inset:0">
-                        <path d="M20,10 L10,10 L10,20" fill="none" stroke="#4f8ef7" stroke-width="3" stroke-linecap="round"/>
-                        <path d="M80,10 L90,10 L90,20" fill="none" stroke="#4f8ef7" stroke-width="3" stroke-linecap="round"/>
-                        <path d="M10,80 L10,90 L20,90" fill="none" stroke="#4f8ef7" stroke-width="3" stroke-linecap="round"/>
-                        <path d="M90,80 L90,90 L80,90" fill="none" stroke="#4f8ef7" stroke-width="3" stroke-linecap="round"/>
-                    </svg>
-                </div>
+            <div class="v2l-qr-wrap">
+                <canvas id="v2lSettingsQrCanvas" class="v2l-qr-canvas" width="220" height="220"></canvas>
+                <div class="v2l-qr-timer" id="v2lSettingsQrTimer">60</div>
+                <div class="v2l-qr-info">QR berubah setiap 60 detik — unik per akun</div>
             </div>
-            <div id="v2lSettingsQrStatus" style="min-height:36px;text-align:center;font-family:var(--font-mono);font-size:12px;color:var(--text2);padding:0 8px;line-height:1.5">Membuka kamera...</div>
-            <div class="modal-footer" style="margin-top:12px">
+            <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeQrScanModal()">Tutup</button>
             </div>
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <!-- Face-API: load lokal dulu (APK/offline), fallback CDN jika gagal -->
 <script>
 (function(){
