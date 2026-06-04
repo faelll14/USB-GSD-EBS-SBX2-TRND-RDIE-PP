@@ -3855,10 +3855,8 @@
         const vid=document.getElementById("v2lVideo");
         if(vid){
           vid.srcObject=stream;
-          // Paksa tidak mirror — kamera biasa (bukan efek cermin)
-          vid.style.transform="none";
-          vid.style.webkitTransform="none";
-          vid.removeAttribute("data-mirror");
+          vid.style.transform="scaleX(-1)";
+          vid.style.webkitTransform="scaleX(-1)";
         }
 
         // Cek kualitas
@@ -3891,7 +3889,11 @@
           "v2lVideo","v2lCanvas","v2lFaceRing","v2lRingProgress",
           "v2lScanFill","v2lScanProgress","v2lFaceStatusBadge",
           async function(descriptors){
-            // Save to Firestore
+            if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
+            if(_v2lStream){_v2lStream.getTracks().forEach(t=>t.stop());_v2lStream=null;}
+            const role=document.getElementById("v2lModal")._role||"student";
+            document.getElementById("v2lModal").classList.add("hidden");
+            showToast("Data wajah berhasil disimpan ✅","success");
             const nis=currentUser.nis;
             const existing=await getV2LData(nis)||{faces:[],enabled:false};
             const newFaceSet={
@@ -3902,12 +3904,6 @@
             };
             existing.faces=[...(existing.faces||[]),newFaceSet];
             await saveV2LData(nis,existing);
-            await new Promise(r=>setTimeout(r,900));
-            if(_v2lStream){_v2lStream.getTracks().forEach(t=>t.stop());_v2lStream=null;}
-            if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
-            document.getElementById("v2lModal").classList.add("hidden");
-            const role=document.getElementById("v2lModal")._role||"student";
-            showToast("Data wajah berhasil disimpan ✅","success");
             await renderV2LSettings(role);
             const v2l=await getV2LData(nis);
             if(v2l&&v2l.faces&&v2l.faces.length===1){
@@ -4040,10 +4036,8 @@
         const vid=document.getElementById("v2lVerifyVideo");
         if(vid){
           vid.srcObject=stream;
-          // Paksa tidak mirror — kamera biasa
-          vid.style.transform="none";
-          vid.style.webkitTransform="none";
-          vid.removeAttribute("data-mirror");
+          vid.style.transform="scaleX(-1)";
+          vid.style.webkitTransform="scaleX(-1)";
         }
 
         // Cek kualitas
