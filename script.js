@@ -3668,168 +3668,12 @@
       }
     }
 
-    // Hitung EAR (Eye Aspect Ratio) untuk deteksi kedipan
-    function _calcEAR(eye){
-      if(!eye||eye.length<6)return 1;
-      const p={};
-      const pts=eye;
-      const A=Math.hypot(pts[1].x-pts[5].x,pts[1].y-pts[5].y);
-      const B=Math.hypot(pts[2].x-pts[4].x,pts[2].y-pts[4].y);
-      const C=Math.hypot(pts[0].x-pts[3].x,pts[0].y-pts[3].y);
-      return C>0?(A+B)/(2*C):1;
-    }
-
-    function _getLandmarkEyes(landmarks){
-      if(!landmarks)return{left:null,right:null};
-      const lm=landmarks.positions||landmarks._positions||[];
-      if(lm.length<68)return{left:null,right:null};
-      return{
-        left:[lm[36],lm[37],lm[38],lm[39],lm[40],lm[41]],
-        right:[lm[42],lm[43],lm[44],lm[45],lm[46],lm[47]]
-      };
-    }
-
-    // ─── LIVENESS: deteksi kedip mata ───
-    let _livenessRAF=null;
-    async function _livenessCheck(vid,progress,badge){
-      const EAR_THRESHOLD=0.27;
-      const EAR_OPEN_THRESHOLD=0.30;
-      const BLINK_NEEDED=1;
-      let blinkCount=0;
-      let eyeOpen=true;
-      let resolved=false;
-      let earHistory=[];
-      const TIMEOUT_MS=15000;
-
-      if(_livenessRAF){cancelAnimationFrame(_livenessRAF);_livenessRAF=null;}
-
-      return new Promise(resolve=>{
-        const deadline=Date.now()+TIMEOUT_MS;
-        let countdown=15;
-        const cdInterval=setInterval(()=>{
-          countdown--;
-          if(progress&&!resolved)progress.textContent=`👁️ Kedipkan mata sekali... (${countdown}s)`;
-          if(countdown<=0){clearInterval(cdInterval);}
-        },1000);
-
-        async function tick(){
-          if(resolved)return;
-          if(Date.now()>deadline){
-            clearInterval(cdInterval);
-            resolved=true;
-            resolve(false);
-            return;
-          }
-          try{
-            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35})).withFaceLandmarks(true);
-            if(det){
-              const eyes=_getLandmarkEyes(det.landmarks);
-              let ear=1;
-              if(eyes.left&&eyes.right){
-                ear=(_calcEAR(eyes.left)+_calcEAR(eyes.right))/2;
-              }
-              earHistory.push(ear);
-              if(earHistory.length>5)earHistory.shift();
-              const avgEAR=earHistory.reduce((a,b)=>a+b,0)/earHistory.length;
-
-              if(eyeOpen&&avgEAR<EAR_THRESHOLD){
-                eyeOpen=false;
-                if(badge)badge.textContent=`👁️ Mata tertutup terdeteksi...`;
-              } else if(!eyeOpen&&avgEAR>=EAR_OPEN_THRESHOLD){
-                eyeOpen=true;
-                blinkCount++;
-                earHistory=[];
-                if(badge)badge.textContent=`✅ Kedipan ${blinkCount}/${BLINK_NEEDED} terdeteksi!`;
-                if(blinkCount>=BLINK_NEEDED){
-                  clearInterval(cdInterval);
-                  resolved=true;
-                  resolve(true);
-                  return;
-                }
-              }
-            } else {
-              if(progress&&!resolved)progress.textContent="🔍 Wajah hilang — kembali ke lingkaran...";
-              earHistory=[];
-            }
-          }catch(e){console.warn("[Liveness]",e);}
-          if(!resolved){
-            await new Promise(r=>setTimeout(r,80));
-            if(!resolved)_livenessRAF=requestAnimationFrame(tick);
-          }
-        }
-        _livenessRAF=requestAnimationFrame(tick);
-      });
-    }
-
-    let _livenessVerifyRAF=null;
-    async function _livenessCheckVerify(vid,progress,badge){
-      const EAR_THRESHOLD=0.27;
-      const EAR_OPEN_THRESHOLD=0.30;
-      const BLINK_NEEDED=1;
-      let blinkCount=0;
-      let eyeOpen=true;
-      let resolved=false;
-      let earHistory=[];
-      const TIMEOUT_MS=15000;
-
-      if(_livenessVerifyRAF){cancelAnimationFrame(_livenessVerifyRAF);_livenessVerifyRAF=null;}
-
-      return new Promise(resolve=>{
-        const deadline=Date.now()+TIMEOUT_MS;
-        let countdown=15;
-        const cdInterval=setInterval(()=>{
-          countdown--;
-          if(progress&&!resolved)progress.textContent=`👁️ Kedipkan mata sekali... (${countdown}s)`;
-          if(countdown<=0){clearInterval(cdInterval);}
-        },1000);
-
-        async function tick(){
-          if(resolved)return;
-          if(Date.now()>deadline){
-            clearInterval(cdInterval);
-            resolved=true;
-            resolve(false);
-            return;
-          }
-          try{
-            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35})).withFaceLandmarks(true);
-            if(det){
-              const eyes=_getLandmarkEyes(det.landmarks);
-              let ear=1;
-              if(eyes.left&&eyes.right){
-                ear=(_calcEAR(eyes.left)+_calcEAR(eyes.right))/2;
-              }
-              earHistory.push(ear);
-              if(earHistory.length>5)earHistory.shift();
-              const avgEAR=earHistory.reduce((a,b)=>a+b,0)/earHistory.length;
-
-              if(eyeOpen&&avgEAR<EAR_THRESHOLD){
-                eyeOpen=false;
-                if(badge)badge.textContent=`👁️ Mata tertutup terdeteksi...`;
-              } else if(!eyeOpen&&avgEAR>=EAR_OPEN_THRESHOLD){
-                eyeOpen=true;
-                blinkCount++;
-                earHistory=[];
-                if(badge)badge.textContent=`✅ Kedipan ${blinkCount}/${BLINK_NEEDED} terdeteksi!`;
-                if(blinkCount>=BLINK_NEEDED){
-                  clearInterval(cdInterval);
-                  resolved=true;
-                  resolve(true);
-                  return;
-                }
-              }
-            } else {
-              if(progress&&!resolved)progress.textContent="🔍 Wajah hilang — kembali ke lingkaran...";
-              earHistory=[];
-            }
-          }catch(e){console.warn("[LivenessVerify]",e);}
-          if(!resolved){
-            await new Promise(r=>setTimeout(r,80));
-            if(!resolved)_livenessVerifyRAF=requestAnimationFrame(tick);
-          }
-        }
-        _livenessVerifyRAF=requestAnimationFrame(tick);
-      });
+    function _normalizeDescriptor(desc){
+      const arr=Array.from(desc);
+      let sum=0;
+      for(let i=0;i<arr.length;i++)sum+=arr[i]*arr[i];
+      const norm=Math.sqrt(sum)||1;
+      return arr.map(v=>v/norm);
     }
 
     async function _startAutoCapture(videoId,canvasId,ringId,ringProgressId,fillId,progressId,badgeId,onComplete){
@@ -3841,51 +3685,40 @@
       const progress=document.getElementById(progressId);
       const badge=document.getElementById(badgeId);
 
-      // Model sudah dimuat di proceedV2LCapture, langsung mulai deteksi
       _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah di dalam lingkaran");
       _setRingProgress(ringProg,0,"#22c55e");
 
       let stableFrames=0;
-      const STABLE_NEEDED=8; // turunkan dari 12 → 8 agar lebih cepat terpenuhi
+      const STABLE_NEEDED=10;
       let lostFrames=0;
       const LOST_THRESHOLD=10;
       let captureStarted=false;
-      let loopBusy=false; // KUNCI: cegah concurrent async loop
+      let loopBusy=false;
       let lastRafTime=0;
-      const TARGET_FPS=12; // sedikit lebih lambat agar await tidak overlap
+      const TARGET_FPS=10;
 
       function scheduleLoop(){
         _v2lAutoDetectRAF=requestAnimationFrame(loop);
       }
 
       async function loop(timestamp){
-        // Guard: jangan jalankan jika sedang proses atau sudah mulai capture
         if(captureStarted||loopBusy)return;
         if(!vid||!canvas)return;
-
-        // Tunggu video benar-benar streaming
-        if(vid.readyState<2||vid.videoWidth===0){
-          scheduleLoop(); return;
-        }
-
+        if(vid.readyState<2||vid.videoWidth===0){scheduleLoop();return;}
         const elapsed=timestamp-lastRafTime;
-        if(elapsed<1000/TARGET_FPS){
-          scheduleLoop(); return;
-        }
+        if(elapsed<1000/TARGET_FPS){scheduleLoop();return;}
         lastRafTime=timestamp;
 
-        // KUNCI: set busy sebelum await
         loopBusy=true;
         let det=null;
         try{
-          det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4}));
+          det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.5}));
         }catch(e){}
         loopBusy=false;
 
-        // Setelah await — cek lagi sebelum update state
         if(captureStarted)return;
 
-        if(det&&det.score>0.4){
+        if(det&&det.score>0.5){
           lostFrames=0;
           stableFrames++;
           const pct=Math.min(stableFrames/STABLE_NEEDED,1);
@@ -3893,37 +3726,14 @@
           if(fill){fill.style.width=(pct*40)+"%";fill.className="v2l-scan-fill";}
 
           if(stableFrames<STABLE_NEEDED){
-            // Belum cukup stabil — tampilkan progress dan lanjut loop
             _setStatus(ring,progress,badge,fill,"found","✅ Wajah terdeteksi! Tahan sebentar...");
             if(fill)fill.style.width=(pct*40)+"%";
             scheduleLoop();
           } else {
-            // Cukup stabil — mulai liveness, STOP loop deteksi wajah
             captureStarted=true;
-            _setStatus(ring,progress,badge,fill,"capturing","👁️ Kedipkan mata sekali sekarang!");
+            _setStatus(ring,progress,badge,fill,"capturing","📸 Mengambil data wajah...");
             _setRingProgress(ringProg,1,"#22c55e");
             if(fill){fill.style.width="40%";fill.className="v2l-scan-fill";}
-
-            const isLive=await _livenessCheck(vid,progress,badge);
-            if(!isLive){
-              _setStatus(ring,progress,badge,fill,"error","❌ Waktu habis. Coba lagi — kedipkan mata sekali.");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              _setRingProgress(ringProg,0,"#ef4444");
-              await new Promise(r=>setTimeout(r,2000));
-              // Reset semua state
-              captureStarted=false;
-              loopBusy=false;
-              stableFrames=0;
-              lostFrames=0;
-              lastRafTime=0;
-              _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah di dalam lingkaran");
-              _setRingProgress(ringProg,0,"#22c55e");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              scheduleLoop();
-              return;
-            }
-
-            _setStatus(ring,progress,badge,fill,"capturing","📸 Liveness OK! Mengambil data wajah...");
             await _doCaptureSamples(vid,canvas,ringProg,fill,progress,badge,ring,onComplete);
           }
         } else {
@@ -3946,19 +3756,19 @@
     }
 
     async function _doCaptureSamples(vid,canvas,ringProg,fill,progress,badge,ring,onComplete){
-      const SAMPLES=5;
+      const SAMPLES=10;
       const descriptors=[];
       for(let i=0;i<SAMPLES;i++){
-        await new Promise(r=>setTimeout(r,400));
-        canvas.width=vid.videoWidth||320;
-        canvas.height=vid.videoHeight||240;
+        await new Promise(r=>setTimeout(r,300));
+        canvas.width=vid.videoWidth||640;
+        canvas.height=vid.videoHeight||480;
         const ctx=canvas.getContext("2d");
         ctx.drawImage(vid,0,0,canvas.width,canvas.height);
         let desc=null;
         try{
-          const det=await faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4}))
+          const det=await faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.5}))
             .withFaceLandmarks(true).withFaceDescriptor();
-          if(det)desc=Array.from(det.descriptor);
+          if(det)desc=_normalizeDescriptor(det.descriptor);
         }catch(e){}
         if(desc)descriptors.push(desc);
         const pct=0.4+(0.6*((i+1)/SAMPLES));
@@ -3967,8 +3777,14 @@
         if(progress)progress.textContent=`📸 Mengambil data wajah ${i+1}/${SAMPLES}...`;
         if(badge)badge.textContent=`📸 Frame ${i+1}/${SAMPLES}`;
       }
-      if(!descriptors.length){
+      if(descriptors.length<4){
         if(progress)progress.textContent="❌ Gagal mengambil data wajah. Coba lagi.";
+        await new Promise(r=>setTimeout(r,2000));
+        if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
+        await _startAutoCapture(
+          "v2lVideo","v2lCanvas","v2lFaceRing","v2lRingProgress",
+          "v2lScanFill","v2lScanProgress","v2lFaceStatusBadge",onComplete
+        );
         return;
       }
       if(ring)ring.className="v2l-face-ring success";
@@ -4107,8 +3923,6 @@
     };
 
     window.cancelV2LCapture=function(){
-      if(_livenessRAF){cancelAnimationFrame(_livenessRAF);_livenessRAF=null;}
-      if(_livenessVerifyRAF){cancelAnimationFrame(_livenessVerifyRAF);_livenessVerifyRAF=null;}
       if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
       if(_v2lVerifyAutoRAF){cancelAnimationFrame(_v2lVerifyAutoRAF);_v2lVerifyAutoRAF=null;}
       if(_v2lStream){_v2lStream.getTracks().forEach(t=>t.stop());_v2lStream=null;}
@@ -4118,24 +3932,35 @@
     // Legacy — kept for compat but not triggered from UI anymore
     window.captureV2LFace=function(){return;};
 
-    // Hitung Euclidean distance antara dua face-api descriptor (128-dim float32)
     function _faceDistance(a,b){
+      if(!a||!b||a.length!==b.length)return 999;
+      let dot=0;
+      for(let i=0;i<a.length;i++)dot+=a[i]*b[i];
+      return 1-dot;
+    }
+
+    function _euclideanDistance(a,b){
       if(!a||!b||a.length!==b.length)return 999;
       let sum=0;
       for(let i=0;i<a.length;i++)sum+=(a[i]-b[i])*(a[i]-b[i]);
       return Math.sqrt(sum);
     }
 
-    // Bandingkan live descriptor vs stored (ambil min distance — makin kecil makin mirip)
     function matchFaceDescriptors(liveDesc,storedFaces){
-      let minDist=999;
+      const normLive=_normalizeDescriptor(liveDesc);
+      let scores=[];
       for(const faceSet of storedFaces){
         for(const storedDesc of (faceSet.descriptors||[])){
-          const d=_faceDistance(liveDesc,storedDesc);
-          if(d<minDist)minDist=d;
+          const normStored=Array.isArray(storedDesc[0])?storedDesc:storedDesc;
+          const cosDist=_faceDistance(normLive,normStored);
+          const eucDist=_euclideanDistance(normLive,normStored);
+          scores.push((cosDist*0.6)+(eucDist*0.4));
         }
       }
-      return minDist;
+      if(!scores.length)return 999;
+      scores.sort((a,b)=>a-b);
+      const topK=scores.slice(0,Math.max(1,Math.floor(scores.length*0.3)));
+      return topK.reduce((a,b)=>a+b,0)/topK.length;
     }
 
     // ─── V2L LOGIN VERIFICATION FLOW ───
@@ -4257,20 +4082,17 @@
       const progress=document.getElementById("v2lVerifyProgress");
       const badge=document.getElementById("v2lVerifyStatusBadge");
 
-      // Model sudah dimuat di startVerifyCamera, langsung mulai deteksi
       _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah Anda di dalam lingkaran");
       _setRingProgress(ringProg,0,"#22c55e");
 
       let stableFrames=0;
-      const STABLE_NEEDED=8;
+      const STABLE_NEEDED=10;
       let lostFrames=0;
       const LOST_THRESHOLD=12;
       let verifyStarted=false;
       let loopBusy=false;
       let lastRafTime=0;
-      const TARGET_FPS=12;
-
-      _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah di dalam lingkaran");
+      const TARGET_FPS=10;
 
       function scheduleLoop(){
         _v2lVerifyAutoRAF=requestAnimationFrame(loop);
@@ -4287,13 +4109,13 @@
         loopBusy=true;
         let det=null;
         try{
-          det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4}));
+          det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.5}));
         }catch(e){}
         loopBusy=false;
 
         if(verifyStarted)return;
 
-        if(det&&det.score>0.4){
+        if(det&&det.score>0.5){
           lostFrames=0;
           stableFrames++;
           const pct=Math.min(stableFrames/STABLE_NEEDED,1);
@@ -4306,29 +4128,9 @@
             scheduleLoop();
           } else {
             verifyStarted=true;
-            _setStatus(ring,progress,badge,fill,"verifying","👁️ Kedipkan mata sekali sekarang!");
+            _setStatus(ring,progress,badge,fill,"verifying","🔍 Menganalisis wajah...");
             _setRingProgress(ringProg,1,"#22c55e");
             if(fill){fill.style.width="40%";fill.className="v2l-scan-fill";}
-
-            const isLive=await _livenessCheckVerify(vid,progress,badge);
-            if(!isLive){
-              _setStatus(ring,progress,badge,fill,"error","❌ Waktu habis. Coba lagi — kedipkan mata sekali.");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              _setRingProgress(ringProg,0,"#ef4444");
-              await new Promise(r=>setTimeout(r,2000));
-              verifyStarted=false;
-              loopBusy=false;
-              stableFrames=0;
-              lostFrames=0;
-              lastRafTime=0;
-              _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah di dalam lingkaran");
-              _setRingProgress(ringProg,0,"#22c55e");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              scheduleLoop();
-              return;
-            }
-
-            _setStatus(ring,progress,badge,fill,"verifying","🔍 Menganalisis wajah...");
             await _doAutoVerify(vid,canvas,ringProg,fill,progress,badge,ring);
           }
         } else {
@@ -4353,20 +4155,26 @@
     async function _doAutoVerify(vid,canvas,ringProg,fill,progress,badge,ring){
       _v2lVerifying=true;
       const samples=[];
-      for(let i=0;i<4;i++){
-        await new Promise(r=>setTimeout(r,300));
+      const SAMPLE_COUNT=8;
+      for(let i=0;i<SAMPLE_COUNT;i++){
+        await new Promise(r=>setTimeout(r,250));
+        canvas.width=vid.videoWidth||640;
+        canvas.height=vid.videoHeight||480;
+        const ctx2=canvas.getContext("2d");
+        ctx2.drawImage(vid,0,0,canvas.width,canvas.height);
         let det=null;
         try{
-          det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4}))
+          det=await faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.5}))
             .withFaceLandmarks(true).withFaceDescriptor();
         }catch(e){}
-        if(det)samples.push(Array.from(det.descriptor));
-        const pct=0.4+(0.5*((i+1)/4));
+        if(det)samples.push(_normalizeDescriptor(det.descriptor));
+        const pct=0.4+(0.5*((i+1)/SAMPLE_COUNT));
         _setRingProgress(ringProg,pct,"#22c55e");
         if(fill)fill.style.width=(pct*100)+"%";
+        if(progress)progress.textContent=`🔍 Menganalisis wajah ${i+1}/${SAMPLE_COUNT}...`;
       }
 
-      if(!samples.length){
+      if(samples.length<3){
         if(ring)ring.className="v2l-face-ring error";
         _setRingProgress(ringProg,1,"#ef4444");
         if(fill){fill.className="v2l-scan-fill error";fill.style.width="100%";}
@@ -4385,36 +4193,38 @@
         return;
       }
 
-      let minDist=999;
+      let distScores=[];
       for(const sample of samples){
         const d=matchFaceDescriptors(sample,v2l.faces);
-        if(d<minDist)minDist=d;
+        distScores.push(d);
       }
+      distScores.sort((a,b)=>a-b);
+      const bestDist=distScores.slice(0,Math.max(1,Math.floor(distScores.length*0.4))).reduce((a,b)=>a+b,0)/Math.max(1,Math.floor(distScores.length*0.4));
 
       _setRingProgress(ringProg,1,"#22c55e");
       if(fill)fill.style.width="100%";
-      const THRESHOLD=0.50;
 
-      if(minDist<=THRESHOLD){
+      const THRESHOLD=0.38;
+      const confidence=Math.round(Math.max(0,Math.min(100,(1-(bestDist/THRESHOLD))*100)));
+
+      if(bestDist<=THRESHOLD){
         if(ring)ring.className="v2l-face-ring success";
-        const matchPct=Math.round(Math.max(0,1-minDist/THRESHOLD)*100);
-        if(progress)progress.textContent="✅ Wajah terverifikasi! ("+matchPct+"% cocok)";
-        if(badge){badge.textContent="✅ Terverifikasi!";badge.style.background="rgba(34,197,94,0.4)";}
+        if(progress)progress.textContent=`✅ Wajah terverifikasi! (${confidence}% cocok)`;
+        if(badge){badge.textContent=`✅ Terverifikasi ${confidence}%`;badge.style.background="rgba(34,197,94,0.4)";}
         await new Promise(r=>setTimeout(r,800));
         resolveV2LVerify(true);
       } else {
         if(ring)ring.className="v2l-face-ring error";
         _setRingProgress(ringProg,1,"#ef4444");
         if(fill){fill.className="v2l-scan-fill error";fill.style.width="100%";}
-        const matchPct=Math.round(Math.max(0,1-minDist/THRESHOLD)*100);
-        if(progress)progress.textContent="❌ Wajah tidak cocok ("+matchPct+"%). Coba lagi atau gunakan QR.";
+        if(progress)progress.textContent=`❌ Wajah tidak cocok (${Math.max(0,100-confidence)}% berbeda). Coba lagi atau gunakan QR.`;
         if(badge){badge.textContent="❌ Tidak cocok — coba lagi";badge.style.background="rgba(239,68,68,0.35)";badge.style.borderColor="rgba(239,68,68,0.5)";}
-        await new Promise(r=>setTimeout(r,2000));
+        await new Promise(r=>setTimeout(r,2500));
         _v2lVerifying=false;
         if(ring)ring.className="v2l-face-ring";
         if(fill){fill.className="v2l-scan-fill";fill.style.width="0%";}
         _setRingProgress(ringProg,0,"#22c55e");
-        _startAutoVerify(); // restart detection
+        _startAutoVerify();
       }
     }
 
