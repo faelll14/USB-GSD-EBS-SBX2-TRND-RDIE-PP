@@ -3690,17 +3690,22 @@
     }
 
     // ─── LIVENESS: deteksi kedip mata ───
+    let _livenessRAF=null;
     async function _livenessCheck(vid,progress,badge){
-      const EAR_THRESHOLD=0.21;
+      const EAR_THRESHOLD=0.27;
+      const EAR_OPEN_THRESHOLD=0.30;
       const BLINK_NEEDED=1;
       let blinkCount=0;
       let eyeOpen=true;
       let resolved=false;
-      const TIMEOUT_MS=12000; // 12 detik wall-clock timeout
+      let earHistory=[];
+      const TIMEOUT_MS=15000;
+
+      if(_livenessRAF){cancelAnimationFrame(_livenessRAF);_livenessRAF=null;}
 
       return new Promise(resolve=>{
         const deadline=Date.now()+TIMEOUT_MS;
-        let countdown=12;
+        let countdown=15;
         const cdInterval=setInterval(()=>{
           countdown--;
           if(progress&&!resolved)progress.textContent=`👁️ Kedipkan mata sekali... (${countdown}s)`;
@@ -3716,19 +3721,25 @@
             return;
           }
           try{
-            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4})).withFaceLandmarks(true);
+            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35})).withFaceLandmarks(true);
             if(det){
               const eyes=_getLandmarkEyes(det.landmarks);
               let ear=1;
               if(eyes.left&&eyes.right){
                 ear=(_calcEAR(eyes.left)+_calcEAR(eyes.right))/2;
               }
-              if(eyeOpen&&ear<EAR_THRESHOLD){
+              earHistory.push(ear);
+              if(earHistory.length>5)earHistory.shift();
+              const avgEAR=earHistory.reduce((a,b)=>a+b,0)/earHistory.length;
+
+              if(eyeOpen&&avgEAR<EAR_THRESHOLD){
                 eyeOpen=false;
-              } else if(!eyeOpen&&ear>=EAR_THRESHOLD){
+                if(badge)badge.textContent=`👁️ Mata tertutup terdeteksi...`;
+              } else if(!eyeOpen&&avgEAR>=EAR_OPEN_THRESHOLD){
                 eyeOpen=true;
                 blinkCount++;
-                if(badge)badge.textContent=`👁️ Kedipan ${blinkCount}/${BLINK_NEEDED}`;
+                earHistory=[];
+                if(badge)badge.textContent=`✅ Kedipan ${blinkCount}/${BLINK_NEEDED} terdeteksi!`;
                 if(blinkCount>=BLINK_NEEDED){
                   clearInterval(cdInterval);
                   resolved=true;
@@ -3738,25 +3749,34 @@
               }
             } else {
               if(progress&&!resolved)progress.textContent="🔍 Wajah hilang — kembali ke lingkaran...";
+              earHistory=[];
             }
-          }catch(e){}
-          if(!resolved)_v2lAutoDetectRAF=requestAnimationFrame(tick);
+          }catch(e){console.warn("[Liveness]",e);}
+          if(!resolved){
+            await new Promise(r=>setTimeout(r,80));
+            if(!resolved)_livenessRAF=requestAnimationFrame(tick);
+          }
         }
-        _v2lAutoDetectRAF=requestAnimationFrame(tick);
+        _livenessRAF=requestAnimationFrame(tick);
       });
     }
 
+    let _livenessVerifyRAF=null;
     async function _livenessCheckVerify(vid,progress,badge){
-      const EAR_THRESHOLD=0.21;
+      const EAR_THRESHOLD=0.27;
+      const EAR_OPEN_THRESHOLD=0.30;
       const BLINK_NEEDED=1;
       let blinkCount=0;
       let eyeOpen=true;
       let resolved=false;
-      const TIMEOUT_MS=12000;
+      let earHistory=[];
+      const TIMEOUT_MS=15000;
+
+      if(_livenessVerifyRAF){cancelAnimationFrame(_livenessVerifyRAF);_livenessVerifyRAF=null;}
 
       return new Promise(resolve=>{
         const deadline=Date.now()+TIMEOUT_MS;
-        let countdown=12;
+        let countdown=15;
         const cdInterval=setInterval(()=>{
           countdown--;
           if(progress&&!resolved)progress.textContent=`👁️ Kedipkan mata sekali... (${countdown}s)`;
@@ -3772,19 +3792,25 @@
             return;
           }
           try{
-            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4})).withFaceLandmarks(true);
+            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35})).withFaceLandmarks(true);
             if(det){
               const eyes=_getLandmarkEyes(det.landmarks);
               let ear=1;
               if(eyes.left&&eyes.right){
                 ear=(_calcEAR(eyes.left)+_calcEAR(eyes.right))/2;
               }
-              if(eyeOpen&&ear<EAR_THRESHOLD){
+              earHistory.push(ear);
+              if(earHistory.length>5)earHistory.shift();
+              const avgEAR=earHistory.reduce((a,b)=>a+b,0)/earHistory.length;
+
+              if(eyeOpen&&avgEAR<EAR_THRESHOLD){
                 eyeOpen=false;
-              } else if(!eyeOpen&&ear>=EAR_THRESHOLD){
+                if(badge)badge.textContent=`👁️ Mata tertutup terdeteksi...`;
+              } else if(!eyeOpen&&avgEAR>=EAR_OPEN_THRESHOLD){
                 eyeOpen=true;
                 blinkCount++;
-                if(badge)badge.textContent=`👁️ Kedipan ${blinkCount}/${BLINK_NEEDED}`;
+                earHistory=[];
+                if(badge)badge.textContent=`✅ Kedipan ${blinkCount}/${BLINK_NEEDED} terdeteksi!`;
                 if(blinkCount>=BLINK_NEEDED){
                   clearInterval(cdInterval);
                   resolved=true;
@@ -3794,11 +3820,15 @@
               }
             } else {
               if(progress&&!resolved)progress.textContent="🔍 Wajah hilang — kembali ke lingkaran...";
+              earHistory=[];
             }
-          }catch(e){}
-          if(!resolved)_v2lVerifyAutoRAF=requestAnimationFrame(tick);
+          }catch(e){console.warn("[LivenessVerify]",e);}
+          if(!resolved){
+            await new Promise(r=>setTimeout(r,80));
+            if(!resolved)_livenessVerifyRAF=requestAnimationFrame(tick);
+          }
         }
-        _v2lVerifyAutoRAF=requestAnimationFrame(tick);
+        _livenessVerifyRAF=requestAnimationFrame(tick);
       });
     }
 
@@ -3868,9 +3898,8 @@
             if(fill)fill.style.width=(pct*40)+"%";
             scheduleLoop();
           } else {
-            // Cukup stabil — mulai liveness, STOP loop
+            // Cukup stabil — mulai liveness, STOP loop deteksi wajah
             captureStarted=true;
-            if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
             _setStatus(ring,progress,badge,fill,"capturing","👁️ Kedipkan mata sekali sekarang!");
             _setRingProgress(ringProg,1,"#22c55e");
             if(fill){fill.style.width="40%";fill.className="v2l-scan-fill";}
@@ -4078,7 +4107,10 @@
     };
 
     window.cancelV2LCapture=function(){
+      if(_livenessRAF){cancelAnimationFrame(_livenessRAF);_livenessRAF=null;}
+      if(_livenessVerifyRAF){cancelAnimationFrame(_livenessVerifyRAF);_livenessVerifyRAF=null;}
       if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
+      if(_v2lVerifyAutoRAF){cancelAnimationFrame(_v2lVerifyAutoRAF);_v2lVerifyAutoRAF=null;}
       if(_v2lStream){_v2lStream.getTracks().forEach(t=>t.stop());_v2lStream=null;}
       document.getElementById("v2lModal").classList.add("hidden");
     };
@@ -4274,7 +4306,6 @@
             scheduleLoop();
           } else {
             verifyStarted=true;
-            if(_v2lVerifyAutoRAF){cancelAnimationFrame(_v2lVerifyAutoRAF);_v2lVerifyAutoRAF=null;}
             _setStatus(ring,progress,badge,fill,"verifying","👁️ Kedipkan mata sekali sekarang!");
             _setRingProgress(ringProg,1,"#22c55e");
             if(fill){fill.style.width="40%";fill.className="v2l-scan-fill";}
