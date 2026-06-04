@@ -3456,17 +3456,8 @@
       const toggle=document.getElementById("v2lToggle"+roleSuffix);
       if(!dot||!statusText||!toggle)return;
 
-      // Tampilkan loading sementara
-      statusText.textContent="Memuat status...";
-
-      // Ambil data fresh langsung dari Firestore (bukan cache)
-      let v2l=null;
-      try{
-        const snap=await getDoc(doc(db,"v2l_faces",nis));
-        if(snap.exists())v2l=snap.data();
-      }catch(e){v2l=null;}
-
-      const hasFace=v2l&&v2l.faces&&Array.isArray(v2l.faces)&&v2l.faces.length>0;
+      const v2l=await getV2LData(nis);
+      const hasFace=v2l&&v2l.faces&&v2l.faces.length>0;
       const isEnabled=v2l&&v2l.enabled===true;
 
       dot.className="v2l-face-dot"+(hasFace?" stored":" empty");
@@ -3476,20 +3467,15 @@
 
       toggle.disabled=!hasFace;
       toggle.checked=isEnabled&&hasFace;
-
-      // Aktifkan QR scan button hanya jika sudah ada wajah
-      const qrBtns=document.querySelectorAll(`[onclick*="openQrScanModal('${role}')"]`);
-      qrBtns.forEach(b=>{b.disabled=false;});
     }
 
     // Toggle V2L on/off
     window.toggleV2L=async function(role, val){
       if(!currentUser)return;
       const nis=currentUser.nis;
-      let v2l=null;
-      try{const snap=await getDoc(doc(db,"v2l_faces",nis));if(snap.exists())v2l=snap.data();}catch(e){}
-      const roleSuffix=role.charAt(0).toUpperCase()+role.slice(1);
-      if(!v2l||!v2l.faces||!Array.isArray(v2l.faces)||!v2l.faces.length){
+      const v2l=await getV2LData(nis);
+      if(!v2l||!v2l.faces||!v2l.faces.length){
+        const roleSuffix=role.charAt(0).toUpperCase()+role.slice(1);
         const toggle=document.getElementById("v2lToggle"+roleSuffix);
         if(toggle){toggle.checked=false;toggle.disabled=true;}
         showToast("Tambahkan data wajah terlebih dahulu","warning");
@@ -3497,7 +3483,6 @@
       }
       await saveV2LData(nis,{...v2l,enabled:val});
       showToast(val?"Verifikasi wajah diaktifkan ✅":"Verifikasi wajah dinonaktifkan","info");
-      await renderV2LSettings(role);
     };
 
     // Buka modal tambah wajah
@@ -3683,170 +3668,6 @@
       }
     }
 
-    // Hitung EAR (Eye Aspect Ratio) untuk deteksi kedipan
-    function _calcEAR(eye){
-      if(!eye||eye.length<6)return 1;
-      const p={};
-      const pts=eye;
-      const A=Math.hypot(pts[1].x-pts[5].x,pts[1].y-pts[5].y);
-      const B=Math.hypot(pts[2].x-pts[4].x,pts[2].y-pts[4].y);
-      const C=Math.hypot(pts[0].x-pts[3].x,pts[0].y-pts[3].y);
-      return C>0?(A+B)/(2*C):1;
-    }
-
-    function _getLandmarkEyes(landmarks){
-      if(!landmarks)return{left:null,right:null};
-      const lm=landmarks.positions||landmarks._positions||[];
-      if(lm.length<68)return{left:null,right:null};
-      return{
-        left:[lm[36],lm[37],lm[38],lm[39],lm[40],lm[41]],
-        right:[lm[42],lm[43],lm[44],lm[45],lm[46],lm[47]]
-      };
-    }
-
-    // ─── LIVENESS: deteksi kedip mata ───
-    let _livenessRAF=null;
-    async function _livenessCheck(vid,progress,badge){
-      const EAR_THRESHOLD=0.27;
-      const EAR_OPEN_THRESHOLD=0.30;
-      const BLINK_NEEDED=1;
-      let blinkCount=0;
-      let eyeOpen=true;
-      let resolved=false;
-      let earHistory=[];
-      const TIMEOUT_MS=15000;
-
-      if(_livenessRAF){cancelAnimationFrame(_livenessRAF);_livenessRAF=null;}
-
-      return new Promise(resolve=>{
-        const deadline=Date.now()+TIMEOUT_MS;
-        let countdown=15;
-        const cdInterval=setInterval(()=>{
-          countdown--;
-          if(progress&&!resolved)progress.textContent=`👁️ Kedipkan mata sekali... (${countdown}s)`;
-          if(countdown<=0){clearInterval(cdInterval);}
-        },1000);
-
-        async function tick(){
-          if(resolved)return;
-          if(Date.now()>deadline){
-            clearInterval(cdInterval);
-            resolved=true;
-            resolve(false);
-            return;
-          }
-          try{
-            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35})).withFaceLandmarks(true);
-            if(det){
-              const eyes=_getLandmarkEyes(det.landmarks);
-              let ear=1;
-              if(eyes.left&&eyes.right){
-                ear=(_calcEAR(eyes.left)+_calcEAR(eyes.right))/2;
-              }
-              earHistory.push(ear);
-              if(earHistory.length>5)earHistory.shift();
-              const avgEAR=earHistory.reduce((a,b)=>a+b,0)/earHistory.length;
-
-              if(eyeOpen&&avgEAR<EAR_THRESHOLD){
-                eyeOpen=false;
-                if(badge)badge.textContent=`👁️ Mata tertutup terdeteksi...`;
-              } else if(!eyeOpen&&avgEAR>=EAR_OPEN_THRESHOLD){
-                eyeOpen=true;
-                blinkCount++;
-                earHistory=[];
-                if(badge)badge.textContent=`✅ Kedipan ${blinkCount}/${BLINK_NEEDED} terdeteksi!`;
-                if(blinkCount>=BLINK_NEEDED){
-                  clearInterval(cdInterval);
-                  resolved=true;
-                  resolve(true);
-                  return;
-                }
-              }
-            } else {
-              if(progress&&!resolved)progress.textContent="🔍 Wajah hilang — kembali ke lingkaran...";
-              earHistory=[];
-            }
-          }catch(e){console.warn("[Liveness]",e);}
-          if(!resolved){
-            await new Promise(r=>setTimeout(r,80));
-            if(!resolved)_livenessRAF=requestAnimationFrame(tick);
-          }
-        }
-        _livenessRAF=requestAnimationFrame(tick);
-      });
-    }
-
-    let _livenessVerifyRAF=null;
-    async function _livenessCheckVerify(vid,progress,badge){
-      const EAR_THRESHOLD=0.27;
-      const EAR_OPEN_THRESHOLD=0.30;
-      const BLINK_NEEDED=1;
-      let blinkCount=0;
-      let eyeOpen=true;
-      let resolved=false;
-      let earHistory=[];
-      const TIMEOUT_MS=15000;
-
-      if(_livenessVerifyRAF){cancelAnimationFrame(_livenessVerifyRAF);_livenessVerifyRAF=null;}
-
-      return new Promise(resolve=>{
-        const deadline=Date.now()+TIMEOUT_MS;
-        let countdown=15;
-        const cdInterval=setInterval(()=>{
-          countdown--;
-          if(progress&&!resolved)progress.textContent=`👁️ Kedipkan mata sekali... (${countdown}s)`;
-          if(countdown<=0){clearInterval(cdInterval);}
-        },1000);
-
-        async function tick(){
-          if(resolved)return;
-          if(Date.now()>deadline){
-            clearInterval(cdInterval);
-            resolved=true;
-            resolve(false);
-            return;
-          }
-          try{
-            const det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35})).withFaceLandmarks(true);
-            if(det){
-              const eyes=_getLandmarkEyes(det.landmarks);
-              let ear=1;
-              if(eyes.left&&eyes.right){
-                ear=(_calcEAR(eyes.left)+_calcEAR(eyes.right))/2;
-              }
-              earHistory.push(ear);
-              if(earHistory.length>5)earHistory.shift();
-              const avgEAR=earHistory.reduce((a,b)=>a+b,0)/earHistory.length;
-
-              if(eyeOpen&&avgEAR<EAR_THRESHOLD){
-                eyeOpen=false;
-                if(badge)badge.textContent=`👁️ Mata tertutup terdeteksi...`;
-              } else if(!eyeOpen&&avgEAR>=EAR_OPEN_THRESHOLD){
-                eyeOpen=true;
-                blinkCount++;
-                earHistory=[];
-                if(badge)badge.textContent=`✅ Kedipan ${blinkCount}/${BLINK_NEEDED} terdeteksi!`;
-                if(blinkCount>=BLINK_NEEDED){
-                  clearInterval(cdInterval);
-                  resolved=true;
-                  resolve(true);
-                  return;
-                }
-              }
-            } else {
-              if(progress&&!resolved)progress.textContent="🔍 Wajah hilang — kembali ke lingkaran...";
-              earHistory=[];
-            }
-          }catch(e){console.warn("[LivenessVerify]",e);}
-          if(!resolved){
-            await new Promise(r=>setTimeout(r,80));
-            if(!resolved)_livenessVerifyRAF=requestAnimationFrame(tick);
-          }
-        }
-        _livenessVerifyRAF=requestAnimationFrame(tick);
-      });
-    }
-
     async function _startAutoCapture(videoId,canvasId,ringId,ringProgressId,fillId,progressId,badgeId,onComplete){
       const vid=document.getElementById(videoId);
       const canvas=document.getElementById(canvasId);
@@ -3913,32 +3734,11 @@
             if(fill)fill.style.width=(pct*40)+"%";
             scheduleLoop();
           } else {
-            // Cukup stabil — mulai liveness, STOP loop deteksi wajah
+            // Cukup stabil — langsung ambil data wajah (tanpa liveness)
             captureStarted=true;
-            _setStatus(ring,progress,badge,fill,"capturing","👁️ Kedipkan mata sekali sekarang!");
+            _setStatus(ring,progress,badge,fill,"capturing","📸 Wajah stabil! Mengambil data...");
             _setRingProgress(ringProg,1,"#22c55e");
             if(fill){fill.style.width="40%";fill.className="v2l-scan-fill";}
-
-            const isLive=await _livenessCheck(vid,progress,badge);
-            if(!isLive){
-              _setStatus(ring,progress,badge,fill,"error","❌ Waktu habis. Coba lagi — kedipkan mata sekali.");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              _setRingProgress(ringProg,0,"#ef4444");
-              await new Promise(r=>setTimeout(r,2000));
-              // Reset semua state
-              captureStarted=false;
-              loopBusy=false;
-              stableFrames=0;
-              lostFrames=0;
-              lastRafTime=0;
-              _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah di dalam lingkaran");
-              _setRingProgress(ringProg,0,"#22c55e");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              scheduleLoop();
-              return;
-            }
-
-            _setStatus(ring,progress,badge,fill,"capturing","📸 Liveness OK! Mengambil data wajah...");
             await _doCaptureSamples(vid,canvas,ringProg,fill,progress,badge,ring,onComplete);
           }
         } else {
@@ -3961,35 +3761,53 @@
     }
 
     async function _doCaptureSamples(vid,canvas,ringProg,fill,progress,badge,ring,onComplete){
-      const SAMPLES=5;
+      // 12 samples untuk akurasi lebih tinggi, interval 350ms
+      const SAMPLES=12;
       const descriptors=[];
+      // Pilih detektor: SsdMobilenetv1 lebih akurat jika model tersedia
+      function _makeDetector(){
+        try{
+          if(faceapi.nets.ssdMobilenetv1&&faceapi.nets.ssdMobilenetv1.isLoaded){
+            return faceapi.detectSingleFace(canvas,new faceapi.SsdMobilenetv1Options({minConfidence:0.5}))
+              .withFaceLandmarks(true).withFaceDescriptor();
+          }
+        }catch(e){}
+        return faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35}))
+          .withFaceLandmarks(true).withFaceDescriptor();
+      }
       for(let i=0;i<SAMPLES;i++){
-        await new Promise(r=>setTimeout(r,400));
-        canvas.width=vid.videoWidth||320;
-        canvas.height=vid.videoHeight||240;
+        await new Promise(r=>setTimeout(r,350));
+        canvas.width=vid.videoWidth||640;
+        canvas.height=vid.videoHeight||480;
         const ctx=canvas.getContext("2d");
+        // Gambar tanpa mirror — deteksi dari frame asli kamera (bukan tampilan kaca)
         ctx.drawImage(vid,0,0,canvas.width,canvas.height);
         let desc=null;
         try{
-          const det=await faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4}))
-            .withFaceLandmarks(true).withFaceDescriptor();
-          if(det)desc=Array.from(det.descriptor);
+          const det=await _makeDetector();
+          if(det&&det.descriptor)desc=Array.from(det.descriptor);
         }catch(e){}
         if(desc)descriptors.push(desc);
-        const pct=0.4+(0.6*((i+1)/SAMPLES));
+        const pct=0.2+(0.8*((i+1)/SAMPLES));
         _setRingProgress(ringProg,pct,"#22c55e");
         if(fill)fill.style.width=(pct*100)+"%";
-        if(progress)progress.textContent=`📸 Mengambil data wajah ${i+1}/${SAMPLES}...`;
-        if(badge)badge.textContent=`📸 Frame ${i+1}/${SAMPLES}`;
+        if(progress)progress.textContent=`📸 Memindai wajah ${i+1}/${SAMPLES} — tetap hadap kamera`;
+        if(badge)badge.textContent=`📸 ${i+1}/${SAMPLES}`;
       }
-      if(!descriptors.length){
-        if(progress)progress.textContent="❌ Gagal mengambil data wajah. Coba lagi.";
+      if(descriptors.length<3){
+        if(progress)progress.textContent="❌ Kurang data wajah terbaca. Pastikan pencahayaan cukup & wajah jelas.";
+        if(ring)ring.className="v2l-face-ring error";
+        _setRingProgress(ringProg,1,"#ef4444");
+        await new Promise(r=>setTimeout(r,2500));
+        if(ring)ring.className="v2l-face-ring";
+        _setRingProgress(ringProg,0,"#22c55e");
+        if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
         return;
       }
       if(ring)ring.className="v2l-face-ring success";
       _setRingProgress(ringProg,1,"#22c55e");
       if(fill)fill.style.width="100%";
-      if(progress)progress.textContent="✅ Berhasil! Menyimpan data...";
+      if(progress)progress.textContent="✅ Berhasil! Menyimpan "+descriptors.length+" titik referensi wajah...";
       if(badge){badge.textContent="✅ Tersimpan!";badge.style.background="rgba(34,197,94,0.35)";}
       if(onComplete)await onComplete(descriptors);
     }
@@ -4054,10 +3872,10 @@
         const vid=document.getElementById("v2lVideo");
         if(vid){
           vid.srcObject=stream;
-          // Paksa tidak mirror — kamera biasa (bukan efek cermin)
-          vid.style.transform="none";
-          vid.style.webkitTransform="none";
-          vid.removeAttribute("data-mirror");
+          // Mirror (kaya kaca) — tampilan selfie natural
+          vid.style.transform="scaleX(-1)";
+          vid.style.webkitTransform="scaleX(-1)";
+          vid.setAttribute("data-mirror","1");
         }
 
         // Cek kualitas
@@ -4100,23 +3918,18 @@
               device:navigator.userAgent.slice(0,60)
             };
             existing.faces=[...(existing.faces||[]),newFaceSet];
-            // Ambil role SEBELUM modal ditutup (modal masih terbuka)
-            const role=document.getElementById("v2lModal")._role||"student";
             await saveV2LData(nis,existing);
-            // Tunggu Firestore commit sebelum refresh
-            await new Promise(r=>setTimeout(r,1500));
+            await new Promise(r=>setTimeout(r,900));
             if(_v2lStream){_v2lStream.getTracks().forEach(t=>t.stop());_v2lStream=null;}
             if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
             document.getElementById("v2lModal").classList.add("hidden");
+            const role=document.getElementById("v2lModal")._role||"student";
             showToast("Data wajah berhasil disimpan ✅","success");
-            // Refresh status dengan data fresh dari Firestore
             await renderV2LSettings(role);
-            // Cek apakah ini wajah pertama -> tawarkan aktifkan
-            let latestV2l=null;
-            try{const s=await getDoc(doc(db,"v2l_faces",nis));if(s.exists())latestV2l=s.data();}catch(e2){}
-            if(latestV2l&&latestV2l.faces&&latestV2l.faces.length===1){
+            const v2l=await getV2LData(nis);
+            if(v2l&&v2l.faces&&v2l.faces.length===1){
               const ok=await showConfirm("Aktifkan Verifikasi Wajah?","Data wajah telah tersimpan. Aktifkan verifikasi wajah untuk login sekarang?","Ya, Aktifkan","btn-primary","👁️");
-              if(ok){await saveV2LData(nis,{...latestV2l,enabled:true});await renderV2LSettings(role);}
+              if(ok){await saveV2LData(nis,{...v2l,enabled:true});await renderV2LSettings(role);}
             }
           }
         );
@@ -4127,8 +3940,6 @@
     };
 
     window.cancelV2LCapture=function(){
-      if(_livenessRAF){cancelAnimationFrame(_livenessRAF);_livenessRAF=null;}
-      if(_livenessVerifyRAF){cancelAnimationFrame(_livenessVerifyRAF);_livenessVerifyRAF=null;}
       if(_v2lAutoDetectRAF){cancelAnimationFrame(_v2lAutoDetectRAF);_v2lAutoDetectRAF=null;}
       if(_v2lVerifyAutoRAF){cancelAnimationFrame(_v2lVerifyAutoRAF);_v2lVerifyAutoRAF=null;}
       if(_v2lStream){_v2lStream.getTracks().forEach(t=>t.stop());_v2lStream=null;}
@@ -4235,10 +4046,10 @@
         const vid=document.getElementById("v2lVerifyVideo");
         if(vid){
           vid.srcObject=stream;
-          // Paksa tidak mirror — kamera biasa
-          vid.style.transform="none";
-          vid.style.webkitTransform="none";
-          vid.removeAttribute("data-mirror");
+          // Mirror (kaya kaca) — tampilan selfie natural
+          vid.style.transform="scaleX(-1)";
+          vid.style.webkitTransform="scaleX(-1)";
+          vid.setAttribute("data-mirror","1");
         }
 
         // Cek kualitas
@@ -4326,29 +4137,9 @@
             scheduleLoop();
           } else {
             verifyStarted=true;
-            _setStatus(ring,progress,badge,fill,"verifying","👁️ Kedipkan mata sekali sekarang!");
+            _setStatus(ring,progress,badge,fill,"verifying","🔍 Menganalisis wajah...");
             _setRingProgress(ringProg,1,"#22c55e");
             if(fill){fill.style.width="40%";fill.className="v2l-scan-fill";}
-
-            const isLive=await _livenessCheckVerify(vid,progress,badge);
-            if(!isLive){
-              _setStatus(ring,progress,badge,fill,"error","❌ Waktu habis. Coba lagi — kedipkan mata sekali.");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              _setRingProgress(ringProg,0,"#ef4444");
-              await new Promise(r=>setTimeout(r,2000));
-              verifyStarted=false;
-              loopBusy=false;
-              stableFrames=0;
-              lostFrames=0;
-              lastRafTime=0;
-              _setStatus(ring,progress,badge,fill,"idle","🔍 Posisikan wajah di dalam lingkaran");
-              _setRingProgress(ringProg,0,"#22c55e");
-              if(fill){fill.style.width="0%";fill.className="v2l-scan-fill";}
-              scheduleLoop();
-              return;
-            }
-
-            _setStatus(ring,progress,badge,fill,"verifying","🔍 Menganalisis wajah...");
             await _doAutoVerify(vid,canvas,ringProg,fill,progress,badge,ring);
           }
         } else {
@@ -4372,18 +4163,33 @@
 
     async function _doAutoVerify(vid,canvas,ringProg,fill,progress,badge,ring){
       _v2lVerifying=true;
+      // Ambil 8 sample untuk keputusan lebih robust
+      const VSAMP=8;
       const samples=[];
-      for(let i=0;i<4;i++){
-        await new Promise(r=>setTimeout(r,300));
-        let det=null;
+      function _makeVerifyDetector(){
         try{
-          det=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.4}))
-            .withFaceLandmarks(true).withFaceDescriptor();
+          if(faceapi.nets.ssdMobilenetv1&&faceapi.nets.ssdMobilenetv1.isLoaded){
+            return faceapi.detectSingleFace(canvas,new faceapi.SsdMobilenetv1Options({minConfidence:0.5}))
+              .withFaceLandmarks(true).withFaceDescriptor();
+          }
         }catch(e){}
-        if(det)samples.push(Array.from(det.descriptor));
-        const pct=0.4+(0.5*((i+1)/4));
+        return faceapi.detectSingleFace(canvas,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:0.35}))
+          .withFaceLandmarks(true).withFaceDescriptor();
+      }
+      for(let i=0;i<VSAMP;i++){
+        await new Promise(r=>setTimeout(r,280));
+        canvas.width=vid.videoWidth||640;
+        canvas.height=vid.videoHeight||480;
+        const ctx=canvas.getContext("2d");
+        // Gambar dari frame asli (tidak mirror)
+        ctx.drawImage(vid,0,0,canvas.width,canvas.height);
+        let det=null;
+        try{ det=await _makeVerifyDetector(); }catch(e){}
+        if(det&&det.descriptor)samples.push(Array.from(det.descriptor));
+        const pct=0.3+(0.6*((i+1)/VSAMP));
         _setRingProgress(ringProg,pct,"#22c55e");
         if(fill)fill.style.width=(pct*100)+"%";
+        if(progress)progress.textContent="🔍 Memverifikasi... "+(i+1)+"/"+VSAMP;
       }
 
       if(!samples.length){
@@ -4405,19 +4211,29 @@
         return;
       }
 
+      // Hitung centroid dari sample-sample live (rata-rata descriptor)
+      const DIM=128;
+      const centroid=new Array(DIM).fill(0);
+      for(const s of samples){for(let d=0;d<DIM;d++)centroid[d]+=s[d]/samples.length;}
+
+      // Bandingkan centroid vs semua stored (lebih stabil dari min sample)
+      const distCentroid=matchFaceDescriptors(centroid,v2l.faces);
+
+      // Juga hitung min dari individual samples sebagai fallback
       let minDist=999;
-      for(const sample of samples){
-        const d=matchFaceDescriptors(sample,v2l.faces);
-        if(d<minDist)minDist=d;
-      }
+      for(const sample of samples){const d=matchFaceDescriptors(sample,v2l.faces);if(d<minDist)minDist=d;}
+
+      // Keputusan: gunakan rata-rata keduanya
+      const finalDist=(distCentroid*0.6+minDist*0.4);
 
       _setRingProgress(ringProg,1,"#22c55e");
       if(fill)fill.style.width="100%";
-      const THRESHOLD=0.50;
+      // Threshold lebih ketat: 0.44 (sebelumnya 0.50)
+      const THRESHOLD=0.44;
 
-      if(minDist<=THRESHOLD){
+      if(finalDist<=THRESHOLD){
         if(ring)ring.className="v2l-face-ring success";
-        const matchPct=Math.round(Math.max(0,1-minDist/THRESHOLD)*100);
+        const matchPct=Math.round(Math.max(0,1-finalDist/THRESHOLD)*100);
         if(progress)progress.textContent="✅ Wajah terverifikasi! ("+matchPct+"% cocok)";
         if(badge){badge.textContent="✅ Terverifikasi!";badge.style.background="rgba(34,197,94,0.4)";}
         await new Promise(r=>setTimeout(r,800));
@@ -4426,7 +4242,7 @@
         if(ring)ring.className="v2l-face-ring error";
         _setRingProgress(ringProg,1,"#ef4444");
         if(fill){fill.className="v2l-scan-fill error";fill.style.width="100%";}
-        const matchPct=Math.round(Math.max(0,1-minDist/THRESHOLD)*100);
+        const matchPct=Math.round(Math.max(0,1-finalDist/THRESHOLD)*100);
         if(progress)progress.textContent="❌ Wajah tidak cocok ("+matchPct+"%). Coba lagi atau gunakan QR.";
         if(badge){badge.textContent="❌ Tidak cocok — coba lagi";badge.style.background="rgba(239,68,68,0.35)";badge.style.borderColor="rgba(239,68,68,0.5)";}
         await new Promise(r=>setTimeout(r,2000));
@@ -4434,7 +4250,7 @@
         if(ring)ring.className="v2l-face-ring";
         if(fill){fill.className="v2l-scan-fill";fill.style.width="0%";}
         _setRingProgress(ringProg,0,"#22c55e");
-        _startAutoVerify(); // restart detection
+        _startAutoVerify();
       }
     }
 
@@ -4509,108 +4325,32 @@
       }
     }
 
-    // ─── QR SCAN dari pengaturan: buka KAMERA untuk scan QR yang ditampilkan di perangkat yang mau login ───
-    let _settingsQrStream=null;
-    let _settingsQrRAF=null;
-    let _settingsQrScanning=false;
+    // ─── QR SCAN dari pengaturan ───
+    let _settingsQrInterval=null;
 
-    window.openQrScanModal=async function(role){
+    window.openQrScanModal=function(role){
       if(!currentUser)return;
       const nis=currentUser.nis;
       document.getElementById("v2lQrScanModal").classList.remove("hidden");
-      const statusEl=document.getElementById("v2lSettingsQrStatus");
-      const videoEl=document.getElementById("v2lSettingsQrVideo");
-      if(statusEl)statusEl.textContent="Membuka kamera...";
-      if(_settingsQrStream){_settingsQrStream.getTracks().forEach(t=>t.stop());_settingsQrStream=null;}
-      if(_settingsQrRAF){cancelAnimationFrame(_settingsQrRAF);_settingsQrRAF=null;}
-      _settingsQrScanning=false;
-      try{
-        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});
-        _settingsQrStream=stream;
-        if(videoEl){videoEl.srcObject=stream;await videoEl.play();}
-        if(statusEl)statusEl.textContent="Arahkan kamera ke QR Code yang tampil di layar perangkat yang mau login...";
-        _settingsQrScanning=true;
+      if(_settingsQrInterval)clearInterval(_settingsQrInterval);
 
-        // Scan QR dari kamera menggunakan BarcodeDetector (native) atau jsQR
-        async function scanLoop(){
-          if(!_settingsQrScanning||!videoEl)return;
-          // Coba BarcodeDetector dulu (Chrome/Android native)
-          if(window.BarcodeDetector){
-            try{
-              const bd=new BarcodeDetector({formats:['qr_code']});
-              const codes=await bd.detect(videoEl);
-              if(codes&&codes.length>0){
-                const qrText=codes[0].rawValue;
-                await handleSettingsQrScan(qrText,nis,role,statusEl);
-                return;
-              }
-            }catch(e){}
-          } else {
-            // Fallback: canvas + jsQR (jika tersedia)
-            if(window.jsQR&&videoEl.readyState>=2&&videoEl.videoWidth>0){
-              const tmpCanvas=document.createElement('canvas');
-              tmpCanvas.width=videoEl.videoWidth;tmpCanvas.height=videoEl.videoHeight;
-              const tmpCtx=tmpCanvas.getContext('2d');
-              tmpCtx.drawImage(videoEl,0,0,tmpCanvas.width,tmpCanvas.height);
-              const imageData=tmpCtx.getImageData(0,0,tmpCanvas.width,tmpCanvas.height);
-              const code=jsQR(imageData.data,imageData.width,imageData.height);
-              if(code&&code.data){
-                await handleSettingsQrScan(code.data,nis,role,statusEl);
-                return;
-              }
-            }
-          }
-          _settingsQrRAF=requestAnimationFrame(scanLoop);
+      function updateSettingsQR(){
+        const round=getCurrentQrRound();
+        const token=generateQrToken(nis,round);
+        drawQrCanvas("v2lSettingsQrCanvas",token);
+        const sisa=60-Math.floor((Date.now()%60000)/1000);
+        const timerEl=document.getElementById("v2lSettingsQrTimer");
+        if(timerEl){
+          timerEl.textContent=sisa;
+          timerEl.className="v2l-qr-timer"+(sisa<=10?" danger":"");
         }
-        _settingsQrRAF=requestAnimationFrame(scanLoop);
-      }catch(e){
-        if(statusEl)statusEl.textContent='Gagal membuka kamera: '+e.message;
       }
+      updateSettingsQR();
+      _settingsQrInterval=setInterval(updateSettingsQR,1000);
     };
 
-    async function handleSettingsQrScan(qrText,nis,role,statusEl){
-      _settingsQrScanning=false;
-      if(_settingsQrRAF){cancelAnimationFrame(_settingsQrRAF);_settingsQrRAF=null;}
-      // QR text adalah token V2L — konfirmasi ke Firestore agar perangkat yang nunggu tahu
-      if(statusEl)statusEl.textContent='🔍 QR terbaca! Memverifikasi...';
-      // Cek apakah token valid untuk NIS ini (round saat ini atau sebelumnya)
-      const round=getCurrentQrRound();
-      const validTokens=[generateQrToken(nis,round),generateQrToken(nis,round-1)];
-      if(validTokens.includes(qrText)){
-        try{
-          await setDoc(doc(db,'v2l_qr_confirms',nis),{token:qrText,ts:Date.now(),confirmed_by:nis});
-          if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ QR berhasil dikonfirmasi! Perangkat yang mau login sekarang terverifikasi.</span>';
-          showToast('QR login berhasil dikonfirmasi ✅','success');
-          setTimeout(()=>closeQrScanModal(),2500);
-        }catch(e){
-          if(statusEl)statusEl.textContent='Gagal konfirmasi: '+e.message;
-        }
-      } else {
-        if(statusEl)statusEl.innerHTML='<span style="color:var(--red)">❌ QR tidak valid atau sudah kadaluarsa. Minta perangkat lain untuk refresh QR.</span>';
-        // Lanjut scan lagi setelah 2 detik
-        setTimeout(()=>{
-          _settingsQrScanning=true;
-          _settingsQrRAF=requestAnimationFrame(()=>window.openQrScanModal&&null); // trigger restart
-          if(statusEl)statusEl.textContent='Arahkan kamera ke QR Code yang tampil di layar perangkat yang mau login...';
-          _settingsQrScanning=true;
-          // Restart scan loop
-          async function scanAgain(){
-            if(!_settingsQrScanning)return;
-            const videoEl=document.getElementById('v2lSettingsQrVideo');
-            if(window.BarcodeDetector){
-              try{const bd=new BarcodeDetector({formats:['qr_code']});const codes=await bd.detect(videoEl);if(codes&&codes.length>0){await handleSettingsQrScan(codes[0].rawValue,nis,role,statusEl);return;}}catch(e){}
-            }
-            _settingsQrRAF=requestAnimationFrame(scanAgain);
-          }
-          _settingsQrRAF=requestAnimationFrame(scanAgain);
-        },2000);
-      }
-    }
-
     window.closeQrScanModal=function(){
-      _settingsQrScanning=false;
-      if(_settingsQrRAF){cancelAnimationFrame(_settingsQrRAF);_settingsQrRAF=null;}
-      if(_settingsQrStream){_settingsQrStream.getTracks().forEach(t=>t.stop());_settingsQrStream=null;}
+      if(_settingsQrInterval){clearInterval(_settingsQrInterval);_settingsQrInterval=null;}
       document.getElementById("v2lQrScanModal").classList.add("hidden");
     };
 
