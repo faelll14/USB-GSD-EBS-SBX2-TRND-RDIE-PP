@@ -380,8 +380,7 @@
         }
 
         /* ═══ V2L ENHANCED RING & CAMERA FIX ═══ */
-        .v2l-ring-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-        /* Kamera tampil mirror (kaya kaca/selfie) */
+        /* Kamera mirror seperti kaca selfie */
         #v2lVideo,#v2lVerifyVideo{transform:scaleX(-1)!important;-webkit-transform:scaleX(-1)!important;object-fit:cover}
         /* Camera container aspect ratio for mobile */
         .v2l-camera-wrap{position:relative;width:100%;padding-top:75%;border-radius:var(--radius);overflow:hidden;background:#000;border:2px solid var(--border2);margin:16px 0}
@@ -1908,19 +1907,12 @@
             </div>
             <div id="v2lModalStep2" style="display:none">
                 <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;text-align:center">
-                    📌 Posisikan wajah di lingkaran, lalu <strong>kedipkan mata sekali</strong> saat diminta untuk uji liveness. Sistem akan menyimpan otomatis.
+                    📌 Posisikan wajah di dalam lingkaran. Sistem akan otomatis memindai dan menyimpan data wajah.
                 </div>
                 <div class="v2l-camera-wrap" id="v2lCameraWrap">
                     <video id="v2lVideo" autoplay playsinline muted></video>
                     <canvas id="v2lCanvas" style="display:none"></canvas>
                     <div class="v2l-face-overlay">
-                        <svg class="v2l-ring-svg" viewBox="0 0 220 270" xmlns="http://www.w3.org/2000/svg">
-                            <ellipse id="v2lRingTrack" cx="110" cy="135" rx="105" ry="130" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
-                            <ellipse id="v2lRingProgress" cx="110" cy="135" rx="105" ry="130" fill="none" stroke="#22c55e" stroke-width="4"
-                                stroke-dasharray="740" stroke-dashoffset="740"
-                                stroke-linecap="round"
-                                style="transition:stroke-dashoffset 0.3s ease,stroke 0.3s ease;transform-origin:center;transform:rotate(-90deg)"/>
-                        </svg>
                         <div class="v2l-face-ring" id="v2lFaceRing"></div>
                     </div>
                     <div id="v2lFaceStatusBadge" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border-radius:20px;padding:6px 16px;font-family:var(--font-mono);font-size:12px;color:#fff;white-space:nowrap;transition:all 0.3s ease;border:1px solid rgba(255,255,255,0.15)">
@@ -1952,13 +1944,6 @@
                     <video id="v2lVerifyVideo" autoplay playsinline muted></video>
                     <canvas id="v2lVerifyCanvas" style="display:none"></canvas>
                     <div class="v2l-face-overlay">
-                        <svg class="v2l-ring-svg" viewBox="0 0 220 270" xmlns="http://www.w3.org/2000/svg">
-                            <ellipse cx="110" cy="135" rx="105" ry="130" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
-                            <ellipse id="v2lVerifyRingProgress" cx="110" cy="135" rx="105" ry="130" fill="none" stroke="#22c55e" stroke-width="4"
-                                stroke-dasharray="740" stroke-dashoffset="740"
-                                stroke-linecap="round"
-                                style="transition:stroke-dashoffset 0.3s ease,stroke 0.3s ease;transform-origin:center;transform:rotate(-90deg)"/>
-                        </svg>
                         <div class="v2l-face-ring" id="v2lVerifyRing"></div>
                     </div>
                     <div id="v2lVerifyStatusBadge" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border-radius:20px;padding:6px 16px;font-family:var(--font-mono);font-size:12px;color:#fff;white-space:nowrap;transition:all 0.3s ease;border:1px solid rgba(255,255,255,0.15)">
