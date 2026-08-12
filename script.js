@@ -10,7 +10,7 @@
              createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js");
     const { initializeAppCheck, ReCaptchaV3Provider } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-app-check.js");
     const FC={apiKey:"AIzaSyAOPrFTN60IBmgzumjBUWs44BdLgg3DmdU",authDomain:"ujian-patlas-209fa.firebaseapp.com",projectId:"ujian-patlas-209fa",storageBucket:"ujian-patlas-209fa.firebasestorage.app",messagingSenderId:"576325442611",appId:"1:576325442611:web:912f211ad990e103ca5746"};
-    const APPCHECK_SITE_KEY="ISI_RECAPTCHA_V3_SITE_KEY_DI_SINI";
+    const APPCHECK_SITE_KEY="6Lf2RIItAAAAAOi-wWy3Z2ThbitgTKkv3tgl-jqp";
     const app=initializeApp(FC);
     if(location.hostname==="localhost"||location.hostname==="127.0.0.1"){ self.FIREBASE_APPCHECK_DEBUG_TOKEN=true; }
     try{
