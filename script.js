@@ -23,12 +23,40 @@
     const EMAIL_DOMAIN = "akun.patlas.local";
     function nisToEmail(nis){ return String(nis).trim().toLowerCase()+"@"+EMAIL_DOMAIN; }
 
-    const USERNAME_REGEX = /^[a-z][a-z0-9_]{3,19}$/;
+    const USERNAME_REGEX = /^[a-z0-9_-]{4,20}$/;
     function isValidUsername(u){
         if(typeof u !== "string") return false;
         if(USERNAME_REGEX.test(u) === false) return false;
-        if(/^\d+$/.test(u)) return false;
+        const letterCount=(u.match(/[a-z]/g)||[]).length;
+        if(letterCount<4) return false;
         return true;
+    }
+    function generateUsernameSuggestions(base,count){
+        count=count||3;
+        let cleaned=String(base||"").toLowerCase().replace(/[^a-z0-9_-]/g,"");
+        const letterCount=(cleaned.match(/[a-z]/g)||[]).length;
+        if(letterCount<4){
+            const fillers=["user","acc","std","opt"];
+            let i=0;
+            while((cleaned.match(/[a-z]/g)||[]).length<4){
+                cleaned=(cleaned+fillers[i%fillers.length]).slice(0,20);
+                i++;
+                if(i>10)break;
+            }
+        }
+        if(cleaned.length>16)cleaned=cleaned.slice(0,16);
+        const suggestions=[];
+        const usedNums=new Set();
+        let guard=0;
+        while(suggestions.length<count&&guard<200){
+            guard++;
+            const n=Math.floor(Math.random()*9000)+1;
+            if(usedNums.has(n))continue;
+            usedNums.add(n);
+            const candidate=(cleaned+n).slice(0,20);
+            if(isValidUsername(candidate))suggestions.push(candidate);
+        }
+        return suggestions;
     }
     async function resolveLoginIdentifier(rawInput){
         const raw = String(rawInput||"").trim();
@@ -2677,7 +2705,7 @@
     const kelasF=document.getElementById("userKelasFilter")?.value||"";
     const sortF=document.getElementById("userSortFilter")?.value||"nama";
     let filtered=allUsersCache.filter(u=>{
-    const matchQ=((u.nis||u.id||"")).includes(q)||(u.nama_lengkap||"").toLowerCase().includes(q);
+    const matchQ=((u.nis||u.id||"")).includes(q)||(u.nama_lengkap||"").toLowerCase().includes(q)||(u.username||"").toLowerCase().includes(q);
     const matchRole=!roleF||u.role===roleF;
     const matchKelas=!kelasF||(u.kelas||"")===kelasF;
     return matchQ&&matchRole&&matchKelas;
@@ -2691,7 +2719,7 @@
     const container=document.getElementById("userList");
     if(!users.length){container.innerHTML='<div class="empty-state"><div class="empty-state-icon">-</div><div>Belum ada akun terdaftar</div></div>';return;}
     const roleBadge=r=>r==="admin"?"badge-red":r==="panitia"?"badge-purple":r==="guru"?"badge-yellow":"badge-blue";
-    let html='<div class="table-wrap"><table><thead><tr><th>NIS/NIP</th><th>Nama Lengkap</th><th>Kelas</th><th>Role</th><th>Password Sementara</th></tr></thead><tbody>';
+    let html='<div class="table-wrap"><table><thead><tr><th>NIS/NIP</th><th>Nama Lengkap</th><th>Kelas</th><th>Role</th><th>Username</th><th>Password Sementara</th></tr></thead><tbody>';
     users.forEach(u=>{
     const nisVal=u.nis||u.id;
     let pwdCell;
@@ -2701,7 +2729,8 @@
     }else{
     pwdCell=`<span style="color:var(--text3);font-size:12px">sudah diganti</span>`;
     }
-    html+=`<tr><td><span class="badge badge-green" style="font-size:11px">${escapeHtml(nisVal)}</span></td><td>${escapeHtml(u.nama_lengkap||"-")}</td><td>${escapeHtml(u.kelas||"-")}</td><td><span class="badge ${roleBadge(u.role)}">${escapeHtml(u.role)}</span></td><td>${pwdCell}</td></tr>`;
+    const usernameCell=u.username?`<span class="badge badge-blue" style="font-family:var(--font-mono);font-size:11px">${escapeHtml(u.username)}</span>`:`<span style="color:var(--text3);font-size:12px">belum diatur</span>`;
+    html+=`<tr><td><span class="badge badge-green" style="font-size:11px">${escapeHtml(nisVal)}</span></td><td>${escapeHtml(u.nama_lengkap||"-")}</td><td>${escapeHtml(u.kelas||"-")}</td><td><span class="badge ${roleBadge(u.role)}">${escapeHtml(u.role)}</span></td><td>${usernameCell}</td><td>${pwdCell}</td></tr>`;
     });
     html+="</tbody></table></div>";
     container.innerHTML=html;
@@ -3133,7 +3162,7 @@
         if(!inputEl)return;
         const raw=inputEl.value.trim().toLowerCase();
         if(!isValidUsername(raw)){
-            showToast("Username harus 4-20 karakter, diawali huruf, hanya huruf kecil/angka/underscore, dan tidak boleh berupa angka saja.","error");
+            showToast("Username minimal 4 karakter dengan minimal 4 huruf, hanya boleh huruf/angka/underscore/strip, tidak boleh hanya angka atau simbol.","error");
             return;
         }
         if(!currentUser||!currentUser.nis||!auth.currentUser){
@@ -3144,12 +3173,19 @@
         showLoader("Menyimpan username...");
         try{
             const nis=currentUser.nis;
-            const existing=await getDoc(doc(db,"usernames",raw));
+            let existing;
+            try{
+                existing=await getDoc(doc(db,"usernames",raw));
+            }catch(readErr){
+                hideLoader();_usernameSaveInFlight=false;
+                showToast("Tidak bisa memeriksa ketersediaan username saat ini. Coba lagi nanti.","error");
+                return;
+            }
             if(existing.exists()){
                 const existingData=existing.data();
                 if(!existingData||existingData.nis!==nis){
                     hideLoader();_usernameSaveInFlight=false;
-                    showToast("Username sudah digunakan, coba yang lain.","error");
+                    showUsernameTakenWithSuggestions(map,raw);
                     return;
                 }
                 hideLoader();_usernameSaveInFlight=false;
@@ -3167,15 +3203,55 @@
             hideLoader();_usernameSaveInFlight=false;
             showToast("Username berhasil disimpan. Sekarang Anda bisa login memakai username ini.","success");
             inputEl.value="";
+            hideUsernameSuggestions(map);
             renderAccountInfo(map.container,currentUser);
         }catch(e){
             hideLoader();_usernameSaveInFlight=false;
             if(e&&e.code==="permission-denied"){
-                showToast("Username sudah dipakai atau tidak diizinkan.","error");
+                showToast("Penyimpanan username ditolak sistem. Username ini mungkin baru saja diambil orang lain, coba username lain.","error");
             }else{
                 showToast("Gagal menyimpan username. Coba lagi.","error");
             }
         }
+    };
+    function usernameSuggestionBoxId(map){ return map.input+"_suggestions"; }
+    function hideUsernameSuggestions(map){
+        const box=document.getElementById(usernameSuggestionBoxId(map));
+        if(box)box.remove();
+    }
+    function renderUsernameSuggestions(map,base){
+        hideUsernameSuggestions(map);
+        const inputEl=document.getElementById(map.input);
+        if(!inputEl)return;
+        const suggestions=generateUsernameSuggestions(base,3);
+        const box=document.createElement("div");
+        box.id=usernameSuggestionBoxId(map);
+        box.style.cssText="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center";
+        let inner='<span style="font-size:12px;color:var(--text3)">Coba:</span>';
+        suggestions.forEach(s=>{
+            const sEsc=escapeHtml(s);
+            inner+=`<button type="button" class="btn btn-outline btn-sm" onclick="applyUsernameSuggestion('${map.input}','${sEsc}')">${sEsc}</button>`;
+        });
+        inner+=`<button type="button" class="btn btn-outline btn-sm" title="Muat rekomendasi lain" onclick="refreshUsernameSuggestions('${map.input}','${escapeHtml(base)}')">&#8635; Refresh</button>`;
+        box.innerHTML=inner;
+        inputEl.insertAdjacentElement("afterend",box);
+    }
+    function showUsernameTakenWithSuggestions(map,raw){
+        showToast("Username sudah digunakan, coba yang lain.","error");
+        renderUsernameSuggestions(map,raw);
+    }
+    window.applyUsernameSuggestion=function(inputId,value){
+        const inputEl=document.getElementById(inputId);
+        if(!inputEl)return;
+        inputEl.value=value;
+        inputEl.focus();
+        const map=Object.values(USERNAME_INPUT_MAP).find(m=>m.input===inputId);
+        if(map)hideUsernameSuggestions(map);
+    };
+    window.refreshUsernameSuggestions=function(inputId,base){
+        const map=Object.values(USERNAME_INPUT_MAP).find(m=>m.input===inputId);
+        if(!map)return;
+        renderUsernameSuggestions(map,base);
     };
     window.changeAdminPassword=async function(){
     const old=document.getElementById("adminOldPwd").value;
