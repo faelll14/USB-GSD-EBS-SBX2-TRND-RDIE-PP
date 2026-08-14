@@ -2338,7 +2338,15 @@
     showToast(`Jadwal Ruang ${ruang} berhasil disimpan`,"success");
     await loadJadwalList();
     await loadPanitiaDashboard();
-    }catch(e){hideLoader();showToast("Gagal menyimpan jadwal","error");}
+    }catch(e){
+    hideLoader();
+    console.error("saveJadwal gagal:",e);
+    let msg="Gagal menyimpan jadwal";
+    if(e&&e.code==="permission-denied")msg="Gagal menyimpan jadwal: akun Anda tidak punya izin (permission-denied). Cek Firestore Security Rules / App Check di Firebase Console.";
+    else if(e&&(e.code==="unavailable"||e.code==="deadline-exceeded"))msg="Gagal menyimpan jadwal: koneksi bermasalah. Coba lagi.";
+    else if(e&&e.message)msg="Gagal menyimpan jadwal: "+e.message;
+    showToast(msg,"error");
+    }
     };
     window.deleteJadwal=async function(id){
     const ok=await showConfirm("Hapus Jadwal","Hapus jadwal ini? Tindakan tidak dapat dibatalkan.","Ya, Hapus","btn-danger","");
@@ -4960,7 +4968,15 @@
             showToast(`Jadwal ulangan untuk kelas ${kelas} berhasil ditambahkan`,'success');
             await loadGuruJadwal();
             await loadGuruDashboard();
-        }catch(e){hideLoader();showToast('Gagal menyimpan jadwal','error');}
+        }catch(e){
+            hideLoader();
+            console.error("saveGuruJadwal gagal:",e);
+            let msg="Gagal menyimpan jadwal";
+            if(e&&e.code==="permission-denied")msg="Gagal menyimpan jadwal: akun Anda tidak punya izin (permission-denied). Cek Firestore Security Rules / App Check di Firebase Console.";
+            else if(e&&(e.code==="unavailable"||e.code==="deadline-exceeded"))msg="Gagal menyimpan jadwal: koneksi bermasalah. Coba lagi.";
+            else if(e&&e.message)msg="Gagal menyimpan jadwal: "+e.message;
+            showToast(msg,"error");
+        }
     };
 
     window.openEditJadwalModal=function(id,tanggal,jam,menit,ampm,durasi){
