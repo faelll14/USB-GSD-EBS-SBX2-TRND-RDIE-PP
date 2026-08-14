@@ -412,6 +412,7 @@
     let pendingUnlockNis=null;
     let currentAssignJadwalId=null;
     let _notifInterval=null;
+    let _studentExamPollInterval=null;
     let _confirmResolve=null;
     window.togglePesanDariInput=function(){
     const mode=document.getElementById("soalPesanDariMode")?.value;
@@ -1162,6 +1163,12 @@
     await loadStudentTodaySchedule();
     await loadAvailableExams();
     await loadStudentScores();
+    if(_studentExamPollInterval)clearInterval(_studentExamPollInterval);
+    _studentExamPollInterval=setInterval(()=>{
+    if(!currentUser||currentUser.role!=="siswa"||currentExam){return;}
+    loadStudentTodaySchedule().catch(()=>{});
+    loadAvailableExams().catch(()=>{});
+    },20000);
     }catch(e){}
     }
     async function loadStudentTodaySchedule(){
@@ -1203,27 +1210,42 @@
     let sysMode='ujian';
     try{const modeDoc=await getDoc(doc(db,'settings','app_mode'));if(modeDoc.exists())sysMode=modeDoc.data().mode||'ujian';}catch(e){}
     const container=document.getElementById("availableExams");
-    let snap;
+    // PENTING: Firestore security rules BUKAN filter untuk query koleksi (list query).
+    // Kalau rule collection "soal" butuh get() ke dokumen jadwal lain untuk cek jam aktif,
+    // Firestore akan MENOLAK SELURUH query "soal" (bukan cuma yang belum aktif) karena
+    // tidak bisa membuktikan semua kemungkinan hasil query aman dibaca — bahkan saat
+    // ujiannya sedang aktif sekalipun. Makanya di sini kita list jadwal dulu (bebas dibaca),
+    // lalu getDoc satu-satu ke "soal/{jadwalId}" — pembacaan dokumen tunggal dievaluasi
+    // pakai data asli, jadi rule berbasis jam tetap berfungsi dengan benar per dokumen.
+    let jadwalSnap;
     if(sysMode==='ulangan'){
-
-    snap=await getDocs(query(collection(db,"soal"),where("mode","==","ulangan")));
+    jadwalSnap=await getDocs(query(collection(db,"jadwal"),where("mode","==","ulangan"),where("kelas","==",kelasFull)));
     }else{
-
-    snap=await getDocs(query(collection(db,"soal"),where("kelas","==",kelasPrefix)));
+    jadwalSnap=await getDocs(query(collection(db,"jadwal"),where("kelas","==",kelasPrefix)));
     }
-    const docs=[];
-    snap.forEach(d=>{
+    const candidateIds=[];
+    jadwalSnap.forEach(d=>{
     const data=d.data();
+    if(sysMode==='ujian'&&data.mode==='ulangan')return;
+    if(sysMode==='ulangan'&&data.mode!=='ulangan')return;
+    candidateIds.push(d.id);
+    });
+    const docs=[];
+    await Promise.all(candidateIds.map(async(jId)=>{
+    try{
+    const soalDoc=await getDoc(doc(db,"soal",jId));
+    if(!soalDoc.exists())return;
+    const data=soalDoc.data();
     if(sysMode==='ujian'){
     if(data.mode==='ulangan')return;
-    docs.push({id:d.id,...data});
+    docs.push({id:soalDoc.id,...data});
     }else{
-
     const targetKelas=data.kelas_exact||data.kelas||'';
     if(targetKelas!==kelasFull)return;
-    docs.push({id:d.id,...data});
+    docs.push({id:soalDoc.id,...data});
     }
-    });
+    }catch(e){ /* belum waktunya / sudah lewat waktu -> ditolak rule, itu wajar & aman */ }
+    }));
     if(!docs.length){container.innerHTML=`<div class="empty-state"><div class="empty-state-icon">-</div><div>Belum ada ${sysMode==='ulangan'?'ulangan':'soal ujian'} tersedia untuk kelas ${escapeHtml(kelasFull||kelasPrefix)}</div></div>`;return;}
     let html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">';
     docs.forEach(data=>{
@@ -2209,9 +2231,11 @@
     const pesanDariMode=document.getElementById("soalPesanDariMode")?.value||"anonymous";
     const pesanDariVal=pesanDariMode==="manual"?(document.getElementById("soalPesanDariManual")?.value||"").trim()||"Anonymous":"Anonymous";
     const soalMode=window._soalMode||'ujian';
-    // ID dokumen dibuat dulu di client (fitur Firestore) supaya bisa dipakai
-    // sebagai bagian derivasi kunci enkripsi per-dokumen (lihat encryptSoalData).
-    const newSoalRef=doc(collection(db,"soal"));
+    // ID dokumen soal DISAMAKAN dengan ID jadwal (bukan ID acak) supaya siswa bisa
+    // mengambilnya lewat getDoc satu-dokumen (bukan query koleksi). Ini penting karena
+    // Firestore menolak SELURUH query koleksi kalau rule butuh cek waktu aktif via
+    // dokumen lain (get()) — sedangkan getDoc satu dokumen dievaluasi dengan benar.
+    const newSoalRef=doc(db,"soal",jadwalId);
     const encSoal=await encryptSoalData(soalArr,newSoalRef.id);
     if(!encSoal){hideLoader();showToast("Gagal mengenkripsi soal","error");return;}
     await setDoc(newSoalRef,{
@@ -4020,6 +4044,7 @@
     const ok=await showConfirm("Keluar dari Sistem","Yakin ingin keluar dari sistem?","Ya, Keluar","btn-danger",'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>');
     if(!ok)return;
     if(_notifInterval){clearInterval(_notifInterval);_notifInterval=null;}
+    if(_studentExamPollInterval){clearInterval(_studentExamPollInterval);_studentExamPollInterval=null;}
     currentUser=null;
     try{await signOut(auth);}catch(e){}
     document.getElementById("nisInput").value="";
