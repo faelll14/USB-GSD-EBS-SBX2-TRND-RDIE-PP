@@ -2229,7 +2229,15 @@
     showToast(`${soalArr.length} soal berhasil dienkripsi & disimpan!`,"success");
     await loadSoalList();
     await loadPanitiaDashboard();
-    }catch(e){hideLoader();showToast("Gagal menyimpan soal","error");console.error(e);}
+    }catch(e){
+    hideLoader();
+    console.error("saveSoal gagal:",e);
+    let msg="Gagal menyimpan soal";
+    if(e&&e.code==="permission-denied")msg="Gagal menyimpan soal: akun Anda tidak punya izin (permission-denied). Cek Firestore Security Rules / App Check di Firebase Console.";
+    else if(e&&(e.code==="unavailable"||e.code==="deadline-exceeded"))msg="Gagal menyimpan soal: koneksi bermasalah. Coba lagi.";
+    else if(e&&e.message)msg="Gagal menyimpan soal: "+e.message;
+    showToast(msg,"error");
+    }
     };
     window.deleteSoal=async function(id){
     const ok=await showConfirm("Hapus Soal","Hapus soal ini? Tindakan tidak dapat dibatalkan.","Ya, Hapus","btn-danger","");
