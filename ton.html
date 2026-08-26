@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ton — offline file transfer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<style>
+:root{
+  --bg:#000; --fg:#fff; --dim:#666; --line:#2a2a2a; --panel:#0a0a0a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.noise{
+  position:fixed;inset:0;pointer-events:none;opacity:.035;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.scanline{
+  position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0px,rgba(255,255,255,.015) 1px,transparent 1px,transparent 3px);
+}
+
+.app{position:relative;z-index:5;min-height:100vh;display:flex;flex-direction:column}
+
+header{
+  border-bottom:1px solid var(--line);
+  padding:22px 24px;display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px;font-size:15px}
+.logo svg{width:20px;height:20px}
+.dot{width:6px;height:6px;background:var(--fg);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
+.badge{font-size:10px;color:var(--dim);border:1px solid var(--line);padding:4px 8px;letter-spacing:1px;text-transform:uppercase}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+
+/* --- MODE SELECT --- */
+#selectScreen{width:100%;max-width:560px;text-align:center;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.tagline{font-size:11px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+h1{font-size:clamp(28px,6vw,42px);font-weight:800;letter-spacing:-1px;margin-bottom:8px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:44px;line-height:1.6}
+
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:480px){.choices{grid-template-columns:1fr}}
+.choice{
+  border:1px solid var(--line); background:var(--panel); padding:32px 20px;
+  cursor:pointer; text-align:left; position:relative; overflow:hidden;
+  transition:border-color .25s, transform .25s;
+}
+.choice:hover{border-color:var(--fg); transform:translateY(-3px)}
+.choice:active{transform:translateY(0)}
+.choice::before{
+  content:''; position:absolute; top:0; left:0; width:100%; height:1px; background:var(--fg);
+  transform:scaleX(0); transform-origin:left; transition:transform .3s;
+}
+.choice:hover::before{transform:scaleX(1)}
+.choice svg{width:28px;height:28px;margin-bottom:18px;display:block}
+.choice h2{font-size:16px;margin-bottom:6px;letter-spacing:.3px}
+.choice p{font-size:12px;color:var(--dim);line-height:1.5}
+.choice .arrow{position:absolute;top:28px;right:20px;opacity:0;transition:opacity .25s, transform .25s;transform:translateX(-6px)}
+.choice:hover .arrow{opacity:1;transform:translateX(0)}
+
+/* --- SHARED PANEL --- */
+.panel{width:100%;max-width:460px;animation:fadeUp .4s ease}
+.panel-head{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.back{cursor:pointer;width:32px;height:32px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;transition:border-color .2s}
+.back:hover{border-color:var(--fg)}
+.back svg{width:16px;height:16px}
+.panel-title{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+
+.dropzone{
+  border:1px dashed var(--line); padding:40px 20px; text-align:center; cursor:pointer;
+  transition:border-color .2s, background .2s; position:relative;
+}
+.dropzone:hover, .dropzone.drag{border-color:var(--fg); background:rgba(255,255,255,.02)}
+.dropzone svg{width:30px;height:30px;margin-bottom:14px;opacity:.7}
+.dropzone .dz-title{font-size:13px;margin-bottom:5px}
+.dropzone .dz-sub{font-size:11px;color:var(--dim)}
+#fileInput{display:none}
+
+.filecard{
+  display:none; border:1px solid var(--line); padding:16px 18px; margin-top:16px;
+  align-items:center; gap:14px; animation:fadeUp .3s ease;
+}
+.filecard svg{width:22px;height:22px;flex-shrink:0}
+.filecard .fname{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filecard .fmeta{font-size:11px;color:var(--dim);margin-top:2px}
+
+select, .btn{
+  width:100%; padding:14px; border:1px solid var(--line); background:transparent; color:var(--fg);
+  font-family:inherit; font-size:13px; letter-spacing:.5px; margin-top:14px; cursor:pointer;
+  transition:all .2s;
+}
+select{appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; background-size:14px}
+.btn{text-align:center; text-transform:uppercase; font-weight:600; background:var(--fg); color:#000; border:1px solid var(--fg)}
+.btn:hover:not(:disabled){background:transparent; color:var(--fg)}
+.btn:disabled{opacity:.25; cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--fg)}
+.btn.ghost:hover:not(:disabled){background:var(--fg);color:#000}
+
+.qrwrap{display:none; margin-top:24px; text-align:center}
+#qrstack{display:inline-block; padding:14px; background:#fff; position:relative; width:230px; height:230px}
+.qrlayer{position:absolute; top:14px; left:14px; width:230px; height:230px; opacity:0}
+.qrlayer.show{opacity:1}
+.qrlayer img,.qrlayer canvas{display:block; width:230px; height:230px}
+.qr-corner{position:absolute;width:14px;height:14px;border:2px solid #fff}
+.frame-counter{font-size:11px;color:var(--dim);margin-top:14px;letter-spacing:1px}
+
+.progress-wrap{margin-top:20px; display:none}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-bottom:8px;letter-spacing:.5px}
+.progress-track{height:2px;background:var(--line);position:relative;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--fg);transition:width .15s ease}
+.progress-fill.striped{
+  background-image:linear-gradient(45deg,rgba(0,0,0,.3) 25%,transparent 25%,transparent 50%,rgba(0,0,0,.3) 50%,rgba(0,0,0,.3) 75%,transparent 75%,transparent);
+  background-size:16px 16px;
+}
+
+.videowrap{display:none; position:relative; border:1px solid var(--line); overflow:hidden}
+video{width:100%; display:block; filter:grayscale(1) contrast(1.1)}
+.scan-frame{position:absolute;inset:16%;border:1px solid rgba(255,255,255,.5);pointer-events:none}
+.scan-frame::before,.scan-frame::after{content:'';position:absolute;width:18px;height:18px;border:2px solid #fff}
+.scan-frame::before{top:-2px;left:-2px;border-right:none;border-bottom:none}
+.scan-frame::after{bottom:-2px;right:-2px;border-left:none;border-top:none}
+.scan-line{position:absolute;left:0;right:0;height:1px;background:#fff;box-shadow:0 0 8px #fff;top:16%;animation:scanmove 2s ease-in-out infinite}
+@keyframes scanmove{0%,100%{top:16%}50%{top:84%}}
+
+.status-line{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-top:16px;min-height:16px}
+.status-line .led{width:6px;height:6px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.status-line.active .led{background:#fff;animation:pulse 1s ease-in-out infinite}
+.status-line.done .led{background:#fff;animation:none}
+.status-line.done{color:var(--fg)}
+
+.done-panel{display:none;text-align:center;margin-top:24px;animation:fadeUp .4s ease}
+.done-panel svg{width:40px;height:40px;margin-bottom:16px}
+.done-panel h3{font-size:15px;margin-bottom:6px}
+.done-panel p{font-size:12px;color:var(--dim);margin-bottom:20px;word-break:break-all}
+
+canvas.hidden-canvas{display:none}
+
+footer{padding:16px 24px;text-align:center;font-size:10px;color:var(--dim);letter-spacing:1px;border-top:1px solid var(--line)}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="scanline"></div>
+
+<div class="app">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM17 17h4v4h-4z"/></svg>
+      <span>ton</span>
+      <span class="dot"></span>
+    </div>
+    <div class="badge" id="netBadge">offline / no-network</div>
+  </header>
+
+  <main>
+
+    <!-- SELECT SCREEN -->
+    <section id="selectScreen">
+      <div class="tagline">optical file transfer</div>
+      <h1>Kirim tanpa jaringan.</h1>
+      <p class="sub">Transfer file lewat kode QR yang berganti otomatis.<br>Tidak butuh wifi, data seluler, atau mode pesawat sekalipun.</p>
+      <div class="choices">
+        <div class="choice" id="goSend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M4 12h13M13 6l6 6-6 6"/></svg>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <h2>Kirim File</h2>
+          <p>Pilih file, tampilkan sebagai QR bergerak untuk dipindai penerima.</p>
+        </div>
+        <div class="choice" id="goReceive">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="6" width="14" height="12" rx="1"/><path d="M17 10l4-2v8l-4-2"/></svg>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <h2>Terima File</h2>
+          <p>Aktifkan kamera, pindai QR dari pengirim, simpan otomatis.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEND SCREEN -->
+    <section class="panel" id="sendScreen" style="display:none">
+      <div class="panel-head">
+        <div class="back" data-back><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div class="panel-title">Kirim File</div>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        <div class="dz-title">Pilih atau tarik file ke sini</div>
+        <div class="dz-sub">Optik murni — cocok untuk file kecil sampai sedang</div>
+        <input type="file" id="fileInput">
+      </div>
+
+      <div class="filecard" id="fileCard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        <div>
+          <div class="fname" id="fname"></div>
+          <div class="fmeta" id="fmeta"></div>
+        </div>
+      </div>
+
+      <select id="speedSel">
+        <option value="60" selected>Kecepatan: Cepat (disarankan)</option>
+        <option value="100">Kecepatan: Normal</option>
+        <option value="180">Kecepatan: Stabil / lambat</option>
+      </select>
+
+      <button class="btn" id="startSend" disabled>Mulai Kirim</button>
+
+      <div class="qrwrap" id="qrwrap">
+        <div id="qrstack">
+          <div id="qrA" class="qrlayer"></div>
+          <div id="qrB" class="qrlayer"></div>
+        </div>
+        <div class="frame-counter" id="frameCounter">frame 0 / 0</div>
+      </div>
+      <div class="progress-wrap" id="sendProgWrap">
+        <div class="progress-label"><span>Mengirim</span><span id="sendPct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill striped" id="sendFill"></div></div>
+      </div>
+      <div class="status-line" id="sendStatus"><span class="led"></span><span>Menunggu file dipilih</span></div>
+    </section>
+
+    <!-- RECEIVE SCREEN -->
+    <section class="panel" id="receiveScreen" style="display:none">
+      <div class="panel-head">
+        <div class="back" data-back><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div class="panel-title">Terima File</div>
+      </div>
+
+      <button class="btn" id="startScan">Aktifkan Kamera</button>
+
+      <div class="videowrap" id="videowrap">
+        <video id="video" playsinline muted></video>
+        <div class="scan-frame"><div class="scan-line"></div></div>
+      </div>
+      <canvas class="hidden-canvas" id="canvas"></canvas>
+
+      <div class="progress-wrap" id="recvProgWrap">
+        <div class="progress-label"><span id="recvLabel">Menangkap chunk</span><span id="recvPct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="recvFill"></div></div>
+      </div>
+      <div class="status-line" id="recvStatus"><span class="led"></span><span>Kamera belum aktif</span></div>
+
+      <div class="done-panel" id="donePanel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <h3>File lengkap</h3>
+        <p id="doneFname"></p>
+        <button class="btn" id="saveBtn">Simpan ke folder /ton</button>
+        <button class="btn ghost" id="scanAgainBtn" style="margin-top:10px">Terima File Lain</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>NO SERVER · NO INTERNET · DEVICE-TO-DEVICE OPTICAL LINK</footer>
+</div>
+
+<script>
+/* ---------- NAV ---------- */
+const screens = { select: selectScreen, send: sendScreen, receive: receiveScreen };
+function show(name){
+  Object.values(screens).forEach(s=>s.style.display='none');
+  screens[name].style.display = name==='select' ? 'block' : 'block';
+}
+goSend.onclick = ()=> show('send');
+goReceive.onclick = ()=> show('receive');
+document.querySelectorAll('[data-back]').forEach(b=> b.onclick = ()=> {
+  stopAllMedia();
+  show('select');
+});
+
+/* ---------- SEND LOGIC ---------- */
+const CHUNK_SIZE = 700;
+let fileBuf=null, fileName="", totalChunks=0, chunks=[], sendRAF=null, sendRunning=false;
+let qrA_inst=null, qrB_inst=null; // dua instance QR bergantian, no blank frame
+
+dropzone.onclick = ()=> fileInput.click();
+['dragover','dragenter'].forEach(ev=> dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.remove('drag')}));
+dropzone.addEventListener('drop', e=>{
+  if(e.dataTransfer.files[0]){ fileInput.files = e.dataTransfer.files; handleFile(e.dataTransfer.files[0]); }
+});
+fileInput.onchange = ()=>{ if(fileInput.files[0]) handleFile(fileInput.files[0]); };
+
+async function handleFile(f){
+  fileName = f.name;
+  fileBuf = new Uint8Array(await f.arrayBuffer());
+  totalChunks = Math.ceil(fileBuf.length / CHUNK_SIZE);
+  fname.textContent = f.name;
+  fmeta.textContent = (f.size/1024).toFixed(1) + ' KB · ' + totalChunks + ' frame';
+  fileCard.style.display = 'flex';
+  startSend.disabled = false;
+  setSendStatus(false, 'Siap dikirim — tekan Mulai Kirim');
+
+  chunks = [];
+  for(let i=0;i<totalChunks;i++){
+    const part = fileBuf.slice(i*CHUNK_SIZE, (i+1)*CHUNK_SIZE);
+    let bin=''; for(let b of part) bin += String.fromCharCode(b);
+    const b64 = btoa(bin);
+    chunks.push(JSON.stringify({n:fileName, t:totalChunks, i:i, d:b64}));
+  }
+}
+
+function setSendStatus(active, text){
+  sendStatus.className = 'status-line' + (active?' active':'');
+  sendStatus.querySelector('span:last-child').textContent = text;
+}
+
+startSend.onclick = ()=>{
+  qrwrap.style.display='block';
+  sendProgWrap.style.display='block';
+  startSend.disabled = true;
+  dropzone.style.pointerEvents='none';
+  dropzone.style.opacity='.4';
+  qrA.innerHTML=''; qrB.innerHTML='';
+  qrA_inst = new QRCode(qrA, {width:230, height:230, correctLevel:QRCode.CorrectLevel.L});
+  qrB_inst = new QRCode(qrB, {width:230, height:230, correctLevel:QRCode.CorrectLevel.L});
+
+  let idx=0, useA=true;
+  const speed = parseInt(speedSel.value);
+  let lastSwitch = 0;
+  sendRunning = true;
+  setSendStatus(true, 'Mengirim — arahkan kamera penerima ke QR');
+
+  // pre-render first frame on A before showing
+  qrA_inst.makeCode(chunks[0]);
+  qrA.classList.add('show');
+
+  function loop(ts){
+    if(!sendRunning) return;
+    if(ts - lastSwitch >= speed){
+      lastSwitch = ts;
+      idx = (idx+1) % totalChunks;
+      // render NEXT frame into hidden layer first, then swap (no blank)
+      if(useA){
+        qrB_inst.makeCode(chunks[idx]);
+        qrB.classList.add('show'); qrA.classList.remove('show');
+      } else {
+        qrA_inst.makeCode(chunks[idx]);
+        qrA.classList.add('show'); qrB.classList.remove('show');
+      }
+      useA = !useA;
+      const pct = Math.round(((idx+1)/totalChunks)*100);
+      sendFill.style.width = pct+'%';
+      sendPct.textContent = pct+'%';
+      frameCounter.textContent = 'frame '+(idx+1)+' / '+totalChunks;
+      if(idx===0) setSendStatus(true, 'Loop selesai — mengulang sampai diterima penuh');
+    }
+    sendRAF = requestAnimationFrame(loop);
+  }
+  sendRAF = requestAnimationFrame(loop);
+};
+
+/* ---------- RECEIVE LOGIC ---------- */
+let received={}, total=0, rFname="", scanning=false, finalBytes=null, videoStream=null;
+
+startScan.onclick = async ()=>{
+  try{
+    videoStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    video.srcObject = videoStream;
+    videowrap.style.display='block';
+    recvProgWrap.style.display='block';
+    startScan.style.display='none';
+    await video.play();
+    scanning = true;
+    setRecvStatus(true, 'Memindai... arahkan ke QR pengirim');
+    requestAnimationFrame(scanTick);
+  }catch(e){
+    setRecvStatus(false, 'Gagal akses kamera: '+e.message);
+  }
+};
+
+function setRecvStatus(active, text, done){
+  recvStatus.className = 'status-line' + (active?' active':'') + (done?' done':'');
+  recvStatus.querySelector('span:last-child').textContent = text;
+}
+
+const canvasCtx = canvas.getContext('2d', {willReadFrequently:true});
+function scanTick(){
+  if(!scanning) return;
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvasCtx.drawImage(video,0,0,canvas.width,canvas.height);
+    const img = canvasCtx.getImageData(0,0,canvas.width,canvas.height);
+    const code = jsQR(img.data, img.width, img.height);
+    if(code) handleChunk(code.data);
+  }
+  requestAnimationFrame(scanTick);
+}
+
+function handleChunk(raw){
+  let obj;
+  try{ obj = JSON.parse(raw); }catch(e){ return; }
+  if(!obj || obj.i===undefined) return;
+  rFname = obj.n; total = obj.t;
+  if(!received[obj.i]) received[obj.i] = obj.d;
+  const got = Object.keys(received).length;
+  const pct = Math.round((got/total)*100);
+  recvFill.style.width = pct+'%';
+  recvPct.textContent = pct+'%';
+  recvLabel.textContent = 'Menangkap chunk ('+got+'/'+total+')';
+  if(got === total) finishReceive();
+}
+
+function finishReceive(){
+  scanning = false;
+  stopAllMedia();
+  videowrap.style.display='none';
+  setRecvStatus(false, 'Semua chunk diterima', true);
+
+  let parts=[];
+  for(let i=0;i<total;i++){
+    const bin = atob(received[i]);
+    const arr = new Uint8Array(bin.length);
+    for(let j=0;j<bin.length;j++) arr[j]=bin.charCodeAt(j);
+    parts.push(arr);
+  }
+  const size = parts.reduce((a,b)=>a+b.length,0);
+  finalBytes = new Uint8Array(size);
+  let off=0; for(const p of parts){ finalBytes.set(p, off); off += p.length; }
+
+  doneFname.textContent = rFname + ' — ' + (size/1024).toFixed(1) + ' KB';
+  donePanel.style.display = 'block';
+}
+
+saveBtn.onclick = async ()=>{
+  const blob = new Blob([finalBytes]);
+  if('showDirectoryPicker' in window){
+    try{
+      const root = await window.showDirectoryPicker();
+      const tonDir = await root.getDirectoryHandle('ton', {create:true});
+      const fh = await tonDir.getFileHandle(rFname, {create:true});
+      const w = await fh.createWritable();
+      await w.write(blob); await w.close();
+      doneFname.textContent = 'Tersimpan di ton/'+rFname;
+      return;
+    }catch(e){ /* fallback below */ }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=rFname; document.body.appendChild(a); a.click(); a.remove();
+  doneFname.textContent = 'Diunduh ke folder Download: '+rFname;
+};
+
+scanAgainBtn.onclick = ()=>{
+  received={}; total=0; finalBytes=null;
+  donePanel.style.display='none';
+  recvFill.style.width='0%'; recvPct.textContent='0%';
+  startScan.style.display='block';
+  recvProgWrap.style.display='none';
+  setRecvStatus(false,'Kamera belum aktif');
+};
+
+function stopAllMedia(){
+  if(videoStream){ videoStream.getTracks().forEach(t=>t.stop()); videoStream=null; }
+  sendRunning = false;
+  if(sendRAF){ cancelAnimationFrame(sendRAF); sendRAF=null; }
+  scanning=false;
+}
+</script>
+</body>
+</html>
