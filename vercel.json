@@ -3,7 +3,7 @@
   "trailingSlash": false,
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/((?!ton.html).*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
