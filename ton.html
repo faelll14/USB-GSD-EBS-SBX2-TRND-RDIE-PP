@@ -2,10 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="description" content="ton — offline optical file transfer via QR">
+<meta name="theme-color" content="#000000">
 <title>ton — offline file transfer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>if(typeof QRCode==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>')}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<script>if(typeof jsQR==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"><\/script>')}</script>
 <style>
 :root{
   --bg:#000; --fg:#fff; --dim:#666; --line:#2a2a2a; --panel:#0a0a0a;
@@ -320,6 +324,10 @@ function setSendStatus(active, text){
 }
 
 startSend.onclick = ()=>{
+  if(typeof QRCode === 'undefined'){
+    alert('Gagal memuat library QR. Cek koneksi internet saat pertama buka halaman (library dimuat dari CDN sekali saja).');
+    return;
+  }
   qrwrap.style.display='block';
   sendProgWrap.style.display='block';
   startSend.disabled = true;
@@ -368,9 +376,23 @@ startSend.onclick = ()=>{
 let received={}, total=0, rFname="", scanning=false, finalBytes=null, videoStream=null;
 
 startScan.onclick = async ()=>{
+  if(typeof jsQR === 'undefined'){
+    alert('Gagal memuat library scanner QR. Cek koneksi internet saat pertama buka halaman.');
+    return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setRecvStatus(false, 'Kamera tidak tersedia — buka via https:// atau localhost, bukan file://');
+    alert('Browser memblokir akses kamera.\n\nBuka halaman ini lewat server (https:// atau http://localhost), bukan langsung dari file lokal (file://).');
+    return;
+  }
+  setRecvStatus(true, 'Meminta izin kamera...');
   try{
-    videoStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720}},
+      audio:false
+    });
     video.srcObject = videoStream;
+    video.setAttribute('playsinline','');
     videowrap.style.display='block';
     recvProgWrap.style.display='block';
     startScan.style.display='none';
@@ -379,7 +401,12 @@ startScan.onclick = async ()=>{
     setRecvStatus(true, 'Memindai... arahkan ke QR pengirim');
     requestAnimationFrame(scanTick);
   }catch(e){
-    setRecvStatus(false, 'Gagal akses kamera: '+e.message);
+    let msg = e.message;
+    if(e.name==='NotAllowedError') msg='Izin kamera ditolak. Aktifkan lewat pengaturan situs di browser.';
+    if(e.name==='NotFoundError') msg='Kamera tidak ditemukan di perangkat ini.';
+    if(e.name==='NotReadableError') msg='Kamera sedang dipakai aplikasi lain.';
+    setRecvStatus(false, 'Gagal akses kamera: '+msg);
+    alert('Gagal akses kamera: '+msg);
   }
 };
 
