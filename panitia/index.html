@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<title>PatSec Panitia</title>
+<link rel="stylesheet" href="../css/themes.css" />
+<link rel="stylesheet" href="../css/components.css" />
+<link rel="stylesheet" href="../css/dashboard.css" />
+<link rel="stylesheet" href="../css/panitia.css" />
+<link rel="stylesheet" href="../css/responsive.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img class="topbar-logo" src="../img/logo.png" alt="" onerror="this.style.visibility='hidden'" />
+      <span class="topbar-school" id="schoolName">SMAN 14 DEPOK</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btnTheme" aria-label="Ganti tema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a6 6 0 0 0 0 12 4 4 0 0 1 0 8"/><circle cx="9" cy="10" r="1"/><circle cx="14" cy="8" r="1"/><circle cx="16" cy="13" r="1"/></svg>
+      </button>
+      <button class="icon-btn" id="btnLogout" aria-label="Keluar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main dash-main" style="padding-bottom:calc(48px + env(safe-area-inset-bottom,0px));">
+
+    <div class="greeting-block">
+      <div class="greeting-time-icon" id="greetingIcon"></div>
+      <p class="greeting-meta" id="greetingSub">Selamat datang,</p>
+      <h1 class="greeting-name" id="greetingName">&nbsp;</h1>
+      <p class="greeting-detail">Panel Panitia</p>
+    </div>
+
+    <div class="card" style="margin-bottom: var(--space-5);">
+      <h2 class="section-title">Jadwal Jaga Saya</h2>
+      <div id="myDutyList"><div class="skeleton"></div></div>
+    </div>
+
+    <div class="card" style="margin-bottom: var(--space-5);">
+      <h2 class="section-title">Kontrol Ruang</h2>
+      <select class="select-native" id="examSelect">
+        <option value="">Memuat jadwal...</option>
+      </select>
+    </div>
+
+    <div id="controlArea"></div>
+
+    <div class="card" style="margin-top: var(--space-6);">
+      <h2 class="section-title">Pengaturan</h2>
+      <div class="settings-list">
+        <div class="settings-row" id="rowAccountInfo">
+          <div class="settings-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg></div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Informasi Akun</div>
+            <div class="settings-row-sub" id="accountInfoSub">NIP &mdash;</div>
+          </div>
+        </div>
+        <div class="settings-row" id="rowPassword">
+          <div class="settings-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Ubah Kata Sandi</div>
+          </div>
+          <svg class="settings-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+        <div class="settings-row" id="rowLoginHistory">
+          <div class="settings-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">Riwayat Login Saya</div>
+          </div>
+          <svg class="settings-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="siteFooter" style="padding-bottom:30px;"></div>
+
+  <div class="modal-scrim" id="themeScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="themeCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Pilih Tema</h2>
+      <div class="theme-grid" id="themeGrid">
+        <div class="theme-swatch" data-theme="dark"><div class="theme-swatch-preview preview-dark"></div><span class="theme-swatch-label">Dark</span></div>
+        <div class="theme-swatch" data-theme="light"><div class="theme-swatch-preview preview-light"></div><span class="theme-swatch-label">Light</span></div>
+        <div class="theme-swatch" data-theme="pink"><div class="theme-swatch-preview preview-pink"></div><span class="theme-swatch-label">Pink</span></div>
+        <div class="theme-swatch" data-theme="hacker"><div class="theme-swatch-preview preview-hacker"></div><span class="theme-swatch-label">Hacker</span></div>
+        <div class="theme-swatch" data-theme="minecraft"><div class="theme-swatch-preview preview-minecraft"></div><span class="theme-swatch-label">Voxel</span></div>
+      </div>
+      <button class="btn btn-ghost modal-close-bottom" id="themeCloseBottom" type="button">Tutup</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="unlockScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="unlockCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Buka Kunci Siswa</h2>
+      <p class="login-subtitle" style="margin-bottom:var(--space-4);" id="unlockStudentName"></p>
+      <div class="field">
+        <label class="field-label" for="unlockReasonInput">Alasan membuka kunci</label>
+        <input class="field-input" id="unlockReasonInput" type="text" placeholder="Contoh: koneksi terputus sementara" />
+      </div>
+      <div class="field-error" id="unlockFormError"></div>
+      <button class="btn btn-primary" id="unlockSubmit" type="button">Konfirmasi Buka Kunci</button>
+      <button class="btn btn-ghost modal-close-bottom" id="unlockCloseBottom" type="button">Batal</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="passwordScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="passwordCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Ubah Kata Sandi</h2>
+      <div class="field">
+        <label class="field-label" for="oldPasswordInput">Kata sandi saat ini</label>
+        <input class="field-input" id="oldPasswordInput" type="password" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="newPasswordInput">Kata sandi baru</label>
+        <input class="field-input" id="newPasswordInput" type="password" placeholder="Minimal 6 karakter" />
+      </div>
+      <div class="field-error" id="passwordFormError"></div>
+      <button class="btn btn-primary" id="passwordSubmit" type="button">Simpan</button>
+      <button class="btn btn-ghost modal-close-bottom" id="passwordCloseBottom" type="button">Batal</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="historyScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="historyCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Riwayat Login Saya</h2>
+      <div id="historyList" style="max-height:50vh;overflow-y:auto;">
+        <div class="skeleton"></div>
+      </div>
+      <button class="btn btn-ghost modal-close-bottom" id="historyCloseBottom" type="button">Tutup</button>
+    </div>
+  </div>
+
+</div>
+<script type="module" src="../js/firebase-init.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/session-guard.js"></script>
+<script src="../js/panitia-bridge-web.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/greeting.js"></script>
+<script src="../js/footer.js"></script>
+<script src="./require-role.js"></script>
+<script src="./panitia.js"></script>
+</body>
+</html>
