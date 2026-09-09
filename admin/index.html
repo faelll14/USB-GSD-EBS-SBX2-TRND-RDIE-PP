@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<title>PatSec Admin</title>
+<link rel="stylesheet" href="/css/themes.css" />
+<link rel="stylesheet" href="/css/components.css" />
+<link rel="stylesheet" href="/css/dashboard.css" />
+<link rel="stylesheet" href="/css/admin.css" />
+<link rel="stylesheet" href="/css/guru.css" />
+<link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img class="topbar-logo" src="/img/logo.png" alt="" onerror="this.style.visibility='hidden'" />
+      <span class="topbar-school" id="schoolName">SMAN 14 DEPOK</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btnTheme" aria-label="Ganti tema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a6 6 0 0 0 0 12 4 4 0 0 1 0 8"/><circle cx="9" cy="10" r="1"/><circle cx="14" cy="8" r="1"/><circle cx="16" cy="13" r="1"/></svg>
+      </button>
+      <button class="icon-btn" id="btnLogout" aria-label="Keluar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main dash-main">
+
+    <section class="section active" id="section-akun">
+      <div class="greeting-block">
+        <div class="greeting-time-icon" id="greetingIcon"></div>
+        <p class="greeting-meta" id="greetingSub">Selamat datang,</p>
+        <h1 class="greeting-name" id="greetingName">&nbsp;</h1>
+        <p class="greeting-detail">Panel Admin</p>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Import Akun Massal</h2>
+        <button class="btn btn-ghost" id="btnShowAiPrompt" style="margin-bottom: var(--space-3);">Lihat Prompt AI untuk Format Data</button>
+        <textarea class="import-textarea" id="bulkAccountTextarea" placeholder="nis, nama_lengkap, kelas, no_absen, no_ruang, siswa"></textarea>
+        <div id="bulkParseErrors"></div>
+        <button class="btn btn-primary" id="btnProcessBulk" style="margin-top: var(--space-4);">Proses Import</button>
+        <div id="bulkPreviewWrap" style="display:none;margin-top:var(--space-4);">
+          <p class="section-title" style="font-size:13px;">Siap dibuat: <span id="bulkPreviewCount">0</span> akun</p>
+          <button class="btn btn-primary" id="btnSubmitBulk">Buat Semua Akun</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Atur Ruang Siswa</h2>
+        <button class="btn btn-ghost" id="btnShowRoomAiPrompt" style="margin-bottom: var(--space-3);">Lihat Prompt AI untuk Format Data</button>
+        <textarea class="import-textarea" id="roomAssignTextarea" placeholder="nis, no_ruang"></textarea>
+        <div id="roomParseErrors"></div>
+        <button class="btn btn-primary" id="btnSubmitRoomAssign" style="margin-top: var(--space-4);">Simpan Penempatan Ruang</button>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Buat Akun</h2>
+        <div class="create-role-grid">
+          <button class="create-role-btn" data-role="siswa">Akun Siswa</button>
+          <button class="create-role-btn" data-role="panitia">Akun Panitia</button>
+          <button class="create-role-btn" data-role="guru">Akun Guru</button>
+          <button class="create-role-btn" data-role="admin">Akun Admin</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Manajemen Akun</h2>
+        <div class="field" style="margin-bottom: var(--space-3);">
+          <input class="field-input" id="searchInput" type="text" placeholder="Cari nama atau NIS/NIP" />
+        </div>
+        <div class="filter-chips" id="filterChips">
+          <button class="filter-chip active" data-role="all">Semua</button>
+          <button class="filter-chip" data-role="admin">Admin</button>
+          <button class="filter-chip" data-role="panitia">Panitia</button>
+          <button class="filter-chip" data-role="guru">Guru</button>
+          <button class="filter-chip" data-role="siswa">Siswa</button>
+        </div>
+        <div id="accountList">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="section-jadwal">
+      <div class="greeting-block">
+        <p class="greeting-meta">Manajemen</p>
+        <h1 class="greeting-name">Jadwal Ujian</h1>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Export Nilai</h2>
+        <div class="field">
+          <label class="field-label">Filter kelas</label>
+          <select class="select-native" id="exportKelasFilter">
+            <option value="all">Semua kelas</option>
+            <option value="X">Kelas X</option>
+            <option value="XI">Kelas XI</option>
+            <option value="XII">Kelas XII</option>
+          </select>
+        </div>
+        <div class="question-actions">
+          <button class="btn btn-primary" id="btnExportCsv">Export CSV</button>
+          <button class="btn btn-primary" id="btnExportPdf">Export PDF</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btnAddJadwal" style="margin-bottom: var(--space-5);">Tambah Jadwal</button>
+
+      <div id="jadwalList">
+        <div class="skeleton"></div>
+      </div>
+    </section>
+
+    <section class="section" id="section-jaga">
+      <div class="greeting-block">
+        <p class="greeting-meta">Manajemen</p>
+        <h1 class="greeting-name">Jadwal Jaga</h1>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <select class="select-native" id="dutyExamSelect">
+          <option value="">Pilih jadwal ujian...</option>
+        </select>
+      </div>
+
+      <div id="dutyPlanningArea"></div>
+    </section>
+
+    <section class="section" id="section-pelanggaran">
+      <div class="greeting-block">
+        <p class="greeting-meta">Manajemen</p>
+        <h1 class="greeting-name">Pelanggaran</h1>
+      </div>
+
+      <div class="stat-row" id="violationStats">
+        <div class="stat-card">
+          <p class="stat-value" id="statTotalViolations">0</p>
+          <p class="stat-label">Total pelanggaran</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-value" id="statLockedNow">0</p>
+          <p class="stat-label">Sedang terkunci</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <button class="btn btn-ghost" id="btnExportViolations">Export CSV</button>
+      </div>
+
+      <div class="card">
+        <div id="violationList"><div class="skeleton"></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="section-backup">
+      <div class="greeting-block">
+        <p class="greeting-meta">Manajemen</p>
+        <h1 class="greeting-name">Pengaturan Sistem</h1>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Akun Saya</h2>
+        <div class="settings-list">
+          <div class="settings-row" id="rowPassword">
+            <div class="settings-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+            <div class="settings-row-text">
+              <div class="settings-row-title">Ubah Kata Sandi</div>
+            </div>
+            <svg class="settings-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Mode Operasi</h2>
+        <div class="settings-row" style="padding:10px 0;">
+          <div class="settings-row-text">
+            <div class="settings-row-title" id="operationModeLabel">Mode Ujian</div>
+            <div class="settings-row-sub">Aktifkan mode ujian saat periode CBT, mode harian di luar itu</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleOperationMode" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Akses Login Siswa</h2>
+        <div class="settings-row" style="padding:8px 0;">
+          <div class="settings-row-text"><div class="settings-row-title">Login via Aplikasi Android</div></div>
+          <label class="switch">
+            <input type="checkbox" id="toggleAndroidLogin" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+        <div class="settings-row" style="padding:8px 0;">
+          <div class="settings-row-text"><div class="settings-row-title">Login via Website</div></div>
+          <label class="switch">
+            <input type="checkbox" id="toggleWebLogin" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+        <div class="settings-row" style="padding:8px 0;">
+          <div class="settings-row-text"><div class="settings-row-title">Login via Aplikasi Windows (EXE)</div></div>
+          <label class="switch">
+            <input type="checkbox" id="toggleExeLogin" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <div class="settings-row" style="padding:10px 0;">
+          <div class="settings-row-text">
+            <div class="settings-row-title">Auto Save</div>
+            <div class="settings-row-sub">Backup otomatis pada momen penting (publikasi nilai, import akun)</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleAutoSave" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Backup Manual</h2>
+        <div class="field">
+          <label class="field-label" for="backupNameInput">Nama file backup</label>
+          <input class="field-input" id="backupNameInput" type="text" placeholder="Contoh: sebelum-uas-ganjil" />
+        </div>
+        <button class="btn btn-primary" id="btnCreateBackup">Simpan Backup</button>
+      </div>
+
+      <div class="card" style="margin-bottom: var(--space-5);">
+        <h2 class="section-title">Restore Data</h2>
+        <div id="backupList"><div class="skeleton"></div></div>
+        <div class="question-actions" style="margin-top:var(--space-3);">
+          <button class="btn btn-ghost" id="btnDeleteAllBackups" style="color:var(--danger);">Hapus Semua Backup</button>
+          <button class="btn btn-ghost" id="btnDeleteOldBackups" style="color:var(--danger);">Hapus Kecuali Terbaru</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Reset Data</h2>
+        <p class="login-subtitle" style="margin-bottom:var(--space-4);">Pilih kategori data yang ingin dihapus permanen.</p>
+        <div class="settings-list">
+          <div class="settings-row" style="padding:8px 0;">
+            <div class="settings-row-text"><div class="settings-row-title">Jadwal Ujian &amp; Soal</div></div>
+            <button class="btn btn-ghost" data-reset="exams" style="width:auto;color:var(--danger);">Hapus</button>
+          </div>
+          <div class="settings-row" style="padding:8px 0;">
+            <div class="settings-row-text"><div class="settings-row-title">Sesi &amp; Jawaban Ujian</div></div>
+            <button class="btn btn-ghost" data-reset="sessions" style="width:auto;color:var(--danger);">Hapus</button>
+          </div>
+          <div class="settings-row" style="padding:8px 0;">
+            <div class="settings-row-text"><div class="settings-row-title">Semua Nilai</div></div>
+            <button class="btn btn-ghost" data-reset="results" style="width:auto;color:var(--danger);">Hapus</button>
+          </div>
+          <div class="settings-row" style="padding:8px 0;">
+            <div class="settings-row-text"><div class="settings-row-title">Semua Akun (kecuali akunmu)</div></div>
+            <button class="btn btn-ghost" data-reset="accounts" style="width:auto;color:var(--danger);">Hapus</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="siteFooter" style="padding-bottom:90px;"></div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-target="akun">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+      <span>Akun</span>
+    </button>
+    <button class="nav-item" data-target="jadwal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
+      <span>Jadwal Ujian</span>
+    </button>
+    <button class="nav-item" data-target="jaga">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a7 7 0 0 0-7 7c0 3 1 5 1 8M12 2a7 7 0 0 1 7 7c0 2-.2 3.5-.6 5"/></svg>
+      <span>Jadwal Jaga</span>
+    </button>
+    <button class="nav-item" data-target="pelanggaran">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      <span>Pelanggaran</span>
+    </button>
+    <button class="nav-item" data-target="backup">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span>Sistem</span>
+    </button>
+  </nav>
+
+  <div class="modal-scrim" id="themeScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="themeCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Pilih Tema</h2>
+      <div class="theme-grid" id="themeGrid">
+        <div class="theme-swatch" data-theme="dark"><div class="theme-swatch-preview preview-dark"></div><span class="theme-swatch-label">Dark</span></div>
+        <div class="theme-swatch" data-theme="light"><div class="theme-swatch-preview preview-light"></div><span class="theme-swatch-label">Light</span></div>
+        <div class="theme-swatch" data-theme="pink"><div class="theme-swatch-preview preview-pink"></div><span class="theme-swatch-label">Pink</span></div>
+        <div class="theme-swatch" data-theme="hacker"><div class="theme-swatch-preview preview-hacker"></div><span class="theme-swatch-label">Hacker</span></div>
+        <div class="theme-swatch" data-theme="minecraft"><div class="theme-swatch-preview preview-minecraft"></div><span class="theme-swatch-label">Voxel</span></div>
+      </div>
+      <button class="btn btn-ghost modal-close-bottom" id="themeCloseBottom" type="button">Tutup</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="aiPromptScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="aiPromptCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title" id="aiPromptTitle">Prompt AI</h2>
+      <textarea class="import-textarea" id="aiPromptText" readonly style="min-height:280px;"></textarea>
+      <button class="btn btn-primary" id="btnCopyAiPrompt" style="margin-top:var(--space-4);">Salin Prompt</button>
+      <button class="btn btn-ghost modal-close-bottom" id="aiPromptCloseBottom" type="button">Tutup</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="passwordScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="passwordCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Ubah Kata Sandi</h2>
+      <div class="field">
+        <label class="field-label" for="oldPasswordInput">Kata sandi saat ini</label>
+        <input class="field-input" id="oldPasswordInput" type="password" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="newPasswordInput">Kata sandi baru</label>
+        <input class="field-input" id="newPasswordInput" type="password" placeholder="Minimal 6 karakter" />
+      </div>
+      <div class="field-error" id="passwordFormError"></div>
+      <button class="btn btn-primary" id="passwordSubmit" type="button">Simpan</button>
+      <button class="btn btn-ghost modal-close-bottom" id="passwordCloseBottom" type="button">Batal</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="tripleConfirmScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="tripleConfirmCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title" id="tripleConfirmTitle">Konfirmasi Aksi</h2>
+      <div id="tripleConfirmStep1">
+        <p class="login-subtitle" style="margin-bottom:var(--space-4);" id="tripleConfirmMessage"></p>
+        <button class="btn btn-primary" id="tripleConfirmNext1" style="background:var(--danger);">Konfirmasi?</button>
+      </div>
+      <div id="tripleConfirmStep2" style="display:none;">
+        <div class="field">
+          <label class="field-label" for="tripleConfirmPassword">Masukkan kata sandi akunmu</label>
+          <input class="field-input" id="tripleConfirmPassword" type="password" />
+        </div>
+        <div class="field-error" id="tripleConfirmError"></div>
+        <button class="btn btn-primary" id="tripleConfirmNext2" style="background:var(--danger);">Lanjutkan</button>
+      </div>
+      <div id="tripleConfirmStep3" style="display:none;">
+        <p class="login-subtitle" style="margin-bottom:var(--space-4);">Apakah kamu benar-benar yakin? Aksi ini tidak bisa dibatalkan.</p>
+        <button class="btn btn-primary" id="tripleConfirmFinal" style="background:var(--danger);">Ya, Saya Yakin</button>
+      </div>
+      <button class="btn btn-ghost modal-close-bottom" id="tripleConfirmCancel" type="button">Batal</button>
+    </div>
+  </div>
+
+  <div class="modal-scrim" id="createScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="createCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title" id="createTitle">Buat Akun</h2>
+
+      <div class="field">
+        <label class="field-label" for="createFullName">Nama lengkap</label>
+        <input class="field-input" id="createFullName" type="text" />
+      </div>
+      <div class="field">
+        <label class="field-label" id="createIdLabel" for="createIdentifier">NIS / NIP</label>
+        <input class="field-input" id="createIdentifier" type="text" inputmode="numeric" />
+      </div>
+      <div class="field" id="createKelasField" style="display:none;">
+        <label class="field-label" for="createKelas">Kelas</label>
+        <input class="field-input" id="createKelas" type="text" placeholder="Contoh: XI IPA.1" />
+      </div>
+      <div class="field" id="createAbsenField" style="display:none;">
+        <label class="field-label" for="createAbsen">Nomor absen</label>
+        <input class="field-input" id="createAbsen" type="number" inputmode="numeric" />
+      </div>
+
+      <div class="field-error" id="createFormError"></div>
+      <button class="btn btn-primary" id="createSubmit" type="button">Buat Akun</button>
+      <button class="btn btn-ghost modal-close-bottom" id="createCloseBottom" type="button">Batal</button>
+    </div>
+  </div>
+  <div class="modal-scrim" id="jadwalScrim">
+    <div class="modal-sheet">
+      <button class="icon-btn modal-close-x" id="jadwalCloseX" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="sheet-title">Tambah Jadwal Ujian</h2>
+
+      <div class="field">
+        <label class="field-label" for="jadwalSubject">Nama mata pelajaran</label>
+        <input class="field-input" id="jadwalSubject" type="text" />
+      </div>
+
+      <div class="field">
+        <label class="field-label">Target kelas</label>
+        <div class="create-role-grid" style="grid-template-columns:repeat(3,1fr);">
+          <button class="create-role-btn" data-grade="X" type="button">X</button>
+          <button class="create-role-btn" data-grade="XI" type="button">XI</button>
+          <button class="create-role-btn" data-grade="XII" type="button">XII</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="jadwalDate">Tanggal</label>
+        <input class="field-input" id="jadwalDate" type="date" />
+      </div>
+
+      <div class="field">
+        <label class="field-label">Jam mulai</label>
+        <div style="display:flex;gap:8px;">
+          <input class="field-input" id="jadwalHour" type="number" min="1" max="12" placeholder="Jam" />
+          <input class="field-input" id="jadwalMinute" type="number" min="0" max="59" placeholder="Menit" />
+          <select class="field-input" id="jadwalAmPm">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="jadwalDuration">Durasi (menit)</label>
+        <input class="field-input" id="jadwalDuration" type="number" min="1" />
+      </div>
+
+      <div class="field-error" id="jadwalFormError"></div>
+      <button class="btn btn-primary" id="jadwalSubmit" type="button">Simpan Jadwal</button>
+      <button class="btn btn-ghost modal-close-bottom" id="jadwalCloseBottom" type="button">Batal</button>
+    </div>
+  </div>
+
+</div>
+<script type="module" src="/js/firebase-init.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/session-guard.js"></script>
+<script src="/js/admin-bridge-web.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/greeting.js"></script>
+<script src="/js/footer.js"></script>
+<script src="/js/account-bulk-parser.js"></script>
+<script src="/admin/require-role.js"></script>
+<script src="/admin/admin.js"></script>
+</body>
+</html>
