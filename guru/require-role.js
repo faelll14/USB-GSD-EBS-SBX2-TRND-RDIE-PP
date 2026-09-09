@@ -1,1 +1,0 @@
-SessionGuard.requireRole("guru");
