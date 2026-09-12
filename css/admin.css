@@ -106,3 +106,14 @@
   font-size: 13px;
   cursor: pointer;
 }
+
+.grade-select-btn {
+  padding: 14px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-solid);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}

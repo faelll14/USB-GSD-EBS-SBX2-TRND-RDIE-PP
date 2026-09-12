@@ -64,7 +64,7 @@
         loadedSections.add("jadwal");
         refreshJadwal();
       }
-      if (btn.dataset.target === "jaga" && !loadedSections.has("jaga")) {
+      if (btn.dataset.target === "jaga") {
         loadedSections.add("jaga");
         loadDutyExamOptions();
       }
@@ -376,6 +376,7 @@
       jadwalScrim.classList.remove("open");
       showToast("Jadwal berhasil disimpan.");
       refreshJadwal();
+      loadDutyExamOptions();
     } catch (e) {
       errorEl.textContent = "Gagal menyimpan jadwal.";
     }
