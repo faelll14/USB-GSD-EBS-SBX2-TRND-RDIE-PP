@@ -142,6 +142,46 @@
   color: var(--text-tertiary);
 }
 
+input[type="date"].field-input,
+input[type="number"].field-input,
+input[type="time"].field-input {
+  font-family: var(--font-ui);
+  color-scheme: dark;
+}
+
+html[data-theme="light"] input[type="date"].field-input,
+html[data-theme="light"] input[type="number"].field-input,
+html[data-theme="light"] input[type="time"].field-input,
+html[data-theme="pink"] input[type="date"].field-input,
+html[data-theme="pink"] input[type="number"].field-input,
+html[data-theme="pink"] input[type="time"].field-input,
+html[data-theme="blue"] input[type="date"].field-input,
+html[data-theme="blue"] input[type="number"].field-input,
+html[data-theme="blue"] input[type="time"].field-input {
+  color-scheme: light;
+}
+
+input[type="date"].field-input::-webkit-datetime-edit,
+input[type="date"].field-input::-webkit-datetime-edit-fields-wrapper,
+input[type="date"].field-input::-webkit-datetime-edit-text,
+input[type="date"].field-input::-webkit-datetime-edit-month-field,
+input[type="date"].field-input::-webkit-datetime-edit-day-field,
+input[type="date"].field-input::-webkit-datetime-edit-year-field {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+}
+
+input[type="date"].field-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+html[data-theme="light"] input[type="date"].field-input::-webkit-calendar-picker-indicator,
+html[data-theme="pink"] input[type="date"].field-input::-webkit-calendar-picker-indicator,
+html[data-theme="blue"] input[type="date"].field-input::-webkit-calendar-picker-indicator {
+  filter: none;
+}
+
 .pt-field-wrap {
   position: relative;
   display: flex;
