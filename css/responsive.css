@@ -1,0 +1,161 @@
+html {
+  font-size: clamp(15px, 0.9vw + 11px, 19px);
+}
+body {
+  font-size: 1rem;
+}
+.app-main,
+.app-main.dash-main {
+  max-width: min(94vw, 560px);
+}
+@media (min-width: 768px) {
+  .app-main,
+  .app-main.dash-main {
+    max-width: min(80vw, 640px);
+  }
+}
+@media (min-width: 1100px) {
+  .app-main,
+  .app-main.dash-main {
+    max-width: min(60vw, 720px);
+  }
+}
+@media (min-width: 1500px) {
+  .app-main,
+  .app-main.dash-main {
+    max-width: 780px;
+  }
+}
+.exam-shell {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+@media (min-width: 1100px) {
+  .exam-body {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .exam-nav-strip {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .exam-bottombar {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
+.topbar-school {
+  font-size: clamp(14px, 0.4vw + 13px, 17px);
+}
+.topbar-logo {
+  width: clamp(30px, 3vw, 42px);
+  height: clamp(30px, 3vw, 42px);
+}
+.icon-btn {
+  width: clamp(38px, 4vw, 46px);
+  height: clamp(38px, 4vw, 46px);
+  min-width: 38px;
+  min-height: 38px;
+}
+.icon-btn svg {
+  width: clamp(17px, 1.6vw, 22px);
+  height: clamp(17px, 1.6vw, 22px);
+}
+.btn {
+  min-height: 44px;
+  font-size: clamp(14px, 0.35vw + 13px, 16px);
+  padding: 12px clamp(16px, 2vw, 24px);
+}
+.field-input,
+.select-native,
+.import-textarea {
+  min-height: 46px;
+  font-size: clamp(14px, 0.35vw + 13px, 16px);
+}
+.card {
+  padding: clamp(16px, 2.2vw, 28px);
+}
+.section-title {
+  font-size: clamp(14px, 0.4vw + 13px, 17px);
+}
+.greeting-name {
+  font-size: clamp(22px, 1.6vw + 16px, 32px);
+}
+.greeting-meta,
+.greeting-detail {
+  font-size: clamp(12px, 0.3vw + 11px, 14px);
+}
+.exam-question-text {
+  font-size: clamp(15px, 0.5vw + 14px, 19px);
+  line-height: 1.7;
+}
+.exam-option-text {
+  font-size: clamp(13.5px, 0.35vw + 12.5px, 16px);
+}
+.exam-timer {
+  font-size: clamp(13px, 0.4vw + 12px, 16px);
+}
+.exam-nav-dot {
+  width: clamp(26px, 2.4vw, 34px);
+  height: clamp(26px, 2.4vw, 34px);
+  font-size: clamp(11px, 0.3vw + 10px, 13px);
+}
+.calc-fab {
+  width: clamp(48px, 5vw, 60px);
+  height: clamp(48px, 5vw, 60px);
+}
+.calc-modal {
+  width: clamp(220px, 24vw, 280px);
+}
+.modal-sheet {
+  max-width: 460px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 700px) {
+  .modal-scrim {
+    align-items: center;
+  }
+  .modal-sheet {
+    border-radius: var(--radius-lg);
+    max-height: 86vh;
+    overflow-y: auto;
+  }
+}
+.question-card,
+.participant-row,
+.leaderboard-row {
+  font-size: clamp(13px, 0.3vw + 12px, 15px);
+}
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+@media (min-width: 1800px) {
+  html {
+    font-size: 19px;
+  }
+}
+@media (max-width: 359px) {
+  .app-main,
+  .app-main.dash-main {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .card {
+    padding: 14px;
+  }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .greeting-block {
+    margin-bottom: 12px;
+  }
+  .app-main {
+    padding-top: var(--space-3);
+  }
+}
