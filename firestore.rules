@@ -1,0 +1,172 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function myDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasProfile() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function primaryRole() {
+      return myDoc().get('role', 'siswa').lower();
+    }
+
+    function extraRoles() {
+      return myDoc().get('additionalRoles', []);
+    }
+
+    function hasRole(r) {
+      return hasProfile() && (primaryRole() == r || r in extraRoles());
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isStaff() {
+      return hasRole('admin') || hasRole('guru');
+    }
+
+    function isSupervisor() {
+      return hasRole('admin') || hasRole('guru') || hasRole('panitia');
+    }
+
+    match /usernames/{usernameKey} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    match /system_config/access {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system_config/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isSupervisor();
+      allow list: if isSupervisor();
+      allow create: if isAdmin() && request.resource.data.role in ['siswa', 'guru', 'panitia', 'admin'];
+      allow delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (isOwner(uid) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+           ['username', 'usernameChangeCount', 'usernameChangeWeekStart', 'passwordIsDefault', 'biometricMethod', 'updatedAt']
+         ));
+
+      match /login_history/{entryId} {
+        allow create: if isOwner(uid);
+        allow read: if isOwner(uid) || isAdmin();
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+
+      match /results/{resultId} {
+        allow read: if (isOwner(uid) && resource.data.published == true) || isStaff();
+        allow write: if isStaff();
+      }
+    }
+
+    match /exam_results_index/{examId} {
+      allow read: if isSupervisor();
+      allow write: if isStaff();
+    }
+
+    match /duty_schedule/{examId} {
+      allow read: if isSupervisor();
+      allow write: if isAdmin();
+    }
+
+    match /backups/{backupId} {
+      allow read, write: if isAdmin();
+
+      match /{document=**} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    match /exams_schedule/published {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /daily_exams/{examId} {
+      allow read: if isSignedIn();
+      allow create: if isStaff();
+      allow update: if isStaff() &&
+        (resource.data.createdBy == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /public_stats/leaderboard {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /exam_timing/{examId} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    match /exam_content/{examId} {
+      allow read: if isStaff() ||
+        (isSignedIn() &&
+         exists(/databases/$(database)/documents/exam_timing/$(examId)) &&
+         request.time.toMillis() >= get(/databases/$(database)/documents/exam_timing/$(examId)).data.startTimestamp);
+      allow write: if isStaff();
+    }
+
+    match /exam_answer_keys/{examId} {
+      allow read, write: if isStaff();
+    }
+
+    match /exam_sessions/{examId}/participants/{uid} {
+      allow read: if isOwner(uid) || isSupervisor();
+      allow create: if isOwner(uid) &&
+        request.resource.data.get('status', 'not_started') in ['not_started', 'in_progress'] &&
+        request.resource.data.get('violationCount', 0) == 0 &&
+        request.resource.data.get('locked', false) == false;
+      allow update: if isSupervisor() ||
+        (isOwner(uid) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+           ['status', 'startedAt', 'violationCount', 'lastActivityAt', 'locked', 'lockReason', 'fullName']
+         ) &&
+         !(resource.data.get('locked', false) == true && request.resource.data.get('locked', false) == false) &&
+         request.resource.data.get('violationCount', 0) >= resource.data.get('violationCount', 0) &&
+         !(resource.data.get('status', '') == 'completed' && request.resource.data.get('status', '') != 'completed') &&
+         request.resource.data.get('status', 'not_started') in ['not_started', 'in_progress', 'completed'] &&
+         !(resource.data.get('status', 'not_started') == 'not_started' && request.resource.data.get('status', '') == 'completed')
+        );
+      allow delete: if isAdmin();
+    }
+
+    match /{path=**}/participants/{uid} {
+      allow read: if isSupervisor();
+    }
+
+    match /submissions/{examId}/entries/{uid} {
+      allow read: if isOwner(uid) || isStaff();
+      allow create: if isOwner(uid);
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+  }
+}

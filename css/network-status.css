@@ -1,0 +1,48 @@
+#networkStatusBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 45;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #fff;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: content-box;
+  pointer-events: none;
+}
+
+#networkStatusBar.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* bottom-nav digeser naik saat bar peringatan tampil, memberi ruang tanpa menimpa */
+body.has-bottom-nav .bottom-nav {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.net-bar-visible.has-bottom-nav .bottom-nav {
+  transform: translateY(-30px);
+}
+
+body.net-bar-visible.has-bottom-nav .app-main.dash-main {
+  transition: padding-bottom 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  padding-bottom: calc(84px + 30px + env(safe-area-inset-bottom, 0px));
+}
+
+#networkStatusBar.offline {
+  background: #FF3B30;
+}
+
+#networkStatusBar.online {
+  background: #2ECC71;
+}
