@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Raffael Putra Hermawan - Portofolio</title>
+<style>
+:root{--bg-base:#000;--bg-elevated:#0c0c0e;--surface-solid:#1c1c1e;--surface-border:rgba(255,255,255,.09);--text-primary:#f5f5f7;--text-secondary:rgba(235,235,245,.62);--text-tertiary:rgba(235,235,245,.38);--accent:#0a84ff;--accent-text:#fff;--accent-soft:rgba(10,132,255,.16);--success:#32d74b;--warning:#ffd60a;--gold:#ffd60a;--divider:rgba(255,255,255,.08);--radius-sm:10px;--radius-md:16px;--radius-lg:22px;--font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--font-mono:ui-monospace,Menlo,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+img{-webkit-user-drag:none;user-drag:none}
+.cp{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+html.shield body{opacity:0!important}
+@media print{html{display:none!important}}
+html{font-size:clamp(14px,.2vw + 12.5px,22px);scroll-behavior:smooth;background:var(--bg-base)}
+body{margin:0;background:var(--gradient-hero,var(--bg-base));background-attachment:fixed;color:var(--text-primary);font-family:var(--font-ui,var(--font-body));font-size:1rem;line-height:1.55;overflow-x:hidden;padding:calc(env(safe-area-inset-top,0px) + 4.2rem) max(1rem,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 2.5rem) max(1rem,env(safe-area-inset-left,0px));min-height:100vh}
+html[data-theme="3d"] body{background-color:#E0E0E0;background-image:radial-gradient(rgba(0,0,0,.38) 1.2px,transparent 1.7px);background-size:24px 24px}
+html[data-theme="minecraft"] h1,html[data-theme="minecraft"] h2{font-family:var(--font-display,var(--font-body));font-size:.8em;line-height:1.5}
+.ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
+.wrap{max-width:64rem;margin:0 auto}
+.rise{opacity:0;transform:translateY(12px)}
+.rise.in{animation:rise .5s var(--ease) both;animation-delay:calc(var(--d,0)*55ms)}
+@keyframes rise{to{opacity:1;transform:none}}
+body.out .rise.in{animation:fall .2s ease-in both}
+@keyframes fall{from{opacity:1;transform:none}to{opacity:0;transform:translateY(8px)}}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;padding:.5rem 0 .75rem}
+.av{width:6.5rem;height:6.5rem;border-radius:50%;background:var(--accent-soft);border:2px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;font:800 2rem/1 var(--font-display,var(--font-body));letter-spacing:.02em;margin-bottom:.4rem}
+html[data-theme="3d"] .av{border:3px solid #000;box-shadow:4px 4px 0 #000}
+h1{margin:0;font-size:clamp(1.5rem,1.4vw + 1rem,2.1rem);line-height:1.15;letter-spacing:-.01em}
+.role{color:var(--accent);font-weight:700}
+.muted{color:var(--text-secondary)}
+.meta{display:inline-flex;align-items:center;gap:.4rem;color:var(--text-secondary);font-size:.93rem}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-top:.6rem}
+.chips.left{justify-content:flex-start;margin:0}
+.chip{padding:.28rem .7rem;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:.82rem;font-weight:600;border:1px solid var(--surface-border)}
+.chip.t{background:var(--bg-elevated);color:var(--text-primary);font-weight:500}
+h2{display:flex;align-items:center;gap:.55rem;margin:2rem .2rem .8rem;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);font-weight:700}
+h2 .ic{color:var(--accent)}
+h2:after{content:"";flex:1;height:1px;background:var(--divider)}
+.card{background:var(--surface-solid);border:1px solid var(--surface-border);border-radius:var(--radius-md);padding:1rem 1.1rem;box-shadow:var(--shadow-elev,none)}
+html[data-theme="3d"] .card,html[data-theme="3d"] .cert,html[data-theme="3d"] .chip{border:3px solid #000;box-shadow:4px 4px 0 #000}
+html[data-theme="3d"] .chip{box-shadow:2px 2px 0 #000}
+.card p{margin:0 0 .6rem}.card p:last-child{margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.8rem}
+.stat{text-align:center;padding:.9rem .4rem}
+.stat b{display:block;font-size:1.9rem;color:var(--accent);line-height:1.1}
+.stat span{font-size:.82rem;color:var(--text-secondary)}
+.about{display:grid;gap:.8rem;grid-template-columns:1fr}
+.ab h3,.grp{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;display:flex;align-items:center;gap:.45rem}
+.ab p{margin:0}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.steps li{display:flex;gap:.7rem;font-size:.93rem}
+.steps b{flex:none;min-width:6.2rem;color:var(--text-secondary);font-weight:600}
+.cat+.cat{margin-top:1rem}
+.sk{margin-bottom:.75rem}.sk:last-child{margin:0}
+.sk div{display:flex;justify-content:space-between;gap:.6rem;font-size:.92rem;margin-bottom:.3rem}
+.bar{display:block;height:.45rem;border-radius:9px;background:var(--divider);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:9px;background:var(--accent);transition:width .8s var(--ease) .15s}
+.in .bar i{width:var(--w)}
+.tl{display:grid;gap:.7rem;grid-template-columns:1fr}
+.log{position:relative;padding:.85rem 1rem}
+.log h3{margin:0 0 .3rem;font-size:.93rem;line-height:1.4;font-weight:650;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.log small{display:block;color:var(--text-secondary);font-size:.8rem;overflow-wrap:anywhere}
+.yr{float:right;margin-left:.6rem;font-size:.78rem;color:var(--text-tertiary);font-weight:700}
+.new{display:inline-block;background:var(--success);color:#000;border-radius:99px;font-size:.68rem;font-weight:800;padding:.08rem .5rem;margin-right:.4rem;vertical-align:.08em}
+.btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;margin-top:.6rem;padding:.38rem .85rem;border-radius:99px;background:var(--accent);color:var(--accent-text);font-size:.82rem;font-weight:700;transition:opacity .15s}
+.btn:hover{opacity:.9}.btn:focus-visible,.cert:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+.cert{all:unset;cursor:pointer;display:flex;flex-direction:column;position:relative;background:var(--surface-solid);border:1px solid var(--surface-border);border-radius:var(--radius-md);overflow:hidden;transition:transform .2s var(--ease),border-color .2s}
+.cert:hover{transform:translateY(-2px);border-color:var(--accent)}
+.cert:active{transform:scale(.98)}
+.cert img{display:block;width:100%;aspect-ratio:1.414;object-fit:contain;background:var(--bg-elevated)}
+.cert b{display:-webkit-box;font-size:.82rem;padding:.55rem .7rem 0;line-height:1.3;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.cert small{display:block;padding:.15rem .7rem .65rem;color:var(--text-secondary);font-size:.75rem;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{position:absolute;top:.45rem;left:.45rem;display:flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--gold,var(--warning));color:#000}
+.badge .ic{width:1rem;height:1rem}
+.row{display:flex;align-items:flex-start;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--divider);font-size:.93rem}
+.row:last-child{border:0}.row .ic{color:var(--accent);margin-top:.15rem}
+.row .k{color:var(--text-secondary);min-width:6.5rem}.row .v{margin-left:auto;text-align:right;overflow-wrap:anywhere;font-weight:600}
+.st{display:inline-flex;align-items:center;gap:.35rem;margin-left:.55rem;padding:.08rem .6rem;border-radius:99px;background:var(--bg-elevated);border:1px solid var(--surface-border);font-size:.76rem;font-weight:700;white-space:nowrap;vertical-align:.05em}
+.st i{width:.55rem;height:.55rem;border-radius:50%;background:var(--text-tertiary)}
+.st em{font-style:normal}
+.st[data-s=up] i{background:var(--success)}.st[data-s=down] i{background:var(--danger,#ef4444)}.st[data-s=off] i{background:var(--warning)}
+.cpy{all:unset;cursor:pointer;display:inline-flex;margin-left:.45rem;padding:.15rem;color:var(--accent);vertical-align:middle;border-radius:6px}
+.cpy:hover{background:var(--accent-soft)}.cpy:focus-visible{outline:2px solid var(--accent)}
+footer{text-align:center;color:var(--text-tertiary);font-size:.8rem;margin-top:2rem}
+#lb{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.88);display:none;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#lb.on{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+#lb figure{margin:auto;padding:4rem 1rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;max-width:100%}
+#lb img{display:block;max-width:min(100%,64rem);max-height:calc(100vh - 8rem);width:auto;height:auto;border-radius:var(--radius-sm);cursor:zoom-in;background:var(--bg-elevated)}
+#lb.zoom figure{margin:0;align-items:flex-start}
+#lb.zoom img{max-width:none;max-height:none;width:max(180%,60rem);cursor:zoom-out}
+#lb figcaption{color:#fff;text-align:center;font-size:.9rem;max-width:40rem}
+#lbx{all:unset;position:fixed;top:calc(env(safe-area-inset-top,0px) + .8rem);right:.9rem;z-index:60;width:2.6rem;height:2.6rem;border-radius:50%;background:var(--surface-solid);color:var(--text-primary);display:none;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--surface-border)}
+#lb.on~#lbx{display:flex}
+@media (min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}.tl{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:900px){.grid{grid-template-columns:repeat(4,1fr)}.about{grid-template-columns:1fr 1fr}}
+@media (min-width:1300px){.grid{grid-template-columns:repeat(5,1fr)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-bug" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="11" rx="4"/><path d="M9 8a3 3 0 016 0M4 12h4M16 12h4M5 6l3 2M19 6l-3 2M5 19l3-2M19 19l-3-2"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></symbol>
+<symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2M3 13h18"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+<symbol id="i-instagram" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 005.500 5.500L15 13.500l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+</defs></svg>
+<div class="wrap">
+  <section class="hero rise">
+    <div class="av" aria-hidden="true">RH</div>
+    <h1>Raffael Putra Hermawan</h1>
+    <div class="role">Ell &middot; Ethical Hacker &amp; Python Developer</div>
+    <div class="meta"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg>Depok, Indonesia &middot; SMAN 14 Depok</div>
+    <div class="chips"><span class="chip">Offensive Security</span><span class="chip">Bug Bounty</span><span class="chip">Python</span><span class="chip">Android</span><span class="chip">Linux</span></div>
+  </section>
+
+  <div class="stats">
+    <div class="card stat rise"><b data-n="15">0</b><span>Laporan</span></div>
+    <div class="card stat rise"><b data-n="36">0</b><span>Sertifikat</span></div>
+    <div class="card stat rise"><b data-n="3">0</b><span>Penghargaan</span></div>
+  </div>
+
+  <h2 class="rise"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Tentang Saya</h2>
+  <div class="about">
+    <div class="card ab rise"><h3><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Siapa saya</h3>
+      <p>Raffael Putra Hermawan, biasa dipanggil Ell. Saya pelajar kelas 11 jurusan IPA di SMAN 14 Depok, Jawa Barat, Indonesia.</p>
+      <p>Saya menekuni dua bidang sekaligus, keamanan siber dan pengembangan Python, dan belajar secara mandiri dengan kursus online, kompetisi, sertifikasi, serta praktik langsung.</p>
+    </div>
+    <div class="card ab rise"><h3><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>Yang saya kerjakan</h3>
+      <p>Fokus utama saya keamanan ofensif: penetration testing, pengintaian (reconnaissance), penilaian kerentanan, dan bug bounty. Temuan saya laporkan lewat responsible disclosure kepada pemilik sistem.</p>
+      <p>Fokus kedua saya Python: membuat tools keamanan, otomatisasi, aplikasi Android, dan antarmuka web.</p>
+    </div>
+    <div class="card ab rise"><h3><svg class="ic" aria-hidden="true"><use href="#i-terminal"/></svg>Yang saya pelajari</h3>
+      <p>Pemrograman, jaringan lanjutan, administrasi Linux, keamanan nirkabel, dasar kriptografi, analisis malware, dan riset keamanan ofensif. Saya terbiasa memahami cara kerja sebuah sistem terlebih dahulu, lalu mencari cara membuatnya lebih kuat.</p>
+    </div>
+    <div class="card ab rise"><h3><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Proyek utama</h3>
+      <p>PATLAS, sistem ujian online untuk sekolah yang saya kembangkan sendiri dalam versi Android dan web. Isinya ujian dan ulangan harian, pemantauan pelanggaran siswa, penilaian otomatis, dan scoreboard.</p>
+    </div>
+    <div class="card ab rise"><h3><svg class="ic" aria-hidden="true"><use href="#i-code"/></svg>Perjalanan</h3>
+      <ul class="steps">
+        <li><b>Kelas 7</b><span>Mulai belajar pemrograman lewat Termux di Android, bereksperimen dengan skrip sebelum benar-benar paham apa yang saya lakukan.</span></li>
+        <li><b>Kelas 8</b><span>Masuk ke dunia siber karena terinspirasi game Watch Dogs 2, yang membuat saya penasaran bagaimana sistem nyata dianalisis dan diuji.</span></li>
+        <li><b>Sejak itu</b><span>Belajar mandiri lewat kursus, kompetisi, sertifikasi, dan eksperimen langsung.</span></li>
+        <li><b>9 Maret 2026</b><span>Mulai menerapkan keamanan siber secara legal dan responsible disclosure.</span></li>
+      </ul>
+    </div>
+    <div class="card ab rise"><h3><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>Prinsip dan peluang</h3>
+      <p>Saya berpegang pada etika dan hanya menguji sistem yang diizinkan. Terbuka untuk magang, kolaborasi, tim CTF, dan proyek riset di bidang keamanan siber dan Python.</p>
+      <p>Bahasa: Indonesia, Inggris, Prancis, dan Rusia.</p>
+    </div>
+  </div>
+
+  <h2 class="rise"><svg class="ic" aria-hidden="true"><use href="#i-code"/></svg>Keahlian</h2>
+  <div class="card rise">
+    <div class="cat"><div class="grp">Bahasa pemrograman</div><div class="chips left"><span class="chip">Python</span><span class="chip">SQL</span><span class="chip">Bash</span><span class="chip">HTML/CSS</span><span class="chip">JavaScript</span><span class="chip">Kotlin</span><span class="chip">C++</span></div></div>
+    <div class="cat"><div class="grp">Bidang keamanan</div><div class="chips left"><span class="chip">Penetration Testing</span><span class="chip">Web App Security</span><span class="chip">OSINT &amp; Recon</span><span class="chip">Wireless</span><span class="chip">Kriptografi</span><span class="chip">Malware Analysis</span><span class="chip">Linux Admin</span><span class="chip">Networking</span><span class="chip">IoT</span></div></div>
+    <div class="cat"><div class="grp">Tools</div><div class="chips left"><span class="chip t">Burp Suite</span><span class="chip t">Nmap</span><span class="chip t">Metasploit</span><span class="chip t">SQLmap</span><span class="chip t">Nikto</span><span class="chip t">Wireshark</span><span class="chip t">Amass</span><span class="chip t">Gobuster</span><span class="chip t">Hydra</span><span class="chip t">Hashcat</span><span class="chip t">Aircrack-ng</span><span class="chip t">Bettercap</span><span class="chip t">Nuclei</span><span class="chip t">Subfinder</span><span class="chip t">Katana</span></div></div>
+  </div>
+
+  <h2 class="rise"><svg class="ic" aria-hidden="true"><use href="#i-bug"/></svg>Log Hunting</h2>
+  <div class="tl" id="log"></div>
+
+  <h2 class="rise"><svg class="ic" aria-hidden="true"><use href="#i-award"/></svg>Penghargaan &amp; Sertifikat</h2>
+  <div class="grid" id="certs"></div>
+
+  <h2 class="rise"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg>Kontak</h2>
+  <div class="card rise">
+    <div class="row"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><span class="k">Email</span><span class="v"><span class="cp">raffael.dev.sec@gmail.com</span><button type="button" class="cpy" aria-label="Salin"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></button></span></div>
+    <div class="row"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg><span class="k">GitHub</span><span class="v">@TheRealRafael00 &middot; @faelll14</span></div>
+    <div class="row"><svg class="ic" aria-hidden="true"><use href="#i-instagram"/></svg><span class="k">Instagram</span><span class="v"><span class="cp">@ell_bugs</span><button type="button" class="cpy" aria-label="Salin"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></button></span></div>
+    <div class="row"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg><span class="k">WhatsApp</span><span class="v"><span class="cp">085156316569</span><button type="button" class="cpy" aria-label="Salin"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></button></span></div>
+    <div class="row"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg><span class="k">Situs</span><span class="v"><span class="cp">raffaelhub.my.id</span><button type="button" class="cpy" aria-label="Salin"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></button><span class="st" id="st" data-s="check" role="status" aria-live="polite"><i></i><em>Memeriksa</em></span></span></div>
+    <div class="row"><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg><span class="k">Terbuka untuk</span><span class="v">Magang, kolaborasi, tim CTF, riset</span></div>
+  </div>
+  <footer class="rise">&copy; 2026 Raffael Putra Hermawan</footer>
+</div>
+
+<div id="lb"><figure><img alt=""><figcaption></figcaption></figure></div>
+<button id="lbx" type="button" aria-label="Tutup"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+
+<script>
+"use strict";
+const CERTS=[{"f": "ggg.jpg", "t": "Stored XSS pada Halaman Berita", "i": "Pemerintah Provinsi Bali", "a": true}, {"f": "gg.jpg", "t": "Appreciation Certificate", "i": "DKI Jakarta Provincial Government", "a": true}, {"f": "g.jpg", "t": "National Informatics Competition", "i": "Olimnesia & Mapresnas", "a": true}, {"f": "my.jpg", "t": "CC Course Conclusion", "i": "ISC2", "a": false}, {"f": "myy.jpg", "t": "Classical Cryptography for Beginners", "i": "Cyberacademy.id", "a": false}, {"f": "myyy.jpg", "t": "Intro to Dark Web, Anonymity & Cryptocurrency", "i": "EC-COUNCIL", "a": false}, {"f": "myyyy.jpg", "t": "ChatGPT for Cybersecurity", "i": "Simplilearn", "a": false}, {"f": "myyyyy.jpg", "t": "Cybersecurity Essentials dengan Kali Linux", "i": "BISA AI", "a": false}, {"f": "myyyyyy.jpg", "t": "Cyber Threat Intelligence 101", "i": "arcX", "a": false}, {"f": "myyyyyyy.jpg", "t": "Cybersecurity Fundamentals", "i": "IBM Skills Build", "a": false}, {"f": "myyyyyyyy.jpg", "t": "CompTIA Security+", "i": "Cursa", "a": false}, {"f": "myyyyyyyyy.jpg", "t": "Ethical Hacker", "i": "Cisco Networking Academy", "a": false}, {"f": "myyyyyyyyyy.jpg", "t": "Ethical Hacking:Introduction", "i": "Cybrary", "a": false}, {"f": "myyyyyyyyyyy.jpg", "t": "Introduction to Cybersecurity", "i": "Cisco Networking Academy", "a": false}, {"f": "myyyyyyyyyyyy.jpg", "t": "Cybersecurity for Business", "i": "EC-COUNCIL", "a": false}, {"f": "myyyyyyyyyyyyy.jpg", "t": "Introduction to Cybersecurity", "i": "Cyberacademy.id", "a": false}, {"f": "myyyyyyyyyyyyyy.jpg", "t": "IT Security by Google Careers", "i": "Cursa", "a": false}, {"f": "myyyyyyyyyyyyyyy.jpg", "t": "Google Analytics Certification", "i": "Google", "a": false}, {"f": "myyyyyyyyyyyyyyyy.jpg", "t": "Fortinet Certified Associate in Cybersecurity", "i": "Fortinet", "a": false}, {"f": "myyyyyyyyyyyyyyyyy.jpg", "t": "Prompt Engineering", "i": "Codecademy", "a": false}, {"f": "myyyyyyyyyyyyyyyyyy.jpg", "t": "DevSecOps in AWS Course", "i": "Codecademy", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyy.jpg", "t": "Ethical Hacker for Dummies", "i": "Komdigi / Kominfo", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyy.jpg", "t": "CyberSecurity", "i": "ADBI Institute", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Certificate of Participation", "i": "HackerVerse / EC-COUNCIL", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "How to Prevent E-Waste?", "i": "United Nations", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "SQL Basic", "i": "HackerRank", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "SQL Intermediate", "i": "HackerRank", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "SQL Advanced", "i": "HackerRank", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Belajar Dasar AI", "i": "Dicoding —Indosat —Google Cloud", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Seminar Nasional IT Holic", "i": "Himatif UTB", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Webinar Broken Access Control", "i": "Merdeka Siber", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Membangun Lab Virtual dan Dasar Linux", "i": "Digital Talent Scholarship —Komdigi", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyy.jpg", "t": "Securing and Protecting Your Data in Amazon S3", "i": "AWS Training & Certification", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Claude 101", "i": "Anthropic", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Claude Code in Action", "i": "Anthropic", "a": false}, {"f": "myyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.jpg", "t": "Modular Summit 2026: Optimalisasi Kecerdasan Artifisial (KA) dalam Pembelajaran bagi Murid", "i": "Kemendikdasmen", "a": false}];
+const LOG=[{"y": "2026", "t": "Stored XSS pada Halaman Berita", "s": "bmc.baliprov.dev · Pemprov Bali", "c": "ggg.jpg", "n": true}, {"y": "2026", "t": "Unauthenticated Access to Internal API Documentation (Swagger UI & OpenAPI Specification) on Staging Environment", "s": "NASA"}, {"y": "2026", "t": "Publicly Accessible AEM Author Instance on Production Environment", "s": "author-assets.science.nasa.gov · NASA"}, {"y": "2026", "t": "Internal IP Address Disclosure via Content-Security-Policy Header", "s": "jakarta.go.id"}, {"y": "2026", "t": "Unauthenticated System Architecture Disclosure via Exposed Health Endpoints on NMC AI API Hub", "s": "proxy.staging.fast.luna.nasa.gov · NASA"}, {"y": "2026", "t": "Unauthenticated Confluence REST API Exposes Active Internal Meeting Credentials and Personnel Data", "s": "wiki.earthdata.nasa.gov · NASA"}, {"y": "2026", "t": "Missing Error Rollback in create_new_did_wallet_from_recovery Causes Persistent Orphan Wallet State Corruption", "s": "Chia Network"}, {"y": "2026", "t": "Exposed Telerik RadAsyncUpload and DialogHandler Endpoints (CVE-2019-18935 / CVE-2017-11317)", "s": "coins.state.gov · U.S. Department of State"}, {"y": "2026", "t": "Unauthenticated IDOR on Cart API Exposes Real Users' Shopping Data at Scale (98 Carts Accessible Without Login)", "s": "Zooplus"}, {"y": "2026", "t": "Exposed Sentry DSN in Production JavaScript Bundle Allows Unauthorized Access to Error Monitoring System", "s": "Zooplus"}, {"y": "2026", "t": "User Enumeration via Distinct Error Messages in Authentication Endpoint", "s": "api.prod.whoop.com · Whoop"}, {"y": "2026", "t": "Exposed JavaScript Source Map Revealing 156 Internal Source Files", "s": "pallid-sturgeon.sec.usace.army.mil · U.S. Department of Defense"}, {"y": "2026", "t": "Sensitive Internal Configuration and Active Sentry DSN Exposed via PUBLIC_ENV Runtime Object on Authenticated Pages", "s": "www.zooplus.com"}, {"y": "2025", "t": "Reflected XSS", "s": "iklim.bmkg.go.id"}, {"y": "2025", "t": ".git Directory Exposed", "s": "jdih.tni.mil.id"}];
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $=(s)=>document.querySelector(s);
+let started=false,built=false,BASE="";
+const SVG="http://www.w3.org/2000/svg";
+function icon(n){const s=document.createElementNS(SVG,"svg");s.setAttribute("class","ic");s.setAttribute("aria-hidden","true");const u=document.createElementNS(SVG,"use");u.setAttribute("href","#i-"+n);s.appendChild(u);return s}
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+
+const logBox=$("#log");
+LOG.forEach((x)=>{
+  const c=el("div","card log rise");
+  const h=el("h3");
+  if(x.n)h.appendChild(el("span","new","BARU"));
+  h.appendChild(document.createTextNode(x.t));
+  c.append(el("span","yr",x.y),h,el("small",null,x.s));
+  if(x.c){const b=el("button","btn");b.type="button";b.append(icon("eye"),document.createTextNode("Lihat sertifikat"));b.addEventListener("click",()=>openLb(x.c,x.t));c.appendChild(b)}
+  logBox.appendChild(c);
+});
+
+const pending=new Map(),blobs=new Map();let rid=0;
+function loadImg(name){
+  if(blobs.has(name))return blobs.get(name);
+  const p=new Promise((res,rej)=>{
+    const id=++rid;pending.set(id,{res,rej});
+    parent.postMessage({type:"pf-img",id,name},"*");
+    setTimeout(()=>{if(pending.delete(id))rej(new Error("timeout"))},30000);
+  });
+  blobs.set(name,p);p.catch(()=>blobs.delete(name));
+  return p;
+}
+const imgIO=new IntersectionObserver((es)=>{
+  es.forEach((en)=>{
+    if(!en.isIntersecting)return;
+    const b=en.target;imgIO.unobserve(b);
+    loadImg(b._n).then((u)=>{b._im.src=u}).catch(()=>b.remove());
+  });
+},{rootMargin:"300px"});
+
+function build(){
+if(built)return;built=true;
+const grid=$("#certs");
+CERTS.forEach((x)=>{
+  const b=el("button","cert rise");b.type="button";b.setAttribute("aria-label",x.t);
+  const im=new Image();im.decoding="async";im.alt=x.t;im.draggable=false;b._n=x.f;b._im=im;imgIO.observe(b);
+  im.addEventListener("error",()=>b.remove());
+  if(x.a){const g=el("span","badge");g.appendChild(icon("award"));b.appendChild(g)}
+  b.append(im,el("b",null,x.t),el("small",null,x.i));
+  b.addEventListener("click",()=>openLb(x.f,x.t+" - "+x.i));
+  grid.appendChild(b);
+});
+}
+
+const lb=$("#lb"),lbi=lb.querySelector("img"),lbc=lb.querySelector("figcaption");
+function openLb(src,cap){lb.classList.remove("zoom");lbi.removeAttribute("src");loadImg(src).then((u)=>{lbi.src=u}).catch(()=>{});lbi.alt=cap||"";lbc.textContent=cap||"";lb.scrollTo(0,0);lb.classList.add("on")}
+function closeLb(){lb.classList.remove("on","zoom")}
+lb.addEventListener("click",(ev)=>{if(ev.target===lbi){lb.classList.toggle("zoom");lb.scrollTo(0,0)}else closeLb()});
+$("#lbx").addEventListener("click",closeLb);
+addEventListener("keydown",(e)=>{if(e.key==="Escape")closeLb()});
+
+function countUp(e){
+  const n=+e.dataset.n,t0=performance.now(),D=reduce?1:700;
+  (function f(t){const p=Math.min(1,(t-t0)/D);e.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0);
+}
+
+
+/* proteksi salin & tangkapan layar */
+let IS_APP=false;
+function inCp(n){while(n){if(n.nodeType===1&&n.classList&&n.classList.contains("cp"))return true;n=n.parentNode}return false}
+function copyAllowed(){const s=getSelection();return !!s&&s.rangeCount>0&&!s.isCollapsed&&inCp(s.anchorNode)&&inCp(s.focusNode)}
+function shield(on){document.documentElement.classList.toggle("shield",on)}
+function shieldFlash(){shield(true);setTimeout(()=>shield(false),1500)}
+document.addEventListener("copy",(e)=>{if(!copyAllowed())e.preventDefault()},true);
+["cut","paste","contextmenu","dragstart"].forEach((t)=>document.addEventListener(t,(e)=>e.preventDefault(),true));
+document.addEventListener("selectstart",(e)=>{if(!inCp(e.target))e.preventDefault()},true);
+addEventListener("keydown",(e)=>{
+  const k=(e.key||"").toLowerCase(),m=e.ctrlKey||e.metaKey;
+  if(e.key==="PrintScreen"){shieldFlash();return}
+  if(m&&k==="c"&&copyAllowed())return;
+  if(m&&["c","x","a","s","p","u"].includes(k))e.preventDefault();
+},true);
+addEventListener("keyup",(e)=>{if(e.key==="PrintScreen"){shieldFlash();try{navigator.clipboard.writeText("")}catch(_){}}});
+addEventListener("blur",()=>{if(!IS_APP)shield(true)});
+["focus","pointerdown","touchstart"].forEach((t)=>addEventListener(t,()=>shield(false),true));
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&!IS_APP)shield(true)});
+document.querySelectorAll(".cpy").forEach((b)=>b.addEventListener("click",()=>{
+  const t=b.previousElementSibling;if(!t)return;
+  const r=document.createRange();r.selectNodeContents(t);
+  const s=getSelection();s.removeAllRanges();s.addRange(r);
+  try{document.execCommand("copy")}catch(_){}
+  const u=b.querySelector("use");if(u)u.setAttribute("href","#i-check");
+  setTimeout(()=>{s.removeAllRanges();if(u)u.setAttribute("href","#i-copy")},1200);
+}));
+const SITE="https://raffaelhub.my.id/";
+let siteBusy=false;
+function setSt(s,t){const st=$("#st");if(!st)return;st.dataset.s=s;st.querySelector("em").textContent=t}
+async function checkSite(){
+  if(siteBusy)return;
+  if(navigator.onLine===false){setSt("off","Tidak ada internet");return}
+  siteBusy=true;
+  const c=new AbortController(),t0=performance.now(),to=setTimeout(()=>c.abort(),8000);
+  try{
+    await fetch(SITE+"?_="+Date.now(),{mode:"no-cors",cache:"no-store",credentials:"omit",signal:c.signal});
+    setSt("up","Aktif \u00b7 "+Math.round(performance.now()-t0)+" ms");
+  }catch(_){setSt("down","Down")}
+  finally{clearTimeout(to);siteBusy=false}
+}
+function watchSite(){
+  checkSite();
+  setInterval(()=>{if(!document.hidden&&!document.body.classList.contains("out"))checkSite()},60000);
+  addEventListener("online",checkSite);addEventListener("offline",()=>setSt("off","Tidak ada internet"));
+}
+
+function enter(){
+  if(started)return;started=true;build();watchSite();
+  const io=new IntersectionObserver((ents)=>{
+    let d=0;
+    ents.forEach((en)=>{
+      if(!en.isIntersecting)return;
+      const t=en.target;io.unobserve(t);
+      t.style.setProperty("--d",Math.min(d++,6));
+      t.classList.add("in");
+      const s=t.querySelector("[data-n]");if(s)setTimeout(()=>countUp(s),200);
+    });
+  },{threshold:.05});
+  document.querySelectorAll(".rise").forEach((p)=>io.observe(p));
+}
+
+function applyTheme(m){
+  const root=document.documentElement;
+  if(typeof m.theme==="string"&&/^[a-z0-9-]{1,20}$/.test(m.theme))root.setAttribute("data-theme",m.theme);
+  const ok=/^--(bg|surface|text|accent|danger|success|warning|gold|divider|radius|font|gradient|shadow|input)[a-z0-9-]*$/;
+  const vars=m.vars&&typeof m.vars==="object"?m.vars:{};
+  for(const k in vars){
+    const v=String(vars[k]);
+    if(ok.test(k)&&v.length<400&&!/[;{}<>]|url\(|@import/i.test(v))root.style.setProperty(k,v);
+  }
+}
+addEventListener("message",(e)=>{
+  if(e.source!==parent)return;
+  const m=e.data;if(!m||typeof m!=="object")return;
+  if(m.type==="pf-init"){applyTheme(m);IS_APP=m.app===true;if(typeof m.base==="string"&&/^(https?:|file:)[^\s"'<>]*\/$/.test(m.base))BASE=m.base;enter()}
+  else if(m.type==="pf-img-res"){const q=pending.get(m.id);if(q){pending.delete(m.id);if(m.ok&&m.buf)q.res(URL.createObjectURL(new Blob([m.buf],{type:"image/jpeg"})));else q.rej(new Error("img"))}}
+  else if(m.type==="pf-leave"){closeLb();document.body.classList.add("out")}
+});
+if(parent!==window){
+  parent.postMessage({type:"pf-ready"},"*");
+  setTimeout(enter,1500);
+}else enter();
+</script>
+</body>
+</html>

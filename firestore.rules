@@ -1,0 +1,201 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function myDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasProfile() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function primaryRole() {
+      return myDoc().get('role', 'siswa').lower();
+    }
+
+    function extraRoles() {
+      return myDoc().get('additionalRoles', []);
+    }
+
+    function hasRole(r) {
+      return hasProfile() && (primaryRole() == r || r in extraRoles());
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isStaff() {
+      return hasRole('admin') || hasRole('guru');
+    }
+
+    function isSupervisor() {
+      return hasRole('admin') || hasRole('guru');
+    }
+
+    // Mode ulangan (daily_exams): hanya guru pembuat (atau admin) yang boleh mengelola.
+    // Jadwal ujian biasa (tanpa dokumen daily_exams) tetap bisa dikelola staf seperti sebelumnya.
+    function canManageExam(examId) {
+      return isAdmin() ||
+        (isStaff() &&
+         (!exists(/databases/$(database)/documents/daily_exams/$(examId)) ||
+          get(/databases/$(database)/documents/daily_exams/$(examId)).data.get('createdBy', '') == request.auth.uid));
+    }
+
+    match /usernames/{usernameKey} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if hasProfile() && request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'nisNip']) &&
+        request.resource.data.get('nisNip', '') == myDoc().get('nisNip', '');
+      allow update: if hasProfile() && resource.data.uid == request.auth.uid && request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'nisNip']) &&
+        request.resource.data.get('nisNip', '') == resource.data.get('nisNip', '');
+      allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    match /system_config/access {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system_config/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isSupervisor();
+      allow list: if isSupervisor();
+      allow create: if isAdmin() && request.resource.data.role in ['siswa', 'guru', 'admin'];
+      allow delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (isOwner(uid) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+           ['username', 'usernameChangeCount', 'usernameChangeWeekStart', 'passwordIsDefault', 'biometricMethod', 'updatedAt']
+         ));
+
+      match /login_history/{entryId} {
+        allow create: if isOwner(uid);
+        allow read: if isOwner(uid) || isAdmin();
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+
+      match /results/{resultId} {
+        allow read: if (isOwner(uid) && resource.data.published == true) || canManageExam(resultId);
+        allow write: if canManageExam(resultId);
+      }
+    }
+
+    match /exam_results_index/{examId} {
+      allow read: if isSupervisor();
+      allow write: if canManageExam(examId);
+    }
+
+    match /duty_schedule/{examId} {
+      allow read: if isSupervisor();
+      allow write: if isAdmin();
+    }
+
+    match /backups/{backupId} {
+      allow read, write: if isAdmin();
+
+      match /{document=**} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    match /exams_schedule/published {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /daily_exams/{examId} {
+      allow read: if isSignedIn();
+      allow create: if isStaff() &&
+        (isAdmin() || request.resource.data.get('createdBy', request.auth.uid) == request.auth.uid);
+      allow update: if isStaff() &&
+        (resource.data.createdBy == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() || (isStaff() && resource.data.createdBy == request.auth.uid);
+    }
+
+    match /class_rosters/{docId} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    match /public_stats/{statId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /exam_timing/{examId} {
+      allow read: if isSignedIn();
+      allow write: if canManageExam(examId);
+    }
+
+    match /exam_content/{examId} {
+      allow read: if canManageExam(examId) ||
+        (hasRole('siswa') &&
+         exists(/databases/$(database)/documents/exam_timing/$(examId)) &&
+         request.time.toMillis() >= get(/databases/$(database)/documents/exam_timing/$(examId)).data.startTimestamp);
+      allow write: if canManageExam(examId);
+    }
+
+    // Scoreboard: dikelola guru pembuat, siswa hanya bisa baca saat guru menyalakan (enabled).
+    match /scoreboards/{examId} {
+      allow read: if canManageExam(examId) ||
+        (hasRole('siswa') && resource.data.get('enabled', false) == true);
+      allow write: if canManageExam(examId);
+    }
+
+    match /exam_answer_keys/{examId} {
+      allow read, write: if canManageExam(examId);
+    }
+
+    match /exam_sessions/{examId}/participants/{uid} {
+      allow read: if isOwner(uid) || canManageExam(examId);
+      allow create: if isOwner(uid) &&
+        request.resource.data.get('status', 'not_started') in ['not_started', 'in_progress'] &&
+        request.resource.data.get('violationCount', 0) == 0 &&
+        request.resource.data.get('locked', false) == false;
+      allow update: if (isOwner(uid) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+           ['status', 'startedAt', 'violationCount', 'lastActivityAt', 'locked', 'lockReason', 'fullName', 'noRuang', 'kelas', 'violations']
+         ) &&
+         !(resource.data.get('locked', false) == true && request.resource.data.get('locked', false) == false) &&
+         (!('startedAt' in resource.data) || request.resource.data.get('startedAt', null) == resource.data.get('startedAt', null)) &&
+         request.resource.data.get('violations', []).size() >= resource.data.get('violations', []).size() &&
+         request.resource.data.get('violationCount', 0) >= resource.data.get('violationCount', 0) &&
+         !(resource.data.get('status', '') == 'completed' && request.resource.data.get('status', '') != 'completed') &&
+         request.resource.data.get('status', 'not_started') in ['not_started', 'in_progress', 'completed'] &&
+         !(resource.data.get('status', 'not_started') == 'not_started' && request.resource.data.get('status', '') == 'completed')
+        ) || canManageExam(examId);
+      allow delete: if isAdmin();
+    }
+
+    match /{path=**}/participants/{uid} {
+      allow read: if isAdmin();
+    }
+
+    match /submissions/{examId}/entries/{uid} {
+      allow read: if isOwner(uid) || canManageExam(examId);
+      allow create: if isOwner(uid) &&
+        request.resource.data.keys().hasOnly(['answers', 'completedAt', 'submittedBy']) &&
+        request.resource.data.get('submittedBy', uid) == uid;
+      allow update: if canManageExam(examId);
+      allow delete: if isAdmin();
+    }
+  }
+}
