@@ -1,0 +1,1 @@
+SessionGuard.requireRole("admin");
